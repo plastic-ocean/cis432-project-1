@@ -1,6 +1,6 @@
 CC=gcc
 
-CFLAGS=-Wall -W -g -Werror 
+CFLAGS=-Wall -W -g -Werror
 
 
 

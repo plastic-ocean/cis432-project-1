@@ -16,6 +16,8 @@ void Error(const char *msg) {
 }
 
 void Connect(char *server, int port) {
+  printf("Connecting to %s\n", server);
+
   memset((char *) &client_addr, 0, sizeof(client_addr));
   client_addr.sin_family = AF_INET;
   client_addr.sin_addr.s_addr = htonl(INADDR_ANY);
