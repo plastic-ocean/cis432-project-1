@@ -1,10 +1,9 @@
-//
-// Created by Keith Hamm on 10/17/15.
-//
-
 #ifndef CIS432_PROJECT_1_SERVER_H
 #define CIS432_PROJECT_1_SERVER_H
 
-int main();
+int kBufferSize = 2048;
+
+void Error(const char *msg);
+void ProcessBuffer(unsigned char buffer[kBufferSize]);
 
 #endif //CIS432_PROJECT_1_SERVER_H

@@ -1,47 +1,54 @@
-//
-// Created by Keith Hamm on 10/17/15.
-//
-
 #include <sys/socket.h>
 #include <string.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "server.h"
 
-//int SERVER_HOST_IP_ADDRESS = '127.0.0.1';
-int PORT = 5000;
-int BUFFER_SIZE = 2048;
+void Error(const char *msg) {
+  perror(msg);
+  exit(1);
+}
 
-int main() {
-    struct sockaddr_in serverAddress;
-    struct sockaddr_in clientAddress;
-    socklen_t clientAddressLen = sizeof(clientAddress);
-    int serverSocket;
-    int receiveLen;
-    unsigned char buffer[BUFFER_SIZE];
+void ProcessBuffer(unsigned char buffer[kBufferSize]) {
+  printf("received message: \"%s\"\n", buffer);
+}
 
-    if ((serverSocket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("server: can't open socket");
-        return 0;
+int main(int argc, char *argv[]) {
+  struct sockaddr_in server_addr;
+  struct sockaddr_in client_addr;
+  socklen_t client_addr_len = sizeof(client_addr);
+  int server_socket;
+  int receive_len;
+  unsigned char buffer[kBufferSize];
+  int port;
+
+  if (argc < 2) {
+    fprintf(stderr,"server: no port provided\n");
+    exit(1);
+  }
+
+  port = atoi(argv[1]);
+
+  memset((char *) &server_addr, 0, sizeof(server_addr));
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  server_addr.sin_port = htons(port);
+
+  if ((server_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    Error("server: can't open socket\n");
+  }
+
+  if (bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
+    Error("server: bind failed\n");
+  }
+
+  while (1) {
+    printf("server: waiting on port %d\n", port);
+    receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
+    if (receive_len > 0) {
+      buffer[receive_len] = 0;
+      ProcessBuffer(buffer);
     }
-
-    memset((char *) &serverAddress, 0, sizeof(serverAddress));
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-    serverAddress.sin_port = htons(PORT);
-
-
-    if (bind(serverSocket, (struct sockaddr *) &serverAddress, sizeof(serverAddress)) < 0) {
-        perror("server: bind failed");
-        return 0;
-    }
-
-    while (1) {
-        printf("server: waiting on port %d\n", PORT);
-        receiveLen = recvfrom(serverSocket, buffer, BUFFER_SIZE, 0, (struct sockaddr *) &clientAddress, &clientAddressLen);
-        if (receiveLen > 0) {
-            buffer[receiveLen] = 0;
-            printf("received message: \"%s\"\n", buffer);
-        }
-    }
+  }
 }

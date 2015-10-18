@@ -1,52 +1,63 @@
-//
-// Created by Keith Hamm on 10/17/15.
-//
-
 #include <stdio.h>
 #include <sys/socket.h>
 #include <string.h>
 #include <netinet/in.h>
+#include <stdlib.h>
 #include "client.h"
 
-int PORT = 5001;
-int SERVER_PORT = 5000;
+int kClientPort = 5001;
+struct sockaddr_in client_addr;
+struct sockaddr_in server_addr;
+int client_socket;
 
-int main() {
-    struct sockaddr_in clientAddress;
-    struct sockaddr_in serverAddress;
+void Error(const char *msg) {
+  perror(msg);
+  exit(1);
+}
 
-    memset((char *) &clientAddress, 0, sizeof(clientAddress));
-    clientAddress.sin_family = AF_INET;
-    clientAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-    clientAddress.sin_port = htons(PORT);
+void Connect(char *server, int port) {
+  memset((char *) &client_addr, 0, sizeof(client_addr));
+  client_addr.sin_family = AF_INET;
+  client_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  client_addr.sin_port = htons(kClientPort);
 
-    memset((char *) &serverAddress, 0, sizeof(serverAddress));
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-    serverAddress.sin_port = htons(SERVER_PORT);
+  memset((char *) &server_addr, 0, sizeof(server_addr));
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  server_addr.sin_port = htons(port);
 
-    unsigned int addressLen;
-    int clientSocket;
+  if ((client_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    Error("client: can't open socket\n");
+  }
 
-    printf("Attempting to create socket.\n");
-    if ((clientSocket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("client: can't open socket");
-        return 0;
-    }
+  if (bind(client_socket, (struct sockaddr *) &client_addr, sizeof(client_addr)) < 0) {
+    Error("client: bind failed\n");
+  }
+}
 
-    printf("Attempting to bind.\n");
-    if (bind(clientSocket, (struct sockaddr *) &clientAddress, sizeof(clientAddress)) < 0) {
-        perror("client: bind failed");
-        return 0;
-    }
+void Send(char *message) {
+  if (sendto(client_socket, message, strlen(message), 0, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
+    Error("client: failed to send message\n");
+  }
+}
 
-    char *message = "test";
+int main(int argc, char *argv[]) {
+  char *server;
+  int port;
+  char *username;
 
-    printf("Attempting to send.\n");
-    if (sendto(clientSocket, message, strlen(message), 0, (struct sockaddr *) &serverAddress, sizeof(serverAddress)) < 0) {
-        perror("client: failed to send message");
-        return 0;
-    }
+  if (argc < 4) {
+    fprintf(stderr,"usage: client [server name] [port] [username]\n");
+    exit(1);
+  }
 
-    return 0;
+  server = argv[1];
+  port = atoi(argv[2]);
+  username = argv[3];
+
+  Connect(server, port);
+
+  Send(username);
+
+  return 0;
 }

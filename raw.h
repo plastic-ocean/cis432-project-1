@@ -7,7 +7,7 @@
  * call cooked_mode() just before your program exits.  You can set
  * this up using the atexit(3) function, or just call it manually.
  *
- * raw_mode() returns -1 if there is an error, but this should not
+ * raw_mode() returns -1 if there is an Error, but this should not
  * happen in this assignment.
  */
 
