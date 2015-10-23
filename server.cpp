@@ -4,14 +4,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "server.h"
+#include "duckchat.h"
 
 void Error(const char *msg) {
   perror(msg);
   exit(1);
 }
 
-void ProcessBuffer(unsigned char buffer[kBufferSize]) {
-  printf("received message: \"%s\"\n", buffer);
+void ProcessRequest(void *buffer) {
+  struct request current_request;
+  memcpy(&current_request, buffer, sizeof(struct request));
+  printf("request type: %d\n", current_request.req_type);
+  request_t request_type = current_request.req_type;
+
+  switch(request_type){
+    case REQ_LOGIN :
+      struct request_login login_request;
+      memcpy(&login_request, buffer, sizeof(struct request_login));
+      printf("Username: %s\n", login_request.req_username);
+      break;
+  }
+
 }
 
 int main(int argc, char *argv[]) {
@@ -20,7 +33,7 @@ int main(int argc, char *argv[]) {
   socklen_t client_addr_len = sizeof(client_addr);
   int server_socket;
   int receive_len;
-  unsigned char buffer[kBufferSize];
+  void* buffer[kBufferSize];
   int port;
 
   if (argc < 2) {
@@ -48,7 +61,7 @@ int main(int argc, char *argv[]) {
     receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
     if (receive_len > 0) {
       buffer[receive_len] = 0;
-      ProcessBuffer(buffer);
+      ProcessRequest(buffer);
     }
   }
 }

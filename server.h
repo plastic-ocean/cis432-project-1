@@ -4,6 +4,6 @@
 int kBufferSize = 2048;
 
 void Error(const char *msg);
-void ProcessBuffer(unsigned char buffer[kBufferSize]);
+void ProcessRequest(void *buffer);
 
 #endif //CIS432_PROJECT_1_SERVER_H
