@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
     FD_SET(client_socket, &read_set);
     FD_SET(STDIN_FILENO, &read_set);
 
-    std::cout << ">" << std::endl;
+    std::cout << ">";
 
     if ((result = select(client_socket + 1, &read_set, NULL, NULL, NULL)) < 0) {
       Error("client: problem using select");
@@ -281,10 +281,11 @@ int main(int argc, char *argv[]) {
             std::cout << "[" << channel << "]" << "[" << username << "]: " << stdin_buffer << std::endl;
           }
         }
-      }
+      } // end of if STDIN
+      
+    } // end of if result
 
-    }
+  } // end of while
 
-    return 0;
-  }
+  return 0;
 }
