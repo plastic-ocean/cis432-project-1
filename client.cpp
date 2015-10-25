@@ -241,8 +241,6 @@ int main(int argc, char *argv[]) {
 
   std::cout << ">" << std::flush;
 
-  std::string tmp;
-
   while (1) {
     FD_ZERO(&read_set);
     FD_SET(client_socket, &read_set);
@@ -254,7 +252,11 @@ int main(int argc, char *argv[]) {
 
     if (result > 0) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
+        std::cout << "entering if STDIN" << std::endl;
+
         int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
+        
+        std::cout << "after read STDIN" << std::endl;
 
         if (read_stdin_size != 0) {
           if (stdin_buffer[0] == '/') {
@@ -263,12 +265,11 @@ int main(int argc, char *argv[]) {
             // Send chat messages
             StripChar(stdin_buffer, '\n');
             RequestSay(stdin_buffer);
-            std::cout << ">" << stdin_buffer << std::flush;
           }
         }
 
         memset(&stdin_buffer, 0, kBufferSize);
-      } // end of if STDIN
+      } // end of if STDIN_FILENO
 
       if (FD_ISSET(client_socket, &read_set)) {
         // Socket has data
@@ -286,7 +287,7 @@ int main(int argc, char *argv[]) {
               memcpy(&say, receive_buffer, sizeof(struct text_say));
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              std::cout << ">" << stdin_buffer << std::flush;
+              std::cout << ">" << std::flush;
               break;
             default:
               break;
