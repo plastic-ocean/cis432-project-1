@@ -54,6 +54,7 @@ int main(int argc, char *argv[]) {
   struct sockaddr_in server_addr;
   struct sockaddr_in client_addr;
   socklen_t client_addr_len = sizeof(client_addr);
+
   int server_socket;
   int receive_len;
   void* buffer[kBufferSize];
@@ -62,7 +63,7 @@ int main(int argc, char *argv[]) {
   user = "";
 
   if (argc < 2) {
-    fprintf(stderr,"server: no port provided\n");
+    std::cerr << "server: no port provided" << std::endl;
     exit(1);
   }
 
