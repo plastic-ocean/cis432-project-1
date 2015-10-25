@@ -239,6 +239,8 @@ int main(int argc, char *argv[]) {
 
   // TODO handle response from send
 
+  std::cout << ">" << std::flush;
+
   while (1) {
     FD_ZERO(&read_set);
     FD_SET(client_socket, &read_set);
@@ -265,7 +267,7 @@ int main(int argc, char *argv[]) {
               memcpy(&say, receive_buffer, sizeof(struct text_say));
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              std::cout << ">" << std::flush;
+              std::cout << ">" << stdin_buffer << std::flush;
               break;
             default:
               break;
