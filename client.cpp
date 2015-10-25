@@ -267,7 +267,13 @@ int main(int argc, char *argv[]) {
               memcpy(&say, receive_buffer, sizeof(struct text_say));
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              std::cout << ">" << stdin_buffer << std::flush;
+              std::cout << ">" << std::flush;
+
+              size_t size = strlen(stdin_buffer);
+              for (size_t i = 0; i < size; i++) {
+                std::cout << stdin_buffer[i] < std::flush;
+              }
+
               break;
             default:
               break;
