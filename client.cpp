@@ -51,16 +51,6 @@ void Connect(char *domain, const char *port) {
 }
 
 
-// Sends requests to the server.
-int SendRequest(auto packet, size_t packet_size) {
-  if (sendto(client_socket, &packet, packet_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
-    Error("client: failed to send request\n");
-  }
-
-  return 0;
-}
-
-
 // Sends a message to all users in on the active channel.
 int Say(std::string message) {
   if (sendto(client_socket, &message, sizeof(message), 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
@@ -80,7 +70,11 @@ int RequestLogin(char *username) {
 
   size_t message_size = sizeof(struct request_login);
 
-  return SendRequest(login, message_size);
+  if (sendto(client_socket, &login, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to request login\n");
+  }
+
+  return 0;
 }
 
 
