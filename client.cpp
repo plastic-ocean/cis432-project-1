@@ -137,13 +137,14 @@ std::vector<std::string> StringSplit(std::string input) {
 
 
 // Splits strings around spaces.
-std::vector<std::string> SplitString(std::string input, char delimiter) {
+std::vector<std::string> SplitString(char *input, char delimiter) {
   std::vector<std::string> result;
   std::string word = "";
 
-  for (char c : input) {
-    if (c != delimiter) {
-      word += c;
+  size_t input_size = strlen(input);
+  for (size_t i = 0; i < input_size; i++) {
+    if (input[i] != delimiter) {
+      word += input[i];
     } else {
       result.push_back(word);
       word = "";
@@ -229,13 +230,12 @@ int main(int argc, char *argv[]) {
 
   // TODO handle response from send
 
-  while(1) {
+  while (1) {
     FD_ZERO(&read_set);
     FD_SET(client_socket, &read_set);
     FD_SET(STDIN_FILENO, &read_set);
 
-//    timeout.tv_sec = 0; // TODO change time value?
-//    timeout.tv_usec = 0;
+    std::cout << ">" << std::endl;
 
     if ((result = select(client_socket + 1, &read_set, NULL, NULL, NULL)) < 0) {
       Error("client: problem using select");
@@ -258,7 +258,8 @@ int main(int argc, char *argv[]) {
             case TXT_SAY:
               struct text_say say;
               memcpy(&say, receive_buffer, sizeof(struct text_say));
-              std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
+              std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text <<
+              std::endl;
               break;
             default:
               break;
@@ -271,48 +272,19 @@ int main(int argc, char *argv[]) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
         int read_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
 
-        std::cout << "read_size: " << read_size << std::endl;
-
         if (read_size != 0) {
-          std::cout << "typed: " << stdin_buffer << std::endl;
+          if (stdin_buffer[0] == '/') {
+            ProcessInput(stdin_buffer);
+          } else {
+            // Send chat messages
+            RequestSay(stdin_buffer);
+            std::cout << "[" << channel << "]" << "[" << username << "]: " << stdin_buffer << std::endl;
+          }
         }
-
       }
+
     }
 
-//    std::cout << "past check result" << std::endl;
-
-//    std::cout << "> ";
-//    getline(std::cin, input);
-//
-//    if (input[0] == '/') {
-//      if (!ProcessInput(input)) {
-//        break;
-//      }
-//    } else {
-//      // Send chat messages
-//      RequestSay(input.c_str());
-//      std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
-//    }
-//
-//    if (FD_ISSET(STDIN_FILENO, &read_set)) {
-//      std::cout << "> ";
-//      getline(std::cin, input);
-//
-//      if (input[0] == '/') {
-//        if (!ProcessInput(input)) {
-//          break;
-//        }
-//      } else {
-//        // Send chat messages
-//        RequestSay(input.c_str());
-//        std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
-//      }
-//    }
-
-//    std::cout << "past getline" << std::endl;
-
+    return 0;
   }
-
-  return 0;
 }
