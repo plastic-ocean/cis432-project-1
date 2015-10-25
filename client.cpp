@@ -5,6 +5,7 @@
 #include <cstring>
 #include <vector>
 #include <sstream>
+#include <iterator>
 #include <netinet/in.h>
 
 int kClientPort = 5001;
