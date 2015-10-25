@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
   char *username;
   std::string input;
 
-//  struct timeval timeout;
+  struct timeval timeout;
   fd_set read_set;
   int file_desc = 0;
   int result;
@@ -225,13 +225,13 @@ int main(int argc, char *argv[]) {
     FD_ZERO(&read_set);
     FD_SET(file_desc, &read_set);
 
-//    timeout.tv_sec = 5; // TODO change time value?
-//    timeout.tv_usec = 0;
+    timeout.tv_sec = 5; // TODO change time value?
+    timeout.tv_usec = 0;
 
 //    if ((result = select(file_desc + 1, &read_set, NULL, NULL, NULL)) < 0) {
 //      continue;
 //    }
-    if ((result = select(file_desc + 1, &read_set, NULL, NULL, NULL)) < 0) {
+    if ((result = select(file_desc + 1, &read_set, NULL, NULL, &timeout)) < 0) {
       Error("client: problem using select");
     }
 
