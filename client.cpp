@@ -156,6 +156,16 @@ std::vector<std::string> SplitString(char *input, char delimiter) {
 }
 
 
+void StripChar(char *input, char c) {
+  size_t size = strlen(input);
+  for (size_t i = 0; i < size; i++) {
+    if (input[i] == c) {
+      input[i] = '\0';
+    }
+  }
+}
+
+
 // Processes the input string to decide what type of command it is.
 bool ProcessInput(std::string input) {
   std::vector<std::string> inputs = StringSplit(input);
@@ -274,9 +284,10 @@ int main(int argc, char *argv[]) {
             ProcessInput(stdin_buffer);
           } else {
             // Send chat messages
-            stdin_buffer[read_stdin_size] = '\0';
+            std::cout << "before buffer: " << stdin_buffer << std::endl;
+            StripChar(stdin_buffer, '\n');
+            std::cout << "after buffer: " << stdin_buffer << std::endl;
             RequestSay(stdin_buffer);
-//            std::cout << "[" << channel << "]" << "[" << username << "]: " << stdin_buffer << std::endl;
           }
         }
 
