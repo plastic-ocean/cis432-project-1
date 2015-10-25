@@ -229,8 +229,8 @@ int main(int argc, char *argv[]) {
     FD_ZERO(&read_set);
     FD_SET(file_desc, &read_set);
 
-    timeout.tv_sec = 5; // TODO change time value?
-    timeout.tv_usec = 0;
+//    timeout.tv_sec = 5; // TODO change time value?
+//    timeout.tv_usec = 0;
 
 //    if ((result = select(file_desc + 1, &read_set, NULL, NULL, NULL)) < 0) {
 //      continue;
