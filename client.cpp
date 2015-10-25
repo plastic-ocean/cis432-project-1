@@ -246,7 +246,9 @@ int main(int argc, char *argv[]) {
 
         if (read_size != 0) {
           // TODO capture user input, store, clean input, then print buffer, afterward replace input
-          std::cout << "[" << channel << "]" << "[" << username << "]: " << receive_buffer << std::endl;
+          struct text message;
+          memcpy(&message, receive_buffer, sizeof(struct text));
+          std::cout << "[" << channel << "]" << "[" << username << "]: " << message.txt_type << std::endl;
         }
 
         memset(&receive_buffer, 0, SAY_MAX);
