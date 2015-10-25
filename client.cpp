@@ -268,10 +268,7 @@ int main(int argc, char *argv[]) {
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
               std::cout << ">" << std::flush;
-              size_t buffer_size = strlen(stdin_buffer);
-              for (size_t i = 0; i < buffer_size; i++) {
-                std::cout << stdin_buffer[i] << std::flush;
-              }
+              std::cout << stdin_buffer[0] << std::flush;
               break;
             default:
               break;
