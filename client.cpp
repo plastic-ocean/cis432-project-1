@@ -21,38 +21,38 @@ void Connect(char *domain, const char *port) {
   std::cout << "Connecting to " << domain << std::endl;
 
   struct addrinfo hints;
-//  struct addrinfo *server_info_tmp;
+  struct addrinfo *server_info_tmp;
   int status;
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_DGRAM;
+  hints.ai_protocol = 0;
 
-  if ((status = getaddrinfo(domain, port, &hints, &server_info)) < 0) {
-    Error("client: can't open socket\n");
-  }
-
-  if (status != 0) {
+  if ((status = getaddrinfo(domain, port, &hints, &server_info_tmp)) != 0) {
     std::cerr << "client: unable to resolve address: " << gai_strerror(status) << std::endl;
     exit(1);
   }
 
-  // Loop to handle AF_INET and AF_INET6
-//  for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
-//    if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
-//      Error("client: couldn't connect to socket");
-//      continue;
-//    }
-//    break;
-//  }
+  // getaddrinfo() returns a list of address structures.
+  // Try each address until we successfully connect().
+  // If socket() (or connect()) fails, we (close the socket and) try the next address.
 
-  if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
-    Error("client: couldn't connect to socket");
+  for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
+    if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
+      continue;
+    }
+    if (connect(client_socket, server_info->ai_addr, server_info->ai_addrlen) != -1) {
+      break; // Success
+    }
+    close(client_socket);
   }
 
   if (server_info == NULL) {
     Error("client: all sockets failed to connect");
   }
+
+  freeaddrinfo(server_info_tmp);
 }
 
 
