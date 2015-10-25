@@ -186,14 +186,18 @@ int main(int argc, char *argv[]) {
   char *port_str;
   int port_num;
   char *username;
-  std::string input;
+//  std::string input;
 
-  struct timeval timeout;
+//  struct timeval timeout;
   fd_set read_set;
 //  int file_desc = 0;
   int result;
   char receive_buffer[kBufferSize];
   memset(&receive_buffer, 0, kBufferSize);
+
+
+  char stdin_buffer[kBufferSize];
+  memset(&stdin_buffer, 0, kBufferSize);
 
   if (argc < 4) {
     Error("usage: client [server name] [port] [username]");
@@ -228,12 +232,12 @@ int main(int argc, char *argv[]) {
   while(1) {
     FD_ZERO(&read_set);
     FD_SET(client_socket, &read_set);
-//    FD_SET(STDIN_FILENO, &read_set);
+    FD_SET(STDIN_FILENO, &read_set);
 
-    timeout.tv_sec = 0; // TODO change time value?
-    timeout.tv_usec = 0;
+//    timeout.tv_sec = 0; // TODO change time value?
+//    timeout.tv_usec = 0;
 
-    if ((result = select(client_socket + 1, &read_set, NULL, NULL, &timeout)) < 0) {
+    if ((result = select(client_socket + 1, &read_set, NULL, NULL, NULL)) < 0) {
       Error("client: problem using select");
     }
 
@@ -242,7 +246,7 @@ int main(int argc, char *argv[]) {
         // Socket has data
         int read_size = read(client_socket, receive_buffer, kBufferSize);
 
-        std::cout << "result: " << read_size << std::endl;
+//        std::cout << "result: " << read_size << std::endl;
 
         if (read_size != 0) {
           // TODO capture user input, store, clean input, then print buffer, afterward replace input
@@ -259,11 +263,20 @@ int main(int argc, char *argv[]) {
             default:
               break;
           }
-
-//          std::cout << "[" << channel << "]" << "[" << username << "]: " << message.txt_type << std::endl;
         }
 
         memset(&receive_buffer, 0, SAY_MAX);
+      }
+
+      if (FD_ISSET(STDIN_FILENO, &read_set)) {
+        int read_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
+
+        std::cout << "read_size: " << read_size << std::endl;
+
+        if (read_size != 0) {
+          std::cout << "typed: " << stdin_buffer << std::endl;
+        }
+
       }
     }
 
