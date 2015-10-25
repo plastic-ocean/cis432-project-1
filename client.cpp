@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
   memset(&receive_buffer, 0, kBufferSize);
 
   char stdin_buffer[kBufferSize];
-  memset(&stdin_buffer, '\0', kBufferSize);
+  memset(&stdin_buffer, 0, kBufferSize);
 
   if (argc < 4) {
     Error("usage: client [server name] [port] [username]");
@@ -265,9 +265,7 @@ int main(int argc, char *argv[]) {
               memcpy(&say, receive_buffer, sizeof(struct text_say));
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              if (stdin_buffer[0] != '\0') {
-                std::cout << stdin_buffer << std::endl;
-              }
+              std::cout << stdin_buffer;
               break;
             default:
               break;
@@ -292,7 +290,7 @@ int main(int argc, char *argv[]) {
           }
         }
 
-        memset(&stdin_buffer, '\0', kBufferSize);
+        memset(&stdin_buffer, 0, kBufferSize);
       } // end of if STDIN
 
     } // end of if result
