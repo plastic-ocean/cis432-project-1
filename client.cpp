@@ -240,6 +240,8 @@ int main(int argc, char *argv[]) {
 
   // TODO handle response from send
 
+  std::cout << ">";
+
   while (1) {
     FD_ZERO(&read_set);
     FD_SET(client_socket, &read_set);
