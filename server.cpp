@@ -5,6 +5,7 @@
 #include <cstring>
 #include <stdio.h>
 #include <string>
+#include <iostream>
 
 #include "server.h"
 #include "duckchat.h"
@@ -22,7 +23,7 @@ void Error(const char *msg) {
 void ProcessRequest(void *buffer) {
   struct request current_request;
   memcpy(&current_request, buffer, sizeof(struct request));
-  printf("request type: %d\n", current_request.req_type);
+  std::cout << "request type: " << current_request.req_type << std::endl;
   request_t request_type = current_request.req_type;
 
   switch(request_type){
@@ -30,17 +31,18 @@ void ProcessRequest(void *buffer) {
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
       user = login_request.req_username;
+      std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
       printf("server: %s logs in\n", login_request.req_username);
       break;
     case REQ_LOGOUT:
       struct request_logout logout_request;
       memcpy(&logout_request, buffer, sizeof(struct request_logout));
-      printf("server: %s logs out\n", user);
+      std::cout << "server: " << user << " logs out" << std::endl;
       break;
     case REQ_JOIN:
       struct request_join join_request;
       memcpy(&join_request, buffer, sizeof(struct request_join));
-      printf("server: %s joins channel %s\n", user, join_request.req_channel);
+      std::cout << "server: " << user << " joins channel " << join_request.req_channel << std::endl;
       break;
     default:
       break;
