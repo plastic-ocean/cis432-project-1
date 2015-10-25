@@ -245,17 +245,15 @@ int main(int argc, char *argv[]) {
 //      std::cout << "result: " << result << std::endl;
       if (FD_ISSET(client_socket, &read_set)) {
 
-        std::cout << "past FD_ISSET" << std::endl;
+//        std::cout << "past FD_ISSET" << std::endl;
 
         // Socket has data
-        result = recv(file_desc, receive_buffer, sizeof(receive_buffer), 0);
+        result = recv(client_socket, receive_buffer, sizeof(receive_buffer), 0);
 
-        FD_CLR(file_desc, &read_set);
-        memset(&receive_buffer, 0, SAY_MAX);
+//        FD_CLR(file_desc, &read_set);
+//        memset(&receive_buffer, 0, SAY_MAX);
 
-        if (result == 0) {
-          close(file_desc);
-        } else {
+        if (result != 0) {
           // TODO capture user input, store, clean input, then print buffer, afterward replace input
           std::cout << "[" << channel << "]" << "[" << username << "]: " << receive_buffer << std::endl;
         }
