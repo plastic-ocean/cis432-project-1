@@ -184,8 +184,8 @@ int main(int argc, char *argv[]) {
   char *username;
   std::string input;
 
-  struct timeval timeout;
-  fd_set read_set, write_set;
+//  struct timeval timeout;
+  fd_set read_set;
   int file_desc = 0;
   int result;
   char receive_buffer[SAY_MAX];
