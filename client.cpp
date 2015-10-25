@@ -175,7 +175,7 @@ bool ProcessInput(std::string input) {
   } else if (inputs[0] == "/switch") {
 
   } else {
-    std::cout << "Invalid command" << std::endl;
+    std::cout << "\n*Unknown command" << std::endl;
   }
 
   return result;
@@ -274,6 +274,7 @@ int main(int argc, char *argv[]) {
             ProcessInput(stdin_buffer);
           } else {
             // Send chat messages
+            stdin_buffer[read_stdin_size] = '\0';
             RequestSay(stdin_buffer);
             std::cout << "[" << channel << "]" << "[" << username << "]: " << stdin_buffer << std::endl;
           }
