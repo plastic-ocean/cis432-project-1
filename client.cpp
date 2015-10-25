@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
   char *port_str;
   int port_num;
   char *username;
-//  std::string input;
+  char *input;
 
 //  struct timeval timeout;
   fd_set read_set;
@@ -241,6 +241,7 @@ int main(int argc, char *argv[]) {
 
   std::cout << ">" << std::flush;
 
+
   while (1) {
     FD_ZERO(&read_set);
     FD_SET(client_socket, &read_set);
@@ -252,11 +253,7 @@ int main(int argc, char *argv[]) {
 
     if (result > 0) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
-        std::cout << "entering if STDIN" << std::endl;
-
         int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
-        
-        std::cout << "after read STDIN" << std::endl;
 
         if (read_stdin_size != 0) {
           if (stdin_buffer[0] == '/') {
@@ -285,9 +282,10 @@ int main(int argc, char *argv[]) {
             case TXT_SAY:
               struct text_say say;
               memcpy(&say, receive_buffer, sizeof(struct text_say));
+              std::cin >> input;
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              std::cout << ">" << std::flush;
+              std::cout << ">" << input << std::flush;
               break;
             default:
               break;
