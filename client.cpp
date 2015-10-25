@@ -2,7 +2,7 @@
 #include "duckchat.h"
 
 #include <iostream>
-#include <string>
+#include <cstring>
 #include <vector>
 #include <sstream>
 #include <netinet/in.h>
@@ -11,18 +11,16 @@ int kClientPort = 5001;
 struct sockaddr_in client_addr;
 struct sockaddr_in server_addr;
 int client_socket;
-std::vector<char *> delete_queue;
 
 
-
-
+// Prints an error message and exits the program.
 void Error(const char *msg) {
   perror(msg);
   exit(1);
 }
 
 
-
+// Connects to the server at a the given port.
 void Connect(char *server, int port) {
   printf("Connecting to %s\n", server);
 
@@ -46,13 +44,18 @@ void Connect(char *server, int port) {
 }
 
 
-
-
+// Sends login messages to the server.
 int SendLogin(struct request_login user_login) {
   void* message[sizeof(struct request_login)];
   memcpy(message, &user_login, sizeof(struct request_login));
 
-  if (sendto(client_socket, message, sizeof(struct request_login), 0, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
+  return Send(message, sizeof(struct request_login));
+}
+
+
+// Sends messages to the server.
+int Send(void *message, size_t message_size) {
+  if (sendto(client_socket, message, message_size, 0, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
     Error("client: failed to send message\n");
     return 1;
   }
@@ -61,8 +64,7 @@ int SendLogin(struct request_login user_login) {
 }
 
 
-
-
+// Splits strings around spaces.
 std::vector<std::string> StringSplit(std::string input) {
   std::istringstream iss(input);
   std::vector<std::string> result{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
@@ -71,14 +73,13 @@ std::vector<std::string> StringSplit(std::string input) {
 }
 
 
-
-
+// Processes the input string to decide what type of command it is.
 bool ProcessInput(std::string input) {
   std::vector<std::string> inputs = StringSplit(input);
   bool result = true;
 
   if (inputs[0] == "/exit") {
-//    Send(inputs[0]);
+    Send((void *)inputs[0], strlen(inputs[0]));
     result = false;
   } else if (inputs[0] == "/list") {
 
@@ -96,9 +97,6 @@ bool ProcessInput(std::string input) {
 
   return result;
 }
-
-
-
 
 
 int main(int argc, char *argv[]) {
