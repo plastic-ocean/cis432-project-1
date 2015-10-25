@@ -248,7 +248,7 @@ int main(int argc, char *argv[]) {
 //        std::cout << "past FD_ISSET" << std::endl;
 
         // Socket has data
-        result = recv(client_socket, receive_buffer, sizeof(receive_buffer), 0);
+        result = read(client_socket, receive_buffer, SAY_MAX);
 
 //        FD_CLR(file_desc, &read_set);
 //        memset(&receive_buffer, 0, SAY_MAX);
@@ -257,6 +257,8 @@ int main(int argc, char *argv[]) {
           // TODO capture user input, store, clean input, then print buffer, afterward replace input
           std::cout << "[" << channel << "]" << "[" << username << "]: " << receive_buffer << std::endl;
         }
+
+        memset(&receive_buffer, 0, SAY_MAX);
       }
     }
 
