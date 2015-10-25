@@ -49,7 +49,12 @@ int SendLogin(struct request_login user_login) {
   void* message[sizeof(struct request_login)];
   memcpy(message, &user_login, sizeof(struct request_login));
 
-  return Send(message, sizeof(struct request_login));
+  if (sendto(client_socket, message, sizeof(struct request_login), 0, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
+    Error("client: failed to send message\n");
+    return 1;
+  }
+
+  return 0;
 }
 
 
@@ -79,7 +84,7 @@ bool ProcessInput(std::string input) {
   bool result = true;
 
   if (inputs[0] == "/exit") {
-    Send((void *)inputs[0], strlen(inputs[0]));
+//    Send((void *)inputs[0], strlen(inputs[0]));
     result = false;
   } else if (inputs[0] == "/list") {
 
