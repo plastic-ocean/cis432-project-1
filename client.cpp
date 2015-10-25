@@ -36,9 +36,9 @@ void Connect(char *domain, const char *port) {
     exit(1);
   }
 
-  // getaddrinfo() returns a list of address structures.
+  // getaddrinfo() returns a list of address structures into server_info_tmp.
   // Try each address until we successfully connect().
-  // If socket() (or connect()) fails, we (close the socket and) try the next address.
+  // If socket() (or connect()) fails, close the socket and try the next address.
 
   for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
     if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
@@ -54,7 +54,7 @@ void Connect(char *domain, const char *port) {
     Error("client: all sockets failed to connect");
   }
 
-  freeaddrinfo(server_info_tmp);
+//  freeaddrinfo(server_info_tmp);
 }
 
 
