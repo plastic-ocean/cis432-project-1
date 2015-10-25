@@ -227,16 +227,13 @@ int main(int argc, char *argv[]) {
 
   while(1) {
     FD_ZERO(&read_set);
-    FD_SET(file_desc, &read_set);
-    FD_SET(STDIN_FILENO, &read_set);
+    FD_SET(client_socket, &read_set);
+//    FD_SET(STDIN_FILENO, &read_set);
 
     timeout.tv_sec = 0; // TODO change time value?
     timeout.tv_usec = 0;
 
-//    if ((result = select(file_desc + 1, &read_set, NULL, NULL, NULL)) < 0) {
-//      continue;
-//    }
-    if ((result = select(file_desc + 1, &read_set, NULL, NULL, &timeout)) < 0) {
+    if ((result = select(client_socket + 1, &read_set, NULL, NULL, &timeout)) < 0) {
       Error("client: problem using select");
     }
 
