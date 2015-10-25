@@ -192,8 +192,8 @@ int main(int argc, char *argv[]) {
   fd_set read_set;
 //  int file_desc = 0;
   int result;
-  char receive_buffer[SAY_MAX];
-  memset(&receive_buffer, 0, SAY_MAX);
+  char receive_buffer[kBufferSize];
+  memset(&receive_buffer, 0, kBufferSize);
 
   if (argc < 4) {
     Error("usage: client [server name] [port] [username]");
@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
     if (result > 0) {
       if (FD_ISSET(client_socket, &read_set)) {
         // Socket has data
-        int read_size = read(client_socket, receive_buffer, SAY_MAX);
+        int read_size = read(client_socket, receive_buffer, kBufferSize);
 
         std::cout << "result: " << read_size << std::endl;
 
