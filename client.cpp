@@ -248,7 +248,19 @@ int main(int argc, char *argv[]) {
           // TODO capture user input, store, clean input, then print buffer, afterward replace input
           struct text message;
           memcpy(&message, receive_buffer, sizeof(struct text));
-          std::cout << "[" << channel << "]" << "[" << username << "]: " << message.txt_type << std::endl;
+          text_t text_type = message.txt_type;
+
+          switch (text_type) {
+            case TXT_SAY:
+              struct text_say say;
+              memcpy(&say, receive_buffer, sizeof(struct text_say));
+              std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
+              break;
+            default:
+              break;
+          }
+
+//          std::cout << "[" << channel << "]" << "[" << username << "]: " << message.txt_type << std::endl;
         }
 
         memset(&receive_buffer, 0, SAY_MAX);
