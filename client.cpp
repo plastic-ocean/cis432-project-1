@@ -231,7 +231,9 @@ int main(int argc, char *argv[]) {
 //    if ((result = select(file_desc + 1, &read_set, NULL, NULL, NULL)) < 0) {
 //      continue;
 //    }
-    result = select(file_desc + 1, &read_set, NULL, NULL, NULL);
+    if ((result = select(file_desc + 1, &read_set, NULL, NULL, NULL)) < 0) {
+      Error("client: problem using select");
+    }
 
 //    size_t size = sizeof(receive_buffer);
 
@@ -259,6 +261,7 @@ int main(int argc, char *argv[]) {
       } else {
         // Send chat messages
         RequestSay(input.c_str());
+        std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
       }
     }
 
