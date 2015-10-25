@@ -242,11 +242,13 @@ int main(int argc, char *argv[]) {
 
 //    size_t size = sizeof(receive_buffer);
 
-//    std::cout << "past select, result: " << result << std::endl;
+    std::cout << "past select, result: " << result << std::endl;
 
     if (result > 0) {
-      std::cout << "result > 0: " << result << std::endl;
       if (FD_ISSET(file_desc, &read_set)) {
+
+        std::cout << "past FD_ISSET" << std::endl;
+
         // Socket has data
         result = recv(file_desc, receive_buffer, sizeof(receive_buffer), 0);
 
@@ -276,21 +278,21 @@ int main(int argc, char *argv[]) {
 //      RequestSay(input.c_str());
 //      std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
 //    }
-
-    if (FD_ISSET(STDIN_FILENO, &read_set)) {
-      std::cout << "> ";
-      getline(std::cin, input);
-
-      if (input[0] == '/') {
-        if (!ProcessInput(input)) {
-          break;
-        }
-      } else {
-        // Send chat messages
-        RequestSay(input.c_str());
-        std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
-      }
-    }
+//
+//    if (FD_ISSET(STDIN_FILENO, &read_set)) {
+//      std::cout << "> ";
+//      getline(std::cin, input);
+//
+//      if (input[0] == '/') {
+//        if (!ProcessInput(input)) {
+//          break;
+//        }
+//      } else {
+//        // Send chat messages
+//        RequestSay(input.c_str());
+//        std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
+//      }
+//    }
 
 //    std::cout << "past getline" << std::endl;
 
