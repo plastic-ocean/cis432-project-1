@@ -282,7 +282,7 @@ int main(int argc, char *argv[]) {
             case TXT_SAY:
               struct text_say say;
               memcpy(&say, receive_buffer, sizeof(struct text_say));
-              std::cin >> input;
+              std::cin >> input >> std::flush;
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
               std::cout << ">" << input << std::flush;
