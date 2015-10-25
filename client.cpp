@@ -18,10 +18,13 @@ void Error(const char *msg) {
 void Connect(char *server, int port) {
   printf("Connecting to %s\n", server);
 
+  srand((unsigned int) time(NULL));
+  int client_port = (rand() % 5000) + 4000;
+
   memset((char *) &client_addr, 0, sizeof(client_addr));
   client_addr.sin_family = AF_INET;
   client_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  client_addr.sin_port = htons(kClientPort);
+  client_addr.sin_port = htons(client_port);
 
   memset((char *) &server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
@@ -42,7 +45,6 @@ void Connect(char *server, int port) {
 int SendMessage(void *message, size_t message_size) {
   if (sendto(client_socket, message, message_size, 0, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
     Error("client: failed to send message\n");
-    return 1;
   }
 
   return 0;
@@ -110,12 +112,12 @@ std::vector<std::string> StringSplit(std::string input) {
 
 
 // Splits strings around spaces.
-std::vector<std::string> SplitString(std::string input, char delimeter) {
+std::vector<std::string> SplitString(std::string input, char delimiter) {
   std::vector<std::string> result;
   std::string word = "";
 
   for (char c : input) {
-    if (c != delimeter) {
+    if (c != delimiter) {
       word += c;
     } else {
       result.push_back(word);
@@ -173,7 +175,7 @@ int main(int argc, char *argv[]) {
 
   RequestLogin(username);
 
-  RequestJoin("Common");
+
 
   // TODO handle response from send
 

@@ -18,7 +18,7 @@ void ProcessRequest(void *buffer) {
   request_t request_type = current_request.req_type;
 
   switch(request_type){
-    case REQ_LOGIN :
+    case REQ_LOGIN:
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
       printf("Username: %s\n", login_request.req_username);

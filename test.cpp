@@ -20,11 +20,16 @@ std::vector<std::string> SplitString(std::string input) {
 
 
 int main() {
-  std::string test = "this is a test";
+//  std::string test = "this is a test";
+//
+//  std::vector<std::string> result = SplitString(test);
 
-  std::vector<std::string> result = SplitString(test);
+  srand((unsigned int) time(NULL));
+  int client_port = (rand() % 1000) + 4000;
 
-  for (auto word : result) {
-    std::cout << word << std::endl;
-  }
+  std::cout << client_port << std::endl;
+
+//  for (auto word : result) {
+//    std::cout << word << std::endl;
+//  }
 }
