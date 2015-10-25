@@ -1,5 +1,6 @@
 #include <netdb.h>
 #include <unistd.h>
+#include <sys/fcntl.h>
 
 #include "client.h"
 #include "duckchat.h"
@@ -46,10 +47,13 @@ void Connect(char *domain, const char *port) {
       continue;
     }
     if (connect(client_socket, server_info->ai_addr, server_info->ai_addrlen) != -1) {
+      fcntl(client_socket, F_SETFL, O_NONBLOCK);
       break; // Success
     }
     close(client_socket);
   }
+
+
 
   if (server_info == NULL) {
     Error("client: all sockets failed to connect");
