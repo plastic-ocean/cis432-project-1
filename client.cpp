@@ -11,7 +11,7 @@ struct addrinfo *server_info;
 
 // Prints an error message and exits the program.
 void Error(const char *msg) {
-  perror(msg);
+  std::cerr << msg << std::endl;
   exit(1);
 }
 
@@ -29,24 +29,24 @@ void Connect(char *domain, const char *port) {
   hints.ai_socktype = SOCK_DGRAM;
 
   if ((status = getaddrinfo(domain, port, &hints, &server_info_tmp)) < 0) {
-    Error("client: can not open socket\n");
+    Error("client: can't open socket\n");
   }
 
   if (status != 0) {
     std::cerr << "client: unable to resolve address: " << gai_strerror(status) << std::endl;
-    exit(-4);
+    exit(1);
   }
 
   for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
     if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
-      std::cerr << "client: could not connect to socket" << std::endl;
+      Error("client: couldn't connect to socket");
       continue;
     }
     break;
   }
 
   if (server_info == NULL) {
-    std::cerr << "client: all sockets failed to connect" << std::endl;
+    Error("client: all sockets failed to connect");
   }
 }
 
@@ -166,21 +166,34 @@ bool ProcessInput(std::string input) {
 
 
 int main(int argc, char *argv[]) {
-  char *server;
-  char *port;
+  char *domain;
+  char *port_str;
+  int port_num;
   char *username;
   std::string input;
 
   if (argc < 4) {
-    fprintf(stderr,"usage: client [server name] [port] [username]\n");
-    exit(1);
+    Error("usage: client [server name] [port] [username]");
   }
 
-  server = argv[1];
-  port = argv[2];
+  domain = argv[1];
+  port_str = argv[2];
+  port_num = atoi(argv[2]);
   username = argv[3];
 
-  Connect(server, port);
+  if (strlen(domain) > UNIX_PATH_MAX) {
+    Error("client: server name must be less than 108 characters");
+  }
+
+  if (port_num < 0 || port_num > 65535) {
+    Error("client: port number must be between 0 and 65535");
+  }
+
+  if (strlen(username) > USERNAME_MAX) {
+    Error("client: username must be less than 32 characters");
+  }
+
+  Connect(domain, port_str);
 
   RequestLogin(username);
   RequestJoin((char *) "Common");
