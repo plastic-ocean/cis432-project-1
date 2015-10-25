@@ -1,3 +1,11 @@
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <string.h>
+#include <netinet/in.h>
+#include <cstring>
+#include <stdio.h>
+#include <string>
+
 #include "server.h"
 #include "duckchat.h"
 
