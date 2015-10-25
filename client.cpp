@@ -21,7 +21,7 @@ void Connect(char *domain, const char *port) {
   std::cout << "Connecting to " << domain << std::endl;
 
   struct addrinfo hints;
-  struct addrinfo *server_info_tmp;
+//  struct addrinfo *server_info_tmp;
   int status;
 
   memset(&hints, 0, sizeof(hints));
