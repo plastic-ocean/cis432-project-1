@@ -52,14 +52,14 @@ int SendMessage(void *message, size_t message_size) {
 
 // Sends a message to all users in on the active channel.
 int Say(std::string msg) {
-  void *message = static_cast<void*>(&msg);
+  void *message = static_cast<void *>(&msg);
 
   return SendMessage(message, sizeof(message));
 }
 
 
 // Sends login requests to the server.
-int RequestLogin(std::string username) {
+int RequestLogin(char *username) {
   struct request_login login;
   memset((char *) &login, 0, sizeof(login));
   login.req_type = REQ_LOGIN;
@@ -88,7 +88,7 @@ int RequestLogout() {
 
 
 // Sends join requests to the server.
-int RequestJoin(std::string channel) {
+int RequestJoin(char *channel) {
   struct request_join join;
   memset((char *) &join, 0, sizeof(join));
   join.req_type = REQ_JOIN;
@@ -174,7 +174,6 @@ int main(int argc, char *argv[]) {
   Connect(server, port);
 
   RequestLogin(username);
-
 
 
   // TODO handle response from send
