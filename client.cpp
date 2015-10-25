@@ -58,7 +58,7 @@ void Connect(char *domain, const char *port) {
 
 
 // Sends a message to all users in on the active channel.
-int RequestSay(std::string message) {
+int RequestSay(const char *message) {
   struct request_say say;
   memset(&say, 0, sizeof(say));
   say.req_type = REQ_SAY;
@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
 
   RequestLogin(username);
 
-  channel = static_cast<char *>("Common");
+  channel = (char *) "Common";
   RequestJoin(channel);
 
   // TODO handle response from send
@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
       }
     } else {
       // Send chat messages
-      RequestSay(input);
+      RequestSay(input.c_str());
     }
 
   }
