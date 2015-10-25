@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
   char *port_str;
   int port_num;
   char *username;
-  char *input;
+  std::string input;
 
 //  struct timeval timeout;
   fd_set read_set;
