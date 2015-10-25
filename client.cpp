@@ -242,8 +242,8 @@ int main(int argc, char *argv[]) {
 //    std::cout << "past select, result: " << result << std::endl;
 
     if (result > 0) {
-      std::cout << "result: " << result << std::endl;
-      if (FD_ISSET(file_desc, &read_set)) {
+//      std::cout << "result: " << result << std::endl;
+      if (FD_ISSET(client_socket, &read_set)) {
 
         std::cout << "past FD_ISSET" << std::endl;
 
