@@ -53,8 +53,6 @@ void Connect(char *domain, const char *port) {
   if (server_info == NULL) {
     Error("client: all sockets failed to connect");
   }
-
-//  freeaddrinfo(server_info_tmp);
 }
 
 
