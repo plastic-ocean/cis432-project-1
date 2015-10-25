@@ -190,7 +190,7 @@ int main(int argc, char *argv[]) {
 
   struct timeval timeout;
   fd_set read_set;
-  int file_desc = 0;
+//  int file_desc = 0;
   int result;
   char receive_buffer[SAY_MAX];
   memset(&receive_buffer, 0, SAY_MAX);
