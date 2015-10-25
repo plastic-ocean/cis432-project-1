@@ -4,3 +4,4 @@ CMakeLists.txt
 *.o
 client
 server
+test
