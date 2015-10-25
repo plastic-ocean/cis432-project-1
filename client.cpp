@@ -237,23 +237,14 @@ int main(int argc, char *argv[]) {
       Error("client: problem using select");
     }
 
-//    size_t size = sizeof(receive_buffer);
-
-//    std::cout << "past select, result: " << result << std::endl;
-
     if (result > 0) {
-//      std::cout << "result: " << result << std::endl;
       if (FD_ISSET(client_socket, &read_set)) {
-
-//        std::cout << "past FD_ISSET" << std::endl;
-
         // Socket has data
-        result = read(client_socket, receive_buffer, SAY_MAX);
+        int read_size = read(client_socket, receive_buffer, SAY_MAX);
 
-//        FD_CLR(file_desc, &read_set);
-//        memset(&receive_buffer, 0, SAY_MAX);
+        std::cout << "result: " << read_size << std::endl;
 
-        if (result != 0) {
+        if (read_size != 0) {
           // TODO capture user input, store, clean input, then print buffer, afterward replace input
           std::cout << "[" << channel << "]" << "[" << username << "]: " << receive_buffer << std::endl;
         }
