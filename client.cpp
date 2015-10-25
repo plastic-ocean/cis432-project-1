@@ -4,7 +4,7 @@
 
 // Variables
 struct sockaddr_in client_addr;
-//struct sockaddr_in server_addr;
+struct sockaddr_in server_addr;
 int client_socket;
 struct addrinfo *server_info;
 
@@ -38,7 +38,7 @@ void Connect(char *domain, const char *port) {
   }
 
   for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
-    if((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
+    if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
       std::cerr << "client: could not connect to socket" << std::endl;
       continue;
     }
@@ -48,44 +48,26 @@ void Connect(char *domain, const char *port) {
   if (server_info == NULL) {
     std::cerr << "client: all sockets failed to connect" << std::endl;
   }
-
-//  srand((unsigned int) time(NULL));
-//  int client_port = (rand() % 5000) + 4000;
-
-//  memset((char *) &client_addr, 0, sizeof(client_addr));
-//  client_addr.sin_family = AF_INET;
-//  client_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-//  client_addr.sin_port = htons(client_port);
-//
-//  memset((char *) &server_addr, 0, sizeof(server_addr));
-//  server_addr.sin_family = AF_INET;
-//  server_addr.sin_addr.s_addr = htonl(INADDR_ANY); // TODO figure out how to handle ex: ix.cs.uoregon.edu
-//  server_addr.sin_port = htons(atoi(port));
-//
-//  if ((client_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-//    Error("client: can't open socket\n");
-//  }
-//
-//  if (bind(client_socket, (struct sockaddr *) &client_addr, sizeof(client_addr)) < 0) {
-//    Error("client: bind failed\n");
-//  }
 }
 
 
-// Sends messages to the server.
-int SendMessage(void *message, size_t message_size) {
-  if (sendto(client_socket, message, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
-    Error("client: failed to send message\n");
+// Sends requests to the server.
+int SendRequest(auto packet, size_t packet_size) {
+  if (sendto(client_socket, &packet, packet_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to send request\n");
   }
 
   return 0;
 }
 
-// Sends a message to all users in on the active channel.
-int Say(std::string msg) {
-  void *message = static_cast<void *>(&msg);
 
-  return SendMessage(message, sizeof(message));
+// Sends a message to all users in on the active channel.
+int Say(std::string message) {
+  if (sendto(client_socket, &message, sizeof(message), 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to send message\n");
+  }
+
+  return 0;
 }
 
 
@@ -97,16 +79,8 @@ int RequestLogin(char *username) {
   strncpy(login.req_username, username, USERNAME_MAX);
 
   size_t message_size = sizeof(struct request_login);
-//  void* message[size];
-//  memcpy(message, &login, size);
 
-  if (sendto(client_socket, &login, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
-    Error("client: failed to send message\n");
-  }
-
-  return 0;
-
-//  return SendMessage(message, size);
+  return SendRequest(login, message_size);
 }
 
 
@@ -116,11 +90,13 @@ int RequestLogout() {
   memset((char *) &logout, 0, sizeof(logout));
   logout.req_type = REQ_LOGOUT;
 
-  size_t size = sizeof(struct request_logout);
-  void* message[size];
-  memcpy(message, &logout, size);
+  size_t message_size = sizeof(struct request_logout);
 
-  return SendMessage(message, size);
+  if (sendto(client_socket, &logout, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to request logout\n");
+  }
+
+  return 0;
 }
 
 
@@ -131,11 +107,13 @@ int RequestJoin(char *channel) {
   join.req_type = REQ_JOIN;
   strncpy(join.req_channel, channel, CHANNEL_MAX);
 
-  size_t size = sizeof(struct request_join);
-  void* message[size];
-  memcpy(message, &join, size);
+  size_t message_size = sizeof(struct request_join);
 
-  return SendMessage(message, size);
+  if (sendto(client_socket, &join, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to request join\n");
+  }
+
+  return 0;
 }
 
 
