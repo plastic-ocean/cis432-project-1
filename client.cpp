@@ -1,14 +1,7 @@
 #include "client.h"
 #include "duckchat.h"
 
-#include <iostream>
-#include <cstring>
-#include <vector>
-#include <sstream>
-#include <iterator>
-#include <netinet/in.h>
-
-int kClientPort = 5001;
+// Variables
 struct sockaddr_in client_addr;
 struct sockaddr_in server_addr;
 int client_socket;
@@ -55,20 +48,55 @@ int SendMessage(void *message, size_t message_size) {
   return 0;
 }
 
+// Sends a message to all users in on the active channel.
+int Say(std::string msg) {
+  void *message = static_cast<void*>(&msg);
 
-// Sends login messages to the server.
-int SendLogin(struct request_login user_login) {
-  void* message[sizeof(struct request_login)];
-  memcpy(message, &user_login, sizeof(struct request_login));
+  return SendMessage(message, sizeof(message));
+}
 
-//  if (sendto(client_socket, message, sizeof(struct request_login), 0, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
-//    Error("client: failed to send message\n");
-//    return 1;
-//  }
-//
-//  return 0;
 
-  return SendMessage(message, sizeof(struct request_login));
+// Sends login requests to the server.
+int RequestLogin(std::string username) {
+  struct request_login login;
+  memset((char *) &login, 0, sizeof(login));
+  login.req_type = REQ_LOGIN;
+  strncpy(login.req_username, username, USERNAME_MAX);
+
+  size_t size = sizeof(struct request_login);
+  void* message[size];
+  memcpy(message, &login, size);
+
+  return SendMessage(message, size);
+}
+
+
+// Sends logout requests to the server.
+int RequestLogout() {
+  struct request_logout logout;
+  memset((char *) &logout, 0, sizeof(logout));
+  logout.req_type = REQ_LOGOUT;
+
+  size_t size = sizeof(struct request_logout);
+  void* message[size];
+  memcpy(message, &logout, size);
+
+  return SendMessage(message, size);
+}
+
+
+// Sends join requests to the server.
+int RequestJoin(std::string channel) {
+  struct request_join join;
+  memset((char *) &join, 0, sizeof(join));
+  join.req_type = REQ_JOIN;
+  strncpy(join.req_channel, channel, CHANNEL_MAX);
+
+  size_t size = sizeof(struct request_join);
+  void* message[size];
+  memcpy(message, &join, size);
+
+  return SendMessage(message, size);
 }
 
 
@@ -81,6 +109,7 @@ std::vector<std::string> StringSplit(std::string input) {
 }
 
 
+// Splits strings around spaces.
 std::vector<std::string> SplitString(std::string input, char delimeter) {
   std::vector<std::string> result;
   std::string word = "";
@@ -105,7 +134,7 @@ bool ProcessInput(std::string input) {
   bool result = true;
 
   if (inputs[0] == "/exit") {
-//    SendMessage((void *)inputs[0], strlen(inputs[0]));
+    RequestLogout();
     result = false;
   } else if (inputs[0] == "/list") {
 
@@ -142,12 +171,9 @@ int main(int argc, char *argv[]) {
 
   Connect(server, port);
 
-  struct request_login user_login;
-  memset((char *) &user_login, 0, sizeof(user_login));
-  user_login.req_type = REQ_LOGIN;
-  strncpy(user_login.req_username, username, USERNAME_MAX);
+  RequestLogin(username);
 
-  SendLogin(user_login);
+  RequestJoin("Common");
 
   // TODO handle response from send
 
@@ -160,8 +186,8 @@ int main(int argc, char *argv[]) {
         break;
       }
     } else {
-      // Sending chat messages
-//      SendMessage(input);
+      // Send chat messages
+      Say(input);
     }
 
   }
