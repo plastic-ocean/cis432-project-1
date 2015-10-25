@@ -274,6 +274,10 @@ int main(int argc, char *argv[]) {
         memset(&receive_buffer, 0, SAY_MAX);
       }
 
+      if (stdin_buffer[0] != 0) {
+        std::cout << stdin_buffer << std::endl;
+      }
+
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
         int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
 
