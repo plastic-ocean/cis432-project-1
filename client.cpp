@@ -228,6 +228,7 @@ int main(int argc, char *argv[]) {
   while(1) {
     FD_ZERO(&read_set);
     FD_SET(file_desc, &read_set);
+    FD_SET(STDIN_FILENO, &read_set);
 
     timeout.tv_sec = 0; // TODO change time value?
     timeout.tv_usec = 0;
@@ -246,14 +247,17 @@ int main(int argc, char *argv[]) {
     if (result > 0) {
       if (FD_ISSET(file_desc, &read_set)) {
         // Socket has data
-        result = read(client_socket, receive_buffer, sizeof(receive_buffer));
-      }
+        result = recv(file_desc, receive_buffer, sizeof(receive_buffer), 0);
 
-      if (result == 0) {
-        close(file_desc);
-      } else {
-        // TODO capture user input, store, clean input, then print buffer, afterward replace input
-        std::cout << "[" << channel << "]" << "[" << username << "]: " << receive_buffer << std::endl;
+        FD_CLR(file_desc, &read_set);
+        memset(&receive_buffer, 0, SAY_MAX);
+
+        if (result == 0) {
+          close(file_desc);
+        } else {
+          // TODO capture user input, store, clean input, then print buffer, afterward replace input
+          std::cout << "[" << channel << "]" << "[" << username << "]: " << receive_buffer << std::endl;
+        }
       }
     }
 
@@ -272,33 +276,20 @@ int main(int argc, char *argv[]) {
 //      std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
 //    }
 
-    std::cout << "> ";
-    getline(std::cin, input);
+    if (FD_ISSET(STDIN_FILENO, &read_set)) {
+      std::cout << "> ";
+      getline(std::cin, input);
 
-    if (input[0] == '/') {
-      if (!ProcessInput(input)) {
-        break;
+      if (input[0] == '/') {
+        if (!ProcessInput(input)) {
+          break;
+        }
+      } else {
+        // Send chat messages
+        RequestSay(input.c_str());
+        std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
       }
-    } else {
-      // Send chat messages
-      RequestSay(input.c_str());
-      std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
     }
-
-//    if (FD_ISSET(STDIN_FILENO, &read_set)) {
-//      std::cout << "> ";
-//      getline(std::cin, input);
-//
-//      if (input[0] == '/') {
-//        if (!ProcessInput(input)) {
-//          break;
-//        }
-//      } else {
-//        // Send chat messages
-//        RequestSay(input.c_str());
-//        std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
-//      }
-//    }
 
 //    std::cout << "past getline" << std::endl;
 
