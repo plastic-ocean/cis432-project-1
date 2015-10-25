@@ -237,6 +237,8 @@ int main(int argc, char *argv[]) {
 
 //    size_t size = sizeof(receive_buffer);
 
+    std::cout << "past select" << std::endl;
+
     if (result > 0) {
       if (FD_ISSET(file_desc, &read_set)) {
         // Socket has data
@@ -246,9 +248,12 @@ int main(int argc, char *argv[]) {
       if (result == 0) {
         close(file_desc);
       } else {
+        // TODO capture user input, store, clean input, then print buffer, afterward replace input
         std::cout << "[" << channel << "]" << "[" << username << "]: " << receive_buffer << std::endl;
       }
     }
+
+    std::cout << "past check result" << std::endl;
 
     if (FD_ISSET(STDIN_FILENO, &read_set)) {
       std::cout << "> ";
@@ -265,7 +270,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
-
+    std::cout << "past getline" << std::endl;
 
   }
 
