@@ -25,10 +25,10 @@ void Connect(char *domain, const char *port) {
   int status;
 
   memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_UNSPEC;
+  hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_DGRAM;
 
-  if ((status = getaddrinfo(domain, port, &hints, &server_info_tmp)) < 0) {
+  if ((status = getaddrinfo(domain, port, &hints, &server_info)) < 0) {
     Error("client: can't open socket\n");
   }
 
@@ -37,12 +37,17 @@ void Connect(char *domain, const char *port) {
     exit(1);
   }
 
-  for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
-    if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
-      Error("client: couldn't connect to socket");
-      continue;
-    }
-    break;
+  // Loop to handle AF_INET and AF_INET6
+//  for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
+//    if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
+//      Error("client: couldn't connect to socket");
+//      continue;
+//    }
+//    break;
+//  }
+
+  if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
+    Error("client: couldn't connect to socket");
   }
 
   if (server_info == NULL) {
