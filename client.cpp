@@ -68,7 +68,7 @@ int SendLogin(struct request_login user_login) {
 //
 //  return 0;
 
-  return SendMessage(message, sizeof(struct request_login);
+  return SendMessage(message, sizeof(struct request_login));
 }
 
 
@@ -76,6 +76,24 @@ int SendLogin(struct request_login user_login) {
 std::vector<std::string> StringSplit(std::string input) {
   std::istringstream iss(input);
   std::vector<std::string> result{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
+
+  return result;
+}
+
+
+std::vector<std::string> SplitString(std::string input, char delimeter) {
+  std::vector<std::string> result;
+  std::string word = "";
+
+  for (char c : input) {
+    if (c != delimeter) {
+      word += c;
+    } else {
+      result.push_back(word);
+      word = "";
+    }
+  }
+  result.push_back(word);
 
   return result;
 }
