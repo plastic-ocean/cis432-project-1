@@ -245,6 +245,7 @@ int main(int argc, char *argv[]) {
 //    std::cout << "past select, result: " << result << std::endl;
 
     if (result > 0) {
+      std::cout << "result > 0: " << result << std::endl;
       if (FD_ISSET(file_desc, &read_set)) {
         // Socket has data
         result = recv(file_desc, receive_buffer, sizeof(receive_buffer), 0);
