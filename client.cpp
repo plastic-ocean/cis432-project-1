@@ -237,12 +237,12 @@ int main(int argc, char *argv[]) {
 
 //    size_t size = sizeof(receive_buffer);
 
-    std::cout << "past select, result: " << result << std::endl;
+//    std::cout << "past select, result: " << result << std::endl;
 
     if (result > 0) {
       if (FD_ISSET(file_desc, &read_set)) {
         // Socket has data
-        result = recv(file_desc, receive_buffer, SAY_MAX, 0);
+        result = read(client_socket, receive_buffer, sizeof(receive_buffer));
       }
 
       if (result == 0) {
@@ -253,7 +253,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    std::cout << "past check result" << std::endl;
+//    std::cout << "past check result" << std::endl;
 
     std::cout << "> ";
     getline(std::cin, input);
@@ -283,7 +283,7 @@ int main(int argc, char *argv[]) {
 //      }
 //    }
 
-    std::cout << "past getline" << std::endl;
+//    std::cout << "past getline" << std::endl;
 
   }
 
