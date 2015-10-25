@@ -239,8 +239,6 @@ int main(int argc, char *argv[]) {
 
   // TODO handle response from send
 
-  bool is_typing = false;
-
   while (1) {
     FD_ZERO(&read_set);
     FD_SET(client_socket, &read_set);
@@ -256,9 +254,6 @@ int main(int argc, char *argv[]) {
         int read_size = read(client_socket, receive_buffer, kBufferSize);
 
         if (read_size != 0) {
-
-          std::cout << is_typing << std::endl;
-
           // TODO capture user input, store, clean input, then print buffer, afterward replace input
           struct text message;
           memcpy(&message, receive_buffer, sizeof(struct text));
@@ -268,6 +263,7 @@ int main(int argc, char *argv[]) {
             case TXT_SAY:
               struct text_say say;
               memcpy(&say, receive_buffer, sizeof(struct text_say));
+              std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
               break;
             default:
@@ -281,8 +277,6 @@ int main(int argc, char *argv[]) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
         int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
 
-        is_typing = true;
-
         if (read_stdin_size != 0) {
           if (stdin_buffer[0] == '/') {
             ProcessInput(stdin_buffer);
@@ -292,8 +286,6 @@ int main(int argc, char *argv[]) {
             RequestSay(stdin_buffer);
           }
         }
-
-        is_typing = false;
 
         memset(&stdin_buffer, 0, kBufferSize);
       } // end of if STDIN
