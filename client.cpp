@@ -184,6 +184,13 @@ int main(int argc, char *argv[]) {
   char *username;
   std::string input;
 
+  struct timeval timeout;
+  fd_set read_set, write_set;
+  int file_desc = 0;
+  int result;
+  char receive_buffer[SAY_MAX];
+  memset(&receive_buffer, 0, SAY_MAX);
+
   if (argc < 4) {
     Error("usage: client [server name] [port] [username]");
   }
@@ -215,17 +222,47 @@ int main(int argc, char *argv[]) {
   // TODO handle response from send
 
   while(1) {
-    std::cout << "> ";
-    getline(std::cin, input);
+    FD_ZERO(&read_set);
+    FD_SET(file_desc, &read_set);
 
-    if (input[0] == '/') {
-      if (!ProcessInput(input)) {
-        break;
+//    timeout.tv_sec = 5; // TODO change time value?
+//    timeout.tv_usec = 0;
+
+//    if ((result = select(file_desc + 1, &read_set, NULL, NULL, NULL)) < 0) {
+//      continue;
+//    }
+    result = select(file_desc + 1, &read_set, NULL, NULL, NULL);
+
+//    size_t size = sizeof(receive_buffer);
+
+    if (result > 0) {
+      if (FD_ISSET(file_desc, &read_set)) {
+        // Socket has data
+        result = recv(file_desc, receive_buffer, SAY_MAX, 0);
       }
-    } else {
-      // Send chat messages
-      RequestSay(input.c_str());
+
+      if (result == 0) {
+        close(file_desc);
+      } else {
+        std::cout << "[" << channel << "]" << "[" << username << "]: " << receive_buffer << std::endl;
+      }
     }
+
+    if (FD_ISSET(STDIN_FILENO, &read_set)) {
+      std::cout << "> ";
+      getline(std::cin, input);
+
+      if (input[0] == '/') {
+        if (!ProcessInput(input)) {
+          break;
+        }
+      } else {
+        // Send chat messages
+        RequestSay(input.c_str());
+      }
+    }
+
+
 
   }
 
