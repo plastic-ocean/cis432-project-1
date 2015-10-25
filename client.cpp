@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
 //    if ((result = select(file_desc + 1, &read_set, NULL, NULL, NULL)) < 0) {
 //      continue;
 //    }
-    if ((result = select(file_desc + 1, &read_set, NULL, NULL, &timeout)) < 0) {
+    if ((result = select(file_desc + 1, &read_set, NULL, NULL, NULL)) < 0) {
       Error("client: problem using select");
     }
 
