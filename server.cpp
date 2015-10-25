@@ -1,17 +1,15 @@
 #include "server.h"
 #include "duckchat.h"
 
-#include <sys/socket.h>
-#include <string>
-#include <netinet/in.h>
-#include <stdlib.h>
 
 std::string user;
+
 
 void Error(const char *msg) {
   perror(msg);
   exit(1);
 }
+
 
 void ProcessRequest(void *buffer) {
   struct request current_request;
@@ -41,6 +39,7 @@ void ProcessRequest(void *buffer) {
   }
 
 }
+
 
 int main(int argc, char *argv[]) {
   struct sockaddr_in server_addr;
