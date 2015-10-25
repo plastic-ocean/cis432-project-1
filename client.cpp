@@ -278,6 +278,8 @@ int main(int argc, char *argv[]) {
             std::cout << "[" << channel << "]" << "[" << username << "]: " << stdin_buffer << std::endl;
           }
         }
+
+        memset(&stdin_buffer, 0, kBufferSize);
       } // end of if STDIN
 
     } // end of if result
