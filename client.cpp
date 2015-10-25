@@ -276,7 +276,7 @@ int main(int argc, char *argv[]) {
             // Send chat messages
             stdin_buffer[read_stdin_size] = '\0';
             RequestSay(stdin_buffer);
-            std::cout << "[" << channel << "]" << "[" << username << "]: " << stdin_buffer << std::endl;
+//            std::cout << "[" << channel << "]" << "[" << username << "]: " << stdin_buffer << std::endl;
           }
         }
 
