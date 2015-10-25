@@ -245,8 +245,6 @@ int main(int argc, char *argv[]) {
     FD_SET(client_socket, &read_set);
     FD_SET(STDIN_FILENO, &read_set);
 
-    std::cout << ">";
-
     if ((result = select(client_socket + 1, &read_set, NULL, NULL, NULL)) < 0) {
       Error("client: problem using select");
     }
@@ -276,6 +274,8 @@ int main(int argc, char *argv[]) {
         memset(&receive_buffer, 0, SAY_MAX);
       }
 
+      std::cout << ">";
+
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
         int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
 
@@ -290,8 +290,6 @@ int main(int argc, char *argv[]) {
         }
 
         memset(&stdin_buffer, 0, kBufferSize);
-
-//        std::cout << std::endl;
       } // end of if STDIN
 
     } // end of if result
