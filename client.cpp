@@ -240,8 +240,6 @@ int main(int argc, char *argv[]) {
 
   // TODO handle response from send
 
-  std::cout << ">";
-
   while (1) {
     FD_ZERO(&read_set);
     FD_SET(client_socket, &read_set);
@@ -275,8 +273,6 @@ int main(int argc, char *argv[]) {
 
         memset(&receive_buffer, 0, SAY_MAX);
       }
-
-      std::cout << ">";
 
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
         int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
