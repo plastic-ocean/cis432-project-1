@@ -32,7 +32,6 @@ void ProcessRequest(void *buffer) {
       memcpy(&login_request, buffer, sizeof(struct request_login));
       user = login_request.req_username;
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
-      printf("server: %s logs in\n", login_request.req_username);
       break;
     case REQ_LOGOUT:
       struct request_logout logout_request;
