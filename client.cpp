@@ -268,7 +268,6 @@ int main(int argc, char *argv[]) {
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
               std::cout << ">" << std::flush;
-              std::cout << strlen(stdin_buffer) << std::flush;
               break;
             default:
               break;
@@ -278,10 +277,10 @@ int main(int argc, char *argv[]) {
         memset(&receive_buffer, 0, SAY_MAX);
       }
 
-
-
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
         int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
+
+        std::cout << stdin_buffer << std::flush;
 
         if (read_stdin_size != 0) {
           if (stdin_buffer[0] == '/') {
