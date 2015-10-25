@@ -263,6 +263,7 @@ int main(int argc, char *argv[]) {
             // Send chat messages
             StripChar(stdin_buffer, '\n');
             RequestSay(stdin_buffer);
+            std::cout << ">" << stdin_buffer << std::flush;
           }
         }
 
