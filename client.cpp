@@ -206,7 +206,6 @@ int main(int argc, char *argv[]) {
   char receive_buffer[kBufferSize];
   memset(&receive_buffer, 0, kBufferSize);
 
-
   char stdin_buffer[kBufferSize];
   memset(&stdin_buffer, 0, kBufferSize);
 
@@ -272,9 +271,7 @@ int main(int argc, char *argv[]) {
         }
 
         memset(&receive_buffer, 0, SAY_MAX);
-      }
-
-      if (FD_ISSET(STDIN_FILENO, &read_set)) {
+      } else if (FD_ISSET(STDIN_FILENO, &read_set)) {
         int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
 
         if (read_stdin_size != 0) {
