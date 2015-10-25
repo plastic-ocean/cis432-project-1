@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
 
 //    size_t size = sizeof(receive_buffer);
 
-    std::cout << "past select" << std::endl;
+    std::cout << "past select, result: " << result << std::endl;
 
     if (result > 0) {
       if (FD_ISSET(file_desc, &read_set)) {
