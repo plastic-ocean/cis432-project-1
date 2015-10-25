@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
     FD_SET(client_socket, &read_set);
     FD_SET(STDIN_FILENO, &read_set);
 
-    std::cout << ">";
+//    std::cout << ">";
 
     if ((result = select(client_socket + 1, &read_set, NULL, NULL, NULL)) < 0) {
       Error("client: problem using select");
@@ -245,8 +245,6 @@ int main(int argc, char *argv[]) {
       if (FD_ISSET(client_socket, &read_set)) {
         // Socket has data
         int read_size = read(client_socket, receive_buffer, kBufferSize);
-
-//        std::cout << "result: " << read_size << std::endl;
 
         if (read_size != 0) {
           // TODO capture user input, store, clean input, then print buffer, afterward replace input
@@ -258,8 +256,7 @@ int main(int argc, char *argv[]) {
             case TXT_SAY:
               struct text_say say;
               memcpy(&say, receive_buffer, sizeof(struct text_say));
-              std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text <<
-              std::endl;
+              std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
               break;
             default:
               break;
@@ -270,9 +267,9 @@ int main(int argc, char *argv[]) {
       }
 
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
-        int read_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
+        int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
 
-        if (read_size != 0) {
+        if (read_stdin_size != 0) {
           if (stdin_buffer[0] == '/') {
             ProcessInput(stdin_buffer);
           } else {
@@ -282,7 +279,7 @@ int main(int argc, char *argv[]) {
           }
         }
       } // end of if STDIN
-      
+
     } // end of if result
 
   } // end of while
