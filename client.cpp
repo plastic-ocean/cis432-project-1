@@ -272,20 +272,33 @@ int main(int argc, char *argv[]) {
 //      std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
 //    }
 
-    if (FD_ISSET(STDIN_FILENO, &read_set)) {
-      std::cout << "> ";
-      getline(std::cin, input);
+    std::cout << "> ";
+    getline(std::cin, input);
 
-      if (input[0] == '/') {
-        if (!ProcessInput(input)) {
-          break;
-        }
-      } else {
-        // Send chat messages
-        RequestSay(input.c_str());
-        std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
+    if (input[0] == '/') {
+      if (!ProcessInput(input)) {
+        break;
       }
+    } else {
+      // Send chat messages
+      RequestSay(input.c_str());
+      std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
     }
+
+//    if (FD_ISSET(STDIN_FILENO, &read_set)) {
+//      std::cout << "> ";
+//      getline(std::cin, input);
+//
+//      if (input[0] == '/') {
+//        if (!ProcessInput(input)) {
+//          break;
+//        }
+//      } else {
+//        // Send chat messages
+//        RequestSay(input.c_str());
+//        std::cout << "[" << channel << "]" << "[" << username << "]: " << input << std::endl;
+//      }
+//    }
 
 //    std::cout << "past getline" << std::endl;
 
