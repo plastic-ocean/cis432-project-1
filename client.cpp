@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
   Connect(server, port);
 
   RequestLogin(username);
-
+  RequestJoin((char *) "Common");
 
   // TODO handle response from send
 

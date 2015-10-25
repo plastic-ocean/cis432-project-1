@@ -1,10 +1,12 @@
-#include <sys/socket.h>
-#include <string.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "server.h"
 #include "duckchat.h"
+
+#include <sys/socket.h>
+#include <string>
+#include <netinet/in.h>
+#include <stdlib.h>
+
+std::string user;
 
 void Error(const char *msg) {
   perror(msg);
@@ -21,7 +23,20 @@ void ProcessRequest(void *buffer) {
     case REQ_LOGIN:
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
-      printf("Username: %s\n", login_request.req_username);
+      user = login_request.req_username;
+      printf("server: %s logs in\n", login_request.req_username);
+      break;
+    case REQ_LOGOUT:
+      struct request_logout logout_request;
+      memcpy(&logout_request, buffer, sizeof(struct request_logout));
+      printf("server: %s logs out\n", user);
+      break;
+    case REQ_JOIN:
+      struct request_join join_request;
+      memcpy(&join_request, buffer, sizeof(struct request_join));
+      printf("server: %s joins channel %s\n", user, join_request.req_channel);
+      break;
+    default:
       break;
   }
 
@@ -35,6 +50,8 @@ int main(int argc, char *argv[]) {
   int receive_len;
   void* buffer[kBufferSize];
   int port;
+
+  user = "";
 
   if (argc < 2) {
     fprintf(stderr,"server: no port provided\n");
@@ -56,8 +73,8 @@ int main(int argc, char *argv[]) {
     Error("server: bind failed\n");
   }
 
+  printf("server: waiting on port %d\n", port);
   while (1) {
-    printf("server: waiting on port %d\n", port);
     receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
     if (receive_len > 0) {
       buffer[receive_len] = 0;
