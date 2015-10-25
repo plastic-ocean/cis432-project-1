@@ -9,6 +9,7 @@ struct sockaddr_in client_addr;
 struct sockaddr_in server_addr;
 int client_socket;
 struct addrinfo *server_info;
+char *channel;
 
 
 // Prints an error message and exits the program.
@@ -27,7 +28,7 @@ void Connect(char *domain, const char *port) {
   int status;
 
   memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_INET;
+  hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_DGRAM;
   hints.ai_protocol = 0;
 
@@ -57,8 +58,14 @@ void Connect(char *domain, const char *port) {
 
 
 // Sends a message to all users in on the active channel.
-int Say(std::string message) {
-  if (sendto(client_socket, &message, sizeof(message), 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+int RequestSay(std::string message) {
+  struct request_say say;
+  memset(&say, 0, sizeof(say));
+  say.req_type = REQ_SAY;
+  strncpy(say.req_text, message, SAY_MAX);
+  strncpy(say.req_channel, channel, CHANNEL_MAX);
+
+  if (sendto(client_socket, &say, sizeof(say), 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
     Error("client: failed to send message\n");
   }
 
@@ -201,7 +208,9 @@ int main(int argc, char *argv[]) {
   Connect(domain, port_str);
 
   RequestLogin(username);
-  RequestJoin((char *) "Common");
+
+  channel = static_cast<char *>("Common");
+  RequestJoin(channel);
 
   // TODO handle response from send
 
@@ -215,7 +224,7 @@ int main(int argc, char *argv[]) {
       }
     } else {
       // Send chat messages
-      Say(input);
+      RequestSay(input);
     }
 
   }
