@@ -271,7 +271,7 @@ int main(int argc, char *argv[]) {
 
               size_t size = strlen(stdin_buffer);
               for (size_t i = 0; i < size; i++) {
-                std::cout << stdin_buffer[i] < std::flush;
+                std::cout << stdin_buffer[i] << std::flush;
               }
 
               break;
