@@ -241,6 +241,8 @@ int main(int argc, char *argv[]) {
 
   std::cout << ">" << std::flush;
 
+  std::string tmp;
+
   while (1) {
     FD_ZERO(&read_set);
     FD_SET(client_socket, &read_set);
@@ -251,6 +253,22 @@ int main(int argc, char *argv[]) {
     }
 
     if (result > 0) {
+      if (FD_ISSET(STDIN_FILENO, &read_set)) {
+        int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
+
+        if (read_stdin_size != 0) {
+          if (stdin_buffer[0] == '/') {
+            ProcessInput(stdin_buffer);
+          } else {
+            // Send chat messages
+            StripChar(stdin_buffer, '\n');
+            RequestSay(stdin_buffer);
+          }
+        }
+
+        memset(&stdin_buffer, 0, kBufferSize);
+      } // end of if STDIN
+
       if (FD_ISSET(client_socket, &read_set)) {
         // Socket has data
         int read_size = read(client_socket, receive_buffer, kBufferSize);
@@ -267,7 +285,7 @@ int main(int argc, char *argv[]) {
               memcpy(&say, receive_buffer, sizeof(struct text_say));
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              std::cout << ">" << std::flush;
+              std::cout << ">" << stdin_buffer << std::flush;
               break;
             default:
               break;
@@ -275,25 +293,7 @@ int main(int argc, char *argv[]) {
         }
 
         memset(&receive_buffer, 0, SAY_MAX);
-      }
-
-      std::cout << stdin_buffer << std::flush;
-
-      if (FD_ISSET(STDIN_FILENO, &read_set)) {
-        int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
-
-        if (read_stdin_size != 0) {
-          if (stdin_buffer[0] == '/') {
-            ProcessInput(stdin_buffer);
-          } else {
-            // Send chat messages
-            StripChar(stdin_buffer, '\n');
-            RequestSay(stdin_buffer);
-          }
-        }
-
-        memset(&stdin_buffer, 0, kBufferSize);
-      } // end of if STDIN
+      } // end of if client_socket
 
     } // end of if result
 
