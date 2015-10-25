@@ -1,4 +1,6 @@
 #include <netdb.h>
+#include <unistd.h>
+
 #include "client.h"
 #include "duckchat.h"
 
