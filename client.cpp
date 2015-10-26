@@ -289,7 +289,7 @@ int main(int argc, char *argv[]) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
 //        char c = (char) getchar();
 //        *bufPosition++ = c;
-//        printf("%c", c);
+//        std::cout << c << std::endl;
 //        fflush(stdout);
 
 //        int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
@@ -303,18 +303,6 @@ int main(int argc, char *argv[]) {
           printf("\n");
           fflush(stdout);
           input = inBuffer;
-        } else if (bufPosition != inBuffer + SAY_MAX) {
-          *bufPosition++ = c;
-          printf("%c", c);
-          fflush(stdout);
-        }
-
-        const char *DELIM = " \n";
-        char *tok = (char*) malloc(sizeof(char) * (strlen(input) + 1));
-        strcpy(tok, input);
-        char *command = strtok(tok, DELIM);
-
-        if (command != NULL) {
           if (input[0] == '/') {
             ProcessInput(input);
           } else {
@@ -322,9 +310,30 @@ int main(int argc, char *argv[]) {
 //            StripChar(stdin_buffer, '\n');
             RequestSay(input);
           }
+          
+        } else if (bufPosition != inBuffer + SAY_MAX) {
+          *bufPosition++ = c;
+          printf("%c", c);
+          fflush(stdout);
         }
-
-        memset(&stdin_buffer, 0, kBufferSize);
+//
+//        const char *DELIM = " \n";
+//        char *tok = (char*) malloc(sizeof(char) * (strlen(input) + 1));
+//        strcpy(tok, input);
+//        char *command = strtok(tok, DELIM);
+//        free(tok);
+//
+//        if (command != NULL) {
+//          if (input[0] == '/') {
+//            ProcessInput(input);
+//          } else {
+//            // Send chat messages
+////            StripChar(stdin_buffer, '\n');
+//            RequestSay(input);
+//          }
+//        }
+//
+//        memset(&stdin_buffer, 0, kBufferSize);
       } // end of if STDIN_FILENO
 
       if (FD_ISSET(client_socket, &read_set)) {
