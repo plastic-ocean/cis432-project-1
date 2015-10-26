@@ -294,9 +294,27 @@ int main(int argc, char *argv[]) {
 
 //        int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
 
-        input = NewInputString();
+//        input = NewInputString();
 
-        if (input[strlen(input)] == '\n') {
+        char c = (char) getchar();
+        if (c == '\n') {
+          *bufPosition++ = '\0';
+          bufPosition = inBuffer;
+          printf("\n");
+          fflush(stdout);
+          input = inBuffer;
+        } else if (bufPosition != inBuffer + SAY_MAX) {
+          *bufPosition++ = c;
+          printf("%c", c);
+          fflush(stdout);
+        }
+
+        const char *DELIM = " \n";
+        char *tok = (char*) malloc(sizeof(char) * (strlen(input) + 1));
+        strcpy(tok, input);
+        char *command = strtok(tok, DELIM);
+
+        if (command != NULL) {
           if (input[0] == '/') {
             ProcessInput(input);
           } else {
