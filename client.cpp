@@ -262,16 +262,13 @@ int main(int argc, char *argv[]) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
         char c = (char) getchar();
         if (c == '\n') {
-          // Increments the stdin_buffer pointer's position and sets new position to the NULL char.
+          // Increments pointer and adds NULL char.
           *stdin_buffer_position++ = '\0';
 
           // Resets stdin_buffer_position to the original pointer position.
           stdin_buffer_position = stdin_buffer;
 
           std::cout << "\n" << std::flush;
-
-//          printf("\n");
-//          fflush(stdout);
 
           // Prevents output from printing on the new prompt.
           output = (char *) "";
@@ -284,10 +281,10 @@ int main(int argc, char *argv[]) {
             RequestSay(input);
           }
         } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
+          // Increments pointer and adds char c.
           *stdin_buffer_position++ = c;
+          
           std::cout << c << std::flush;
-//          printf("%c", c); // cout does not work
-//          fflush(stdout);
 
           // Creates output to use on the new prompt after receiving a server message.
           output = stdin_buffer_position;
