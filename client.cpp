@@ -207,15 +207,10 @@ int main(int argc, char *argv[]) {
   char stdin_buffer[SAY_MAX + 1];
   char *stdin_buffer_position = stdin_buffer;
 
-//  struct timeval timeout;
   fd_set read_set;
-//  int file_desc = 0;
   int result;
   char receive_buffer[kBufferSize];
   memset(&receive_buffer, 0, kBufferSize);
-
-//  char stdin_buffer[kBufferSize];
-//  memset(&stdin_buffer, 0, kBufferSize);
 
   if (argc < 4) {
     Error("usage: client [server name] [port] [username]");
@@ -266,13 +261,14 @@ int main(int argc, char *argv[]) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
         char c = (char) getchar();
         if (c == '\n') {
-          *stdin_buffer_position++ = '\0';
-          stdin_buffer_position = stdin_buffer;
+//          *stdin_buffer_position++ = '\0';
+//          stdin_buffer_position = stdin_buffer;
+          *stdin_buffer++ = '\0';
           printf("\n");
           fflush(stdout);
           input = stdin_buffer;
 
-          // Clear output after receiving newline at prompt to not print old stdin_buffer.
+          // Clear output after receiving newline at prompt to not print output.
           output = (char *) "";
 
           if (input[0] == '/') {
@@ -283,15 +279,15 @@ int main(int argc, char *argv[]) {
             // Send chat messages
             RequestSay(input);
           }
-        } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
-          *stdin_buffer_position++ = c;
+        } else if (strlen(stdin_buffer) < SAY_MAX) {
+          *stdin_buffer++ = c;
           printf("%c", c); // cout does not work
           fflush(stdout);
 
           // Create output to use on new prompt after receiving server message.
-          output = stdin_buffer_position;
-          *output++ = '\0';
           output = stdin_buffer;
+          *output++ = '\0';
+//          output = stdin_buffer;
         }
       } else if (FD_ISSET(client_socket, &read_set)) {
         // Socket has data
