@@ -193,33 +193,6 @@ bool ProcessInput(std::string input) {
   return result;
 }
 
-char inBuffer[SAY_MAX + 1];
-char *bufPosition = inBuffer;
-
-char *NewInputString() {
-  char c = (char) getchar();
-  if (c == '\n') {
-    *bufPosition ++= '\0';
-    bufPosition = inBuffer;
-    printf("\n");
-    fflush(stdout);
-    return inBuffer;
-  } else if (((int) c) == 127) { // Check for backspace
-    if (bufPosition > inBuffer) {
-      --bufPosition;
-      printf("\b");
-      fflush(stdout);
-    }
-    // Trap case where no more to delete
-  } else if (bufPosition != inBuffer + SAY_MAX) {
-    *bufPosition++ = c;
-    printf("%c", c);
-    fflush(stdout);
-    return NULL;
-  }
-  return NULL;
-}
-
 
 int main(int argc, char *argv[]) {
   char *domain;
@@ -230,6 +203,9 @@ int main(int argc, char *argv[]) {
   char tmp_buffer[SAY_MAX];
   memset(&tmp_buffer, 0, SAY_MAX);
 
+  char stdin_buffer[SAY_MAX + 1];
+  char *stdin_buffer_position = stdin_buffer;
+
 //  struct timeval timeout;
   fd_set read_set;
 //  int file_desc = 0;
@@ -237,8 +213,8 @@ int main(int argc, char *argv[]) {
   char receive_buffer[kBufferSize];
   memset(&receive_buffer, 0, kBufferSize);
 
-  char stdin_buffer[kBufferSize];
-  memset(&stdin_buffer, 0, kBufferSize);
+//  char stdin_buffer[kBufferSize];
+//  memset(&stdin_buffer, 0, kBufferSize);
 
   if (argc < 4) {
     Error("usage: client [server name] [port] [username]");
@@ -298,21 +274,22 @@ int main(int argc, char *argv[]) {
 
         char c = (char) getchar();
         if (c == '\n') {
-          *bufPosition++ = '\0';
-          bufPosition = inBuffer;
+          *stdin_buffer_position++ = '\0';
+          stdin_buffer_position = stdin_buffer;
           printf("\n");
           fflush(stdout);
-          input = inBuffer;
+          input = stdin_buffer;
           if (input[0] == '/') {
+            std::cout << "input[0] == '/'" << std::endl;
             ProcessInput(input);
           } else {
             // Send chat messages
 //            StripChar(stdin_buffer, '\n');
             RequestSay(input);
           }
-          
-        } else if (bufPosition != inBuffer + SAY_MAX) {
-          *bufPosition++ = c;
+
+        } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
+          *stdin_buffer_position++ = c;
           printf("%c", c);
           fflush(stdout);
         }
