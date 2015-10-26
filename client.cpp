@@ -215,11 +215,9 @@ int main(int argc, char *argv[]) {
   char *username;
   char *input;
   char *output = (char *) "";
-  char tmp_buffer[SAY_MAX];
-  memset(&tmp_buffer, 0, SAY_MAX);
 
   char stdin_buffer[SAY_MAX + 1];
-  char *stdin_buffer_position = stdin_buffer;
+  char *stdin_buffer_pointer = stdin_buffer;
 
   fd_set read_set;
   int result;
@@ -271,13 +269,14 @@ int main(int argc, char *argv[]) {
 
     if (result > 0) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
+        // User enter a char.
         char c = (char) getchar();
         if (c == '\n') {
           // Increments pointer and adds NULL char.
-          *stdin_buffer_position++ = '\0';
+          *stdin_buffer_pointer++ = '\0';
 
-          // Resets stdin_buffer_position to the original pointer position.
-          stdin_buffer_position = stdin_buffer;
+          // Resets stdin_buffer_pointer to the start of stdin_buffer.
+          stdin_buffer_pointer = stdin_buffer;
 
           std::cout << "\n" << std::flush;
 
@@ -288,22 +287,24 @@ int main(int argc, char *argv[]) {
           if (input[0] == '/' && !ProcessInput(input)) {
             break;
           } else {
-            // Sends chat messages
+            // Sends chat messages.
             SendSay(input);
           }
-        } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
+        } else if (stdin_buffer_pointer != stdin_buffer + SAY_MAX) {
           // Increments pointer and adds char c.
-          *stdin_buffer_position++ = c;
+          *stdin_buffer_pointer++ = c;
           
           std::cout << c << std::flush;
 
-          // Creates output to use on the new prompt after receiving a server message.
-          output = stdin_buffer_position;
+          // Copies pointer into output.
+          output = stdin_buffer_pointer;
+          // Increments and sets NULL char.
           *output++ = '\0';
+          // Copies stdin_buffer into part of output before NULL char.
           output = stdin_buffer;
         }
       } else if (FD_ISSET(client_socket, &read_set)) {
-        // Socket has data
+        // Socket has data.
         int read_size = read(client_socket, receive_buffer, kBufferSize);
 
         if (read_size != 0) {
