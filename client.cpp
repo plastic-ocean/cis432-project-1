@@ -270,7 +270,7 @@ int main(int argc, char *argv[]) {
           printf("\n");
           fflush(stdout);
 
-          input = (char *) "";
+          memset(&input, 0, SAY_MAX + 1);;
           strncpy(input, stdin_buffer, sizeof(stdin_buffer));
           memset(&stdin_buffer, 0, SAY_MAX + 1);
 
