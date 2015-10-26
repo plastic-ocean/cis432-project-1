@@ -274,6 +274,8 @@ int main(int argc, char *argv[]) {
 //          strncpy(input, stdin_buffer, sizeof(stdin_buffer));
 //          memset(&stdin_buffer, 0, SAY_MAX + 1);
 
+          input = stdin_buffer;
+
           if (input[0] == '/') {
             if (!ProcessInput(input)) {
               break;
