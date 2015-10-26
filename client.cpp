@@ -270,9 +270,9 @@ int main(int argc, char *argv[]) {
           printf("\n");
           fflush(stdout);
 
-          memset(&input, 0, SAY_MAX + 1);;
-          strncpy(input, stdin_buffer, sizeof(stdin_buffer));
-          memset(&stdin_buffer, 0, SAY_MAX + 1);
+//          memset(&input, 0, SAY_MAX + 1);;
+//          strncpy(input, stdin_buffer, sizeof(stdin_buffer));
+//          memset(&stdin_buffer, 0, SAY_MAX + 1);
 
           if (input[0] == '/') {
             if (!ProcessInput(input)) {
