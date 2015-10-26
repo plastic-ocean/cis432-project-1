@@ -190,7 +190,12 @@ int SendJoin(const char *channel) {
 void HandleTextSay(char *receive_buffer, char *output) {
   struct text_say say;
   memcpy(&say, receive_buffer, sizeof(struct text_say));
-  std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
+
+  std::string backspaces = "";
+  for (int i = 0; i < SAY_MAX; i++) {
+    backspaces.append("\b");
+  }
+  std::cout << backspaces;
   std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
   PrintPrompt();
   std::cout << output << std::flush;
