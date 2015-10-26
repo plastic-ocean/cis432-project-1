@@ -174,7 +174,7 @@ bool ProcessInput(std::string input) {
 
   if (inputs[0] == "/exit") {
     RequestLogout();
-//    cooked_mode();
+    cooked_mode();
     result = false;
   } else if (inputs[0] == "/list") {
 
@@ -263,25 +263,17 @@ int main(int argc, char *argv[]) {
 
     if (result > 0) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
-//        char c = (char) getchar();
-//        *bufPosition++ = c;
-//        std::cout << c << std::endl;
-//        fflush(stdout);
-
-//        int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
-
-//        input = NewInputString();
-
         char c = (char) getchar();
         if (c == '\n') {
-          *stdin_buffer_position++ = '\0';
+//          *stdin_buffer_position++ = '\0';
           stdin_buffer_position = stdin_buffer;
           printf("\n");
           fflush(stdout);
           input = stdin_buffer;
           if (input[0] == '/') {
-            std::cout << "input[0] == '/'" << std::endl;
-            ProcessInput(input);
+            if (!ProcessInput(input)) {
+              break;
+            }
           } else {
             // Send chat messages
 //            StripChar(stdin_buffer, '\n');
@@ -290,17 +282,11 @@ int main(int argc, char *argv[]) {
 
         } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
           *stdin_buffer_position++ = c;
-          printf("%c", c);
+          std::cout << c << std::endl;
           fflush(stdout);
         }
-//
-//        const char *DELIM = " \n";
-//        char *tok = (char*) malloc(sizeof(char) * (strlen(input) + 1));
-//        strcpy(tok, input);
-//        char *command = strtok(tok, DELIM);
-//        free(tok);
-//
-//        if (command != NULL) {
+
+//        if (input != NULL) {
 //          if (input[0] == '/') {
 //            ProcessInput(input);
 //          } else {
