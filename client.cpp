@@ -154,7 +154,7 @@ int SendLogout() {
 
 
 // Sends join requests to the server.
-int SendJoin(char *channel) {
+int SendJoin(const char *channel) {
   struct request_join join;
   memset((char *) &join, 0, sizeof(join));
   join.req_type = REQ_JOIN;
@@ -192,8 +192,8 @@ bool ProcessInput(std::string input) {
     result = false;
   } else if (inputs[0] == "/list") {
 
-  } else if (inputs[0] == "/join") {
-
+  } else if (inputs[0] == "/join" && strlen(inputs) > 1) {
+    SendJoin(inputs[1].c_str());
   } else if (inputs[0] == "/leave") {
 
   } else if (inputs[0] == "/who") {
