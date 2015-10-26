@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
   char *port_str;
   int port_num;
   char *username;
-  char *input;
+  char *input = (char *) "";
   char tmp_buffer[SAY_MAX];
   memset(&tmp_buffer, 0, SAY_MAX);
 
@@ -252,8 +252,6 @@ int main(int argc, char *argv[]) {
 
   std::cout << ">" << std::flush;
 
-  bool is_newline = false;
-
   while (1) {
     FD_ZERO(&read_set);
     FD_SET(client_socket, &read_set);
@@ -272,7 +270,6 @@ int main(int argc, char *argv[]) {
           printf("\n");
           fflush(stdout);
           input = stdin_buffer;
-          is_newline = true;
 
           if (input[0] == '/') {
             if (!ProcessInput(input)) {
@@ -283,10 +280,8 @@ int main(int argc, char *argv[]) {
             RequestSay(input);
           }
         } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
-          is_newline = false;
           *stdin_buffer_position++ = c;
-          printf("%c", c);
-//          std::cout << c << std::endl;
+          printf("%c", c); // cout does not work
           fflush(stdout);
         }
       } else if (FD_ISSET(client_socket, &read_set)) {
@@ -305,11 +300,8 @@ int main(int argc, char *argv[]) {
               memcpy(&say, receive_buffer, sizeof(struct text_say));
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              if (is_newline) {
-                std::cout << ">" << stdin_buffer << std::flush;
-              } else {
-                std::cout << ">" << std::flush;
-              }
+              std::cout << ">" << input << std::flush;
+              input = (char *) "";
               break;
             default:
               break;
