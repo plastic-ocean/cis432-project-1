@@ -192,7 +192,7 @@ bool ProcessInput(std::string input) {
     result = false;
   } else if (inputs[0] == "/list") {
 
-  } else if (inputs[0] == "/join" && strlen(inputs) > 1) {
+  } else if (inputs[0] == "/join" && inputs.size() > 1) {
     SendJoin(inputs[1].c_str());
   } else if (inputs[0] == "/leave") {
 
