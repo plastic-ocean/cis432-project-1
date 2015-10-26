@@ -174,7 +174,7 @@ bool ProcessInput(std::string input) {
 
   if (inputs[0] == "/exit") {
     RequestLogout();
-    cooked_mode();
+//    cooked_mode();
     result = false;
   } else if (inputs[0] == "/list") {
 
@@ -193,13 +193,40 @@ bool ProcessInput(std::string input) {
   return result;
 }
 
+char inBuffer[SAY_MAX + 1];
+char *bufPosition = inBuffer;
+
+char *new_inputString() {
+  char c = getchar();
+  if (c == '\n') {
+    *bufPosition ++= '\0';
+    bufPosition= inBuffer;
+    printf("\n");
+    fflush(stdout);
+    return inBuffer;
+  } else if (((int) c) == 127) { // Check for backspace
+    if (bufPosition > inBuffer) {
+      --bufPosition;
+      printf("\b");
+      fflush(stdout);
+    }
+    // Trap case where no more to delete
+  } else if (bufPosition != inBuffer + SAY_MAX) {
+    *bufPosition++ = c;
+    printf("%c", c);
+    fflush(stdout);
+    return NULL;
+  }
+  return NULL;
+}
+
 
 int main(int argc, char *argv[]) {
   char *domain;
   char *port_str;
   int port_num;
   char *username;
-//  std::string input;
+  std::string input;
   char tmp_buffer[SAY_MAX];
   memset(&tmp_buffer, 0, SAY_MAX);
 
@@ -249,7 +276,6 @@ int main(int argc, char *argv[]) {
 
   std::cout << ">" << std::flush;
 
-
   while (1) {
     FD_ZERO(&read_set);
     FD_SET(client_socket, &read_set);
@@ -261,19 +287,23 @@ int main(int argc, char *argv[]) {
 
     if (result > 0) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
-        int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
+//        int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
+        char c = (char) getchar();
+        *bufPosition++ = c;
+        printf("%c", c);
+        fflush(stdout);
 
-        if (read_stdin_size != 0) {
-          if (stdin_buffer[0] == '/') {
-            ProcessInput(stdin_buffer);
-          } else {
-            // Send chat messages
-            StripChar(stdin_buffer, '\n');
-            RequestSay(stdin_buffer);
-          }
-        }
-
-        memset(&stdin_buffer, 0, kBufferSize);
+//        if (read_stdin_size != 0) {
+//          if (stdin_buffer[0] == '/') {
+//            ProcessInput(stdin_buffer);
+//          } else {
+//            // Send chat messages
+//            StripChar(stdin_buffer, '\n');
+//            RequestSay(stdin_buffer);
+//          }
+//        }
+//
+//        memset(&stdin_buffer, 0, kBufferSize);
       } // end of if STDIN_FILENO
 
       if (FD_ISSET(client_socket, &read_set)) {
