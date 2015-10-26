@@ -6,6 +6,22 @@
 #include "duckchat.h"
 #include "raw.h"
 
+
+// Client connects, logs in, and joins “Common”.
+// Client reads lines from the user and parses commands.
+// Client correctly sends Say message.
+// Client uses select() to wait for input from the user and the server.
+// Client correctly sends Join, Leave, Login, and Logout and TODO handles Switch.
+// TODO Client correctly sends List and Who.
+// TODO Server can accept connections.
+// TODO Server handles Login and Logout from users, and keeps records of which users are logged in.
+// TODO Server handles Join and Leave from users, keeps records of which channels a user belongs to,
+// and keeps records of which users are in a channel.
+// TODO Server handles the Say message.
+// TODO Server correctly handles List and Who.
+// TODO Create copies of your client and server source. Modify them to send invalid packets to your good client
+// and server, to see if you can make your client or server crash. Fix any bugs you find.
+
 // Variables
 struct sockaddr_in client_addr;
 struct sockaddr_in server_addr;
@@ -174,7 +190,7 @@ int SendJoin(const char *channel) {
 void HandleTextSay(char *receive_buffer, char *output) {
   struct text_say say;
   memcpy(&say, receive_buffer, sizeof(struct text_say));
-  std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
+  std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"; // 32 backspaces
   std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
   PrintPrompt();
   std::cout << output << std::flush;
@@ -270,7 +286,7 @@ int main(int argc, char *argv[]) {
 
     if (result > 0) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
-        // User enter a char.
+        // User entered a char.
         char c = (char) getchar();
         if (c == '\n') {
           // Increments pointer and adds NULL char.
