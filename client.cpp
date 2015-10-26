@@ -252,6 +252,8 @@ int main(int argc, char *argv[]) {
 
   std::cout << ">" << std::flush;
 
+  bool is_newline = false;
+
   while (1) {
     FD_ZERO(&read_set);
     FD_SET(client_socket, &read_set);
@@ -269,12 +271,8 @@ int main(int argc, char *argv[]) {
           stdin_buffer_position = stdin_buffer;
           printf("\n");
           fflush(stdout);
-
-//          memset(&input, 0, SAY_MAX + 1);;
-//          strncpy(input, stdin_buffer, sizeof(stdin_buffer));
-//          memset(&stdin_buffer, 0, SAY_MAX + 1);
-
           input = stdin_buffer;
+          is_newline = true;
 
           if (input[0] == '/') {
             if (!ProcessInput(input)) {
@@ -284,8 +282,8 @@ int main(int argc, char *argv[]) {
             // Send chat messages
             RequestSay(input);
           }
-
         } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
+          is_newline = false;
           *stdin_buffer_position++ = c;
           printf("%c", c);
 //          std::cout << c << std::endl;
@@ -309,7 +307,11 @@ int main(int argc, char *argv[]) {
               memcpy(&say, receive_buffer, sizeof(struct text_say));
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              std::cout << ">" << stdin_buffer << std::flush;
+              if (is_newline) {
+                std::cout << ">" << stdin_buffer << std::flush;
+              } else {
+                std::cout << ">" << std::flush;
+              }
               break;
             default:
               break;
