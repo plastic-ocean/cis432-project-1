@@ -197,10 +197,10 @@ char inBuffer[SAY_MAX + 1];
 char *bufPosition = inBuffer;
 
 char *NewInputString() {
-  char c = getchar();
+  char c = (char) getchar();
   if (c == '\n') {
     *bufPosition ++= '\0';
-    bufPosition= inBuffer;
+    bufPosition = inBuffer;
     printf("\n");
     fflush(stdout);
     return inBuffer;
@@ -296,7 +296,7 @@ int main(int argc, char *argv[]) {
 
         input = NewInputString();
 
-        if (strlen(input) != 0) {
+        if (input[strlen(input)] == '\n') {
           if (input[0] == '/') {
             ProcessInput(input);
           } else {
