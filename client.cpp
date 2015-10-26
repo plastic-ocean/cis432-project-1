@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
   memset(&tmp_buffer, 0, SAY_MAX);
 
   char stdin_buffer[SAY_MAX + 1];
-//  char *stdin_buffer_position = stdin_buffer;
+  char *stdin_buffer_position = stdin_buffer;
 
   fd_set read_set;
   int result;
@@ -261,16 +261,20 @@ int main(int argc, char *argv[]) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
         char c = (char) getchar();
         if (c == '\n') {
-//          *stdin_buffer_position++ = '\0';
-//          stdin_buffer_position = stdin_buffer;
-          *(stdin_buffer + 1) = '\0';
+          // Increments the pointer's position and sets new position to the NULL char.
+          *stdin_buffer_position++ = '\0';
+
+          // Resets stdin_buffer_position to the original pointer position.
+          stdin_buffer_position = stdin_buffer;
+
           printf("\n");
           fflush(stdout);
-          input = stdin_buffer;
 
-          // Clear output after receiving newline at prompt to not print output.
+          // Clear output after receiving newline at prompt to prevent output from
+          // //printing when receiving a message from the server.
           output = (char *) "";
 
+          input = stdin_buffer;
           if (input[0] == '/') {
             if (!ProcessInput(input)) {
               break;
@@ -279,22 +283,21 @@ int main(int argc, char *argv[]) {
             // Send chat messages
             RequestSay(input);
           }
-        } else if (strlen(stdin_buffer) < SAY_MAX) {
-          *(stdin_buffer + 1) = c;
+        } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
+          *stdin_buffer_position++ = c;
           printf("%c", c); // cout does not work
           fflush(stdout);
 
-          // Create output to use on new prompt after receiving server message.
-          output = stdin_buffer;
+          // Create output to use on the new prompt after receiving a server message.
+          output = stdin_buffer_position;
           *output++ = '\0';
-//          output = stdin_buffer;
+          output = stdin_buffer;
         }
       } else if (FD_ISSET(client_socket, &read_set)) {
         // Socket has data
         int read_size = read(client_socket, receive_buffer, kBufferSize);
 
         if (read_size != 0) {
-          // TODO capture user input, store, clean input, then print buffer, afterward replace input
           struct text message;
           memcpy(&message, receive_buffer, sizeof(struct text));
           text_t text_type = message.txt_type;
