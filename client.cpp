@@ -271,6 +271,7 @@ int main(int argc, char *argv[]) {
           printf("\n");
           fflush(stdout);
           input = stdin_buffer;
+          output = (char *) "";
 
           if (input[0] == '/') {
             if (!ProcessInput(input)) {
