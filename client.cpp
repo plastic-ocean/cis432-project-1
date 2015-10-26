@@ -199,7 +199,8 @@ int main(int argc, char *argv[]) {
   char *port_str;
   int port_num;
   char *username;
-  char *input = (char *) "";
+  char *input;
+  char *output = (char *) "";
   char tmp_buffer[SAY_MAX];
   memset(&tmp_buffer, 0, SAY_MAX);
 
@@ -283,6 +284,10 @@ int main(int argc, char *argv[]) {
           *stdin_buffer_position++ = c;
           printf("%c", c); // cout does not work
           fflush(stdout);
+
+          memcpy(&output, stdin_buffer_position, sizeof(stdin_buffer_position));
+          *output++ = '\0';
+          output = stdin_buffer;
         }
       } else if (FD_ISSET(client_socket, &read_set)) {
         // Socket has data
@@ -300,7 +305,8 @@ int main(int argc, char *argv[]) {
               memcpy(&say, receive_buffer, sizeof(struct text_say));
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              std::cout << ">" << std::flush;
+              std::cout << ">" << output << std::flush;
+              output = (char *) "";
               break;
             default:
               break;
