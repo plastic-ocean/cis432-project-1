@@ -275,11 +275,9 @@ int main(int argc, char *argv[]) {
             if (!ProcessInput(input)) {
               break;
             }
-            input = (char *) "";
           } else {
             // Send chat messages
             RequestSay(input);
-            input = (char *) "";
           }
         } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
           *stdin_buffer_position++ = c;
@@ -302,7 +300,7 @@ int main(int argc, char *argv[]) {
               memcpy(&say, receive_buffer, sizeof(struct text_say));
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              std::cout << ">" << input << std::flush;
+              std::cout << ">" << stdin_buffer << std::flush;
               break;
             default:
               break;
