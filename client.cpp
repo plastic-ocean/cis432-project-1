@@ -4,6 +4,7 @@
 
 #include "client.h"
 #include "duckchat.h"
+#include "raw.h"
 
 // Variables
 struct sockaddr_in client_addr;
@@ -173,6 +174,7 @@ bool ProcessInput(std::string input) {
 
   if (inputs[0] == "/exit") {
     RequestLogout();
+    cooked_mode();
     result = false;
   } else if (inputs[0] == "/list") {
 
@@ -241,6 +243,10 @@ int main(int argc, char *argv[]) {
 
   // TODO handle response from send
 
+  if (raw_mode() != 0){
+    Error("client: error using raw mode");
+  }
+
   std::cout << ">" << std::flush;
 
 
@@ -284,7 +290,7 @@ int main(int argc, char *argv[]) {
             case TXT_SAY:
               struct text_say say;
               memcpy(&say, receive_buffer, sizeof(struct text_say));
-              std::cin.readsome(tmp_buffer, sizeof(tmp_buffer));
+//              std::cin.readsome(tmp_buffer, sizeof(tmp_buffer));
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
               std::cout << ">" << tmp_buffer << std::flush;
