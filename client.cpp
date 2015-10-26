@@ -270,6 +270,7 @@ int main(int argc, char *argv[]) {
           printf("\n");
           fflush(stdout);
           input = stdin_buffer;
+          memset(&stdin_buffer, 0, SAY_MAX + 1);
           if (input[0] == '/') {
             if (!ProcessInput(input)) {
               break;
