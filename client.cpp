@@ -243,8 +243,6 @@ int main(int argc, char *argv[]) {
   channel = (char *) "Common";
   RequestJoin(channel);
 
-  // TODO handle response from send
-
   if (raw_mode() != 0){
     Error("client: error using raw mode");
   }
@@ -277,10 +275,8 @@ int main(int argc, char *argv[]) {
           output = (char *) "";
 
           input = stdin_buffer;
-          if (input[0] == '/') {
-            if (!ProcessInput(input)) {
-              break;
-            }
+          if (input[0] == '/' && !ProcessInput(input)) {
+            break;
           } else {
             // Sends chat messages
             RequestSay(input);
