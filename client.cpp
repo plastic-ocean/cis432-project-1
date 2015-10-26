@@ -271,6 +271,8 @@ int main(int argc, char *argv[]) {
           printf("\n");
           fflush(stdout);
           input = stdin_buffer;
+
+          // Clear output after receiving newline at prompt to not print old stdin_buffer.
           output = (char *) "";
 
           if (input[0] == '/') {
@@ -286,6 +288,7 @@ int main(int argc, char *argv[]) {
           printf("%c", c); // cout does not work
           fflush(stdout);
 
+          // Create output to use on new prompt after receiving server message.
           output = stdin_buffer_position;
           *output++ = '\0';
           output = stdin_buffer;
