@@ -268,7 +268,7 @@ int main(int argc, char *argv[]) {
           printf("%c", c); // cout does not work
           fflush(stdout);
 
-          // Create output to use on the new prompt after receiving a server message.
+          // Creates output to use on the new prompt after receiving a server message.
           output = stdin_buffer_position;
           *output++ = '\0';
           output = stdin_buffer;
@@ -291,7 +291,7 @@ int main(int argc, char *argv[]) {
               break;
             }
           } else {
-            // Send chat messages
+            // Sends chat messages
             RequestSay(input);
           }
         }
