@@ -171,7 +171,7 @@ int SendJoin(char *channel) {
 
 
 // Handles TXT-SAY server messages.
-int HandleTextSay(char receive_buffer[kBufferSize], char *output) {
+int HandleTextSay(char *receive_buffer, char *output) {
   struct text_say say;
   memcpy(&say, receive_buffer, sizeof(struct text_say));
   std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
