@@ -313,11 +313,11 @@ int main(int argc, char *argv[]) {
               struct text_say say;
               memcpy(&say, receive_buffer, sizeof(struct text_say));
 //              std::cin.readsome(tmp_buffer, sizeof(tmp_buffer));
-              *stdin_buffer_position++ = '\0';
-              stdin_buffer_position = stdin_buffer;
+//              *stdin_buffer_position++ = '\0';
+//              stdin_buffer_position = stdin_buffer;
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              std::cout << ">" << stdin_buffer_position << std::flush;
+              std::cout << ">" << stdin_buffer << std::flush;
               memset(&tmp_buffer, 0, SAY_MAX);
               break;
             default:
