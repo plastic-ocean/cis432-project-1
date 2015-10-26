@@ -269,8 +269,11 @@ int main(int argc, char *argv[]) {
           stdin_buffer_position = stdin_buffer;
           printf("\n");
           fflush(stdout);
-          input = stdin_buffer;
+
+          input = (char *) "";
+          strncpy(input, stdin_buffer, sizeof(stdin_buffer));
           memset(&stdin_buffer, 0, SAY_MAX + 1);
+
           if (input[0] == '/') {
             if (!ProcessInput(input)) {
               break;
@@ -279,6 +282,7 @@ int main(int argc, char *argv[]) {
             // Send chat messages
             RequestSay(input);
           }
+
         } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
           *stdin_buffer_position++ = c;
           printf("%c", c);
