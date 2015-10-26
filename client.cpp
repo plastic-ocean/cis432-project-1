@@ -21,108 +21,8 @@ void Error(const char *msg) {
 }
 
 
-// Connects to the server at a the given port.
-void Connect(char *domain, const char *port) {
-  std::cout << "Connecting to " << domain << std::endl;
-
-  struct addrinfo hints;
-  struct addrinfo *server_info_tmp;
-  int status;
-
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_socktype = SOCK_DGRAM;
-  hints.ai_protocol = 0;
-
-  if ((status = getaddrinfo(domain, port, &hints, &server_info_tmp)) != 0) {
-    std::cerr << "client: unable to resolve address: " << gai_strerror(status) << std::endl;
-    exit(1);
-  }
-
-  // getaddrinfo() returns a list of address structures into server_info_tmp.
-  // Try each address until we successfully connect().
-  // If socket() (or connect()) fails, close the socket and try the next address.
-
-  for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
-    if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
-      continue;
-    }
-    if (connect(client_socket, server_info->ai_addr, server_info->ai_addrlen) != -1) {
-      fcntl(client_socket, F_SETFL, O_NONBLOCK);
-      break; // Success
-    }
-    close(client_socket);
-  }
-
-  if (server_info == NULL) {
-    Error("client: all sockets failed to connect");
-  }
-}
-
-
-// Sends a message to all users in on the active channel.
-int RequestSay(const char *message) {
-  struct request_say say;
-  memset(&say, 0, sizeof(say));
-  say.req_type = REQ_SAY;
-  strncpy(say.req_text, message, SAY_MAX);
-  strncpy(say.req_channel, channel, CHANNEL_MAX);
-
-  if (sendto(client_socket, &say, sizeof(say), 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
-    Error("client: failed to send message\n");
-  }
-
-  return 0;
-}
-
-
-// Sends login requests to the server.
-int RequestLogin(char *username) {
-  struct request_login login;
-  memset(&login, 0, sizeof(login));
-  login.req_type = REQ_LOGIN;
-  strncpy(login.req_username, username, USERNAME_MAX);
-
-  size_t message_size = sizeof(struct request_login);
-
-  if (sendto(client_socket, &login, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
-    Error("client: failed to request login\n");
-  }
-
-  return 0;
-}
-
-
-// Sends logout requests to the server.
-int RequestLogout() {
-  struct request_logout logout;
-  memset((char *) &logout, 0, sizeof(logout));
-  logout.req_type = REQ_LOGOUT;
-
-  size_t message_size = sizeof(struct request_logout);
-
-  if (sendto(client_socket, &logout, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
-    Error("client: failed to request logout\n");
-  }
-
-  return 0;
-}
-
-
-// Sends join requests to the server.
-int RequestJoin(char *channel) {
-  struct request_join join;
-  memset((char *) &join, 0, sizeof(join));
-  join.req_type = REQ_JOIN;
-  strncpy(join.req_channel, channel, CHANNEL_MAX);
-
-  size_t message_size = sizeof(struct request_join);
-
-  if (sendto(client_socket, &join, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
-    Error("client: failed to request join\n");
-  }
-
-  return 0;
+void PrintPrompt() {
+  std::cout << ">" << std::flush;
 }
 
 
@@ -165,13 +65,129 @@ void StripChar(char *input, char c) {
 }
 
 
+// Connects to the server at a the given port.
+void Connect(char *domain, const char *port) {
+  std::cout << "Connecting to " << domain << std::endl;
+
+  struct addrinfo hints;
+  struct addrinfo *server_info_tmp;
+  int status;
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_DGRAM;
+  hints.ai_protocol = 0;
+
+  if ((status = getaddrinfo(domain, port, &hints, &server_info_tmp)) != 0) {
+    std::cerr << "client: unable to resolve address: " << gai_strerror(status) << std::endl;
+    exit(1);
+  }
+
+  // getaddrinfo() returns a list of address structures into server_info_tmp.
+  // Try each address until we successfully connect().
+  // If socket() (or connect()) fails, close the socket and try the next address.
+
+  for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
+    if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
+      continue;
+    }
+    if (connect(client_socket, server_info->ai_addr, server_info->ai_addrlen) != -1) {
+      fcntl(client_socket, F_SETFL, O_NONBLOCK);
+      break; // Success
+    }
+    close(client_socket);
+  }
+
+  if (server_info == NULL) {
+    Error("client: all sockets failed to connect");
+  }
+}
+
+
+// Sends a message to all users in on the active channel.
+int SendSay(const char *message) {
+  struct request_say say;
+  memset(&say, 0, sizeof(say));
+  say.req_type = REQ_SAY;
+  strncpy(say.req_text, message, SAY_MAX);
+  strncpy(say.req_channel, channel, CHANNEL_MAX);
+
+  if (sendto(client_socket, &say, sizeof(say), 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to send message\n");
+  }
+
+  return 0;
+}
+
+
+// Sends login requests to the server.
+int SendLogin(char *username) {
+  struct request_login login;
+  memset(&login, 0, sizeof(login));
+  login.req_type = REQ_LOGIN;
+  strncpy(login.req_username, username, USERNAME_MAX);
+
+  size_t message_size = sizeof(struct request_login);
+
+  if (sendto(client_socket, &login, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to request login\n");
+  }
+
+  return 0;
+}
+
+
+// Sends logout requests to the server.
+int SendLogout() {
+  struct request_logout logout;
+  memset((char *) &logout, 0, sizeof(logout));
+  logout.req_type = REQ_LOGOUT;
+
+  size_t message_size = sizeof(struct request_logout);
+
+  if (sendto(client_socket, &logout, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to request logout\n");
+  }
+
+  return 0;
+}
+
+
+// Sends join requests to the server.
+int SendJoin(char *channel) {
+  struct request_join join;
+  memset((char *) &join, 0, sizeof(join));
+  join.req_type = REQ_JOIN;
+  strncpy(join.req_channel, channel, CHANNEL_MAX);
+
+  size_t message_size = sizeof(struct request_join);
+
+  if (sendto(client_socket, &join, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to request join\n");
+  }
+
+  return 0;
+}
+
+
+// Handles TXT-SAY server messages.
+int HandleTextSay(char receive_buffer[kBufferSize], char *output) {
+  struct text_say say;
+  memcpy(&say, receive_buffer, sizeof(struct text_say));
+  std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
+  std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
+  PrintPrompt();
+  std::cout << output << std::flush;
+}
+
+
 // Processes the input string to decide what type of command it is.
 bool ProcessInput(std::string input) {
   std::vector<std::string> inputs = StringSplit(input);
   bool result = true;
 
   if (inputs[0] == "/exit") {
-    RequestLogout();
+    SendLogout();
     cooked_mode();
     result = false;
   } else if (inputs[0] == "/list") {
@@ -189,11 +205,6 @@ bool ProcessInput(std::string input) {
   }
 
   return result;
-}
-
-
-void PrintPrompt() {
-  std::cout << ">" << std::flush;
 }
 
 
@@ -238,10 +249,10 @@ int main(int argc, char *argv[]) {
 
   Connect(domain, port_str);
 
-  RequestLogin(username);
+  SendLogin(username);
 
   channel = (char *) "Common";
-  RequestJoin(channel);
+  SendJoin(channel);
 
   if (raw_mode() != 0){
     Error("client: error using raw mode");
@@ -278,7 +289,7 @@ int main(int argc, char *argv[]) {
             break;
           } else {
             // Sends chat messages
-            RequestSay(input);
+            SendSay(input);
           }
         } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
           // Increments pointer and adds char c.
@@ -302,12 +313,7 @@ int main(int argc, char *argv[]) {
 
           switch (text_type) {
             case TXT_SAY:
-              struct text_say say;
-              memcpy(&say, receive_buffer, sizeof(struct text_say));
-              std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
-              std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              PrintPrompt();
-              std::cout << output << std::flush;
+              HandleTextSay(receive_buffer, output);
               break;
             default:
               break;
