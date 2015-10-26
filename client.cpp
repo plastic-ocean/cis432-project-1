@@ -270,7 +270,7 @@ int main(int argc, char *argv[]) {
 
           std::cout << "\n" << std::flush;
 
-          // Prevents output from printing on the new prompt.
+          // Prevents output from printing on the new prompt after a newline char.
           output = (char *) "";
 
           input = stdin_buffer;
