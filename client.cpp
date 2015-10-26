@@ -54,8 +54,6 @@ void Connect(char *domain, const char *port) {
     close(client_socket);
   }
 
-
-
   if (server_info == NULL) {
     Error("client: all sockets failed to connect");
   }
@@ -194,6 +192,11 @@ bool ProcessInput(std::string input) {
 }
 
 
+void PrintPrompt() {
+  std::cout << ">" << std::flush;
+}
+
+
 int main(int argc, char *argv[]) {
   char *domain;
   char *port_str;
@@ -246,7 +249,7 @@ int main(int argc, char *argv[]) {
     Error("client: error using raw mode");
   }
 
-  std::cout << ">" << std::flush;
+  PrintPrompt();
 
   while (1) {
     FD_ZERO(&read_set);
@@ -270,8 +273,7 @@ int main(int argc, char *argv[]) {
           printf("\n");
           fflush(stdout);
 
-          // Clear output after receiving newline at prompt to prevent output from
-          // //printing when receiving a message from the server.
+          // Prevents output from printing on the new prompt.
           output = (char *) "";
 
           input = stdin_buffer;
@@ -308,7 +310,8 @@ int main(int argc, char *argv[]) {
               memcpy(&say, receive_buffer, sizeof(struct text_say));
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              std::cout << ">" << output << std::flush;
+              PrintPrompt();
+              std::cout << output << std::flush;
               break;
             default:
               break;
