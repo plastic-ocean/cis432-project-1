@@ -194,6 +194,7 @@ bool ProcessInput(std::string input) {
 
   } else if (inputs[0] == "/join" && inputs.size() > 1) {
     SendJoin(inputs[1].c_str());
+    PrintPrompt();
   } else if (inputs[0] == "/leave") {
 
   } else if (inputs[0] == "/who") {
