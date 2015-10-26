@@ -317,7 +317,14 @@ int main(int argc, char *argv[]) {
               stdin_buffer_position = stdin_buffer;
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-              std::cout << ">" << stdin_buffer_position << std::flush;
+              std::cout << ">" << std::flush;
+              size_t size = strlen(stdin_buffer_position);
+              for (size_t i = 0; i < size; i++) {
+                if (stdin_buffer_position[i] != '\0') {
+                  printf("%c", stdin_buffer_position[i]);
+                }
+              }
+              fflush(stdout);
               memset(&tmp_buffer, 0, SAY_MAX);
               break;
             default:
