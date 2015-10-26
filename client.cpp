@@ -263,8 +263,17 @@ int main(int argc, char *argv[]) {
     if (result > 0) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
         char c = (char) getchar();
-        if (c == '\n') {
-          // Increments the pointer's position and sets new position to the NULL char.
+        if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
+          *stdin_buffer_position++ = c;
+          printf("%c", c); // cout does not work
+          fflush(stdout);
+
+          // Create output to use on the new prompt after receiving a server message.
+          output = stdin_buffer_position;
+          *output++ = '\0';
+          output = stdin_buffer;
+        } else if (c == '\n') {
+          // Increments the stdin_buffer pointer's position and sets new position to the NULL char.
           *stdin_buffer_position++ = '\0';
 
           // Resets stdin_buffer_position to the original pointer position.
@@ -285,15 +294,6 @@ int main(int argc, char *argv[]) {
             // Send chat messages
             RequestSay(input);
           }
-        } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
-          *stdin_buffer_position++ = c;
-          printf("%c", c); // cout does not work
-          fflush(stdout);
-
-          // Create output to use on the new prompt after receiving a server message.
-          output = stdin_buffer_position;
-          *output++ = '\0';
-          output = stdin_buffer;
         }
       } else if (FD_ISSET(client_socket, &read_set)) {
         // Socket has data
