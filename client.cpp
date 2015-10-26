@@ -196,7 +196,7 @@ bool ProcessInput(std::string input) {
 char inBuffer[SAY_MAX + 1];
 char *bufPosition = inBuffer;
 
-char *new_inputString() {
+char *NewInputString() {
   char c = getchar();
   if (c == '\n') {
     *bufPosition ++= '\0';
@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
   char *port_str;
   int port_num;
   char *username;
-  std::string input;
+  char *input;
   char tmp_buffer[SAY_MAX];
   memset(&tmp_buffer, 0, SAY_MAX);
 
@@ -287,23 +287,26 @@ int main(int argc, char *argv[]) {
 
     if (result > 0) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
-//        int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
-        char c = (char) getchar();
-        *bufPosition++ = c;
-        printf("%c", c);
-        fflush(stdout);
+//        char c = (char) getchar();
+//        *bufPosition++ = c;
+//        printf("%c", c);
+//        fflush(stdout);
 
-//        if (read_stdin_size != 0) {
-//          if (stdin_buffer[0] == '/') {
-//            ProcessInput(stdin_buffer);
-//          } else {
-//            // Send chat messages
+//        int read_stdin_size = read(STDIN_FILENO, stdin_buffer, kBufferSize);
+
+        input = NewInputString();
+
+        if (strlen(input) != 0) {
+          if (input[0] == '/') {
+            ProcessInput(input);
+          } else {
+            // Send chat messages
 //            StripChar(stdin_buffer, '\n');
-//            RequestSay(stdin_buffer);
-//          }
-//        }
-//
-//        memset(&stdin_buffer, 0, kBufferSize);
+            RequestSay(input);
+          }
+        }
+
+        memset(&stdin_buffer, 0, kBufferSize);
       } // end of if STDIN_FILENO
 
       if (FD_ISSET(client_socket, &read_set)) {
