@@ -65,8 +65,8 @@ void StripChar(char *input, char c) {
 }
 
 
-// Connects to the server at a the given port.
-void Connect(char *domain, const char *port) {
+// Gets the address info of the server at a the given port and creates the client's socket.
+void CreateSocket(char *domain, const char *port) {
   std::cout << "Connecting to " << domain << std::endl;
 
   struct addrinfo hints;
@@ -84,8 +84,8 @@ void Connect(char *domain, const char *port) {
   }
 
   // getaddrinfo() returns a list of address structures into server_info_tmp.
-  // Try each address until we successfully connect().
-  // If socket() (or connect()) fails, close the socket and try the next address.
+  // Tries each address until a successful connect().
+  // If socket() (or connect()) fails, closes the socket and tries the next address.
 
   for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
     if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
@@ -245,7 +245,7 @@ int main(int argc, char *argv[]) {
     Error("client: username must be less than 32 characters");
   }
 
-  Connect(domain, port_str);
+  CreateSocket(domain, port_str);
 
   SendLogin(username);
 
