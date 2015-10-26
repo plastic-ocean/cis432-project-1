@@ -198,7 +198,8 @@ int main(int argc, char *argv[]) {
   int port_num;
   char *username;
 //  std::string input;
-  char tmp_buffer[kBufferSize];
+  char tmp_buffer[SAY_MAX];
+  memset(&tmp_buffer, 0, SAY_MAX);
 
 //  struct timeval timeout;
   fd_set read_set;
@@ -283,10 +284,11 @@ int main(int argc, char *argv[]) {
             case TXT_SAY:
               struct text_say say;
               memcpy(&say, receive_buffer, sizeof(struct text_say));
-              std::cin.readsome(tmp_buffer, kBufferSize);
+              std::cin.readsome(tmp_buffer, SAY_MAX);
               std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
               std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
               std::cout << ">" << tmp_buffer << std::flush;
+              memset(&tmp_buffer, 0, SAY_MAX);
               break;
             default:
               break;
