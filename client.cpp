@@ -268,8 +268,10 @@ int main(int argc, char *argv[]) {
           // Resets stdin_buffer_position to the original pointer position.
           stdin_buffer_position = stdin_buffer;
 
-          printf("\n");
-          fflush(stdout);
+          std::cout << "\n" << std::flush;
+
+//          printf("\n");
+//          fflush(stdout);
 
           // Prevents output from printing on the new prompt.
           output = (char *) "";
@@ -283,8 +285,9 @@ int main(int argc, char *argv[]) {
           }
         } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
           *stdin_buffer_position++ = c;
-          printf("%c", c); // cout does not work
-          fflush(stdout);
+          std::cout << c << std::flush;
+//          printf("%c", c); // cout does not work
+//          fflush(stdout);
 
           // Creates output to use on the new prompt after receiving a server message.
           output = stdin_buffer_position;
