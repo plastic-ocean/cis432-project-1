@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
   memset(&tmp_buffer, 0, SAY_MAX);
 
   char stdin_buffer[SAY_MAX + 1];
-  char *stdin_buffer_position = stdin_buffer;
+//  char *stdin_buffer_position = stdin_buffer;
 
   fd_set read_set;
   int result;
@@ -263,7 +263,7 @@ int main(int argc, char *argv[]) {
         if (c == '\n') {
 //          *stdin_buffer_position++ = '\0';
 //          stdin_buffer_position = stdin_buffer;
-          *stdin_buffer++ = '\0';
+          *(stdin_buffer + 1) = '\0';
           printf("\n");
           fflush(stdout);
           input = stdin_buffer;
@@ -280,7 +280,7 @@ int main(int argc, char *argv[]) {
             RequestSay(input);
           }
         } else if (strlen(stdin_buffer) < SAY_MAX) {
-          *stdin_buffer++ = c;
+          *(stdin_buffer + 1) = c;
           printf("%c", c); // cout does not work
           fflush(stdout);
 
