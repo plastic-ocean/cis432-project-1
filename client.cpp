@@ -22,7 +22,7 @@ void Error(const char *msg) {
 
 
 void PrintPrompt() {
-  std::cout << ">" << std::flush;
+  std::cout << "> " << std::flush;
 }
 
 
