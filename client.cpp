@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
       if (FD_ISSET(STDIN_FILENO, &read_set)) {
         char c = (char) getchar();
         if (c == '\n') {
-//          *stdin_buffer_position++ = '\0';
+          *stdin_buffer_position++ = '\0';
           stdin_buffer_position = stdin_buffer;
           printf("\n");
           fflush(stdout);
@@ -279,10 +279,10 @@ int main(int argc, char *argv[]) {
 //            StripChar(stdin_buffer, '\n');
             RequestSay(input);
           }
-
         } else if (stdin_buffer_position != stdin_buffer + SAY_MAX) {
           *stdin_buffer_position++ = c;
-          std::cout << c << std::endl;
+          printf("%c", c);
+//          std::cout << c << std::endl;
           fflush(stdout);
         }
 
