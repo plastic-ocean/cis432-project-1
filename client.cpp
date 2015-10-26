@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
           printf("%c", c); // cout does not work
           fflush(stdout);
 
-          memcpy(&output, stdin_buffer_position, sizeof(stdin_buffer_position));
+          memcpy(output, stdin_buffer_position, sizeof(stdin_buffer_position));
           *output++ = '\0';
           output = stdin_buffer;
         }
