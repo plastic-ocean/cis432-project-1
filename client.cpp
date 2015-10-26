@@ -289,9 +289,7 @@ int main(int argc, char *argv[]) {
 //          std::cout << c << std::endl;
           fflush(stdout);
         }
-      } // end of if STDIN_FILENO
-
-      if (FD_ISSET(client_socket, &read_set)) {
+      } else if (FD_ISSET(client_socket, &read_set)) {
         // Socket has data
         int read_size = read(client_socket, receive_buffer, kBufferSize);
 
