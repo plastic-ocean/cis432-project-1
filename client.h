@@ -9,7 +9,7 @@
 #include <iterator>
 #include <netinet/in.h>
 
-int kBufferSize = 2048;
+size_t kBufferSize = 2048;
 int kClientPort = 5001;
 
 void Error(const char *);

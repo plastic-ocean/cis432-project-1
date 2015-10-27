@@ -27,7 +27,8 @@ struct sockaddr_in client_addr;
 struct sockaddr_in server_addr;
 int client_socket;
 struct addrinfo *server_info;
-char *channel;
+char *current_channel;
+std::vector<char *> channels;
 
 
 // Prints an error message and exits the program.
@@ -126,7 +127,7 @@ int SendSay(const char *message) {
   memset(&say, 0, sizeof(say));
   say.req_type = REQ_SAY;
   strncpy(say.req_text, message, SAY_MAX);
-  strncpy(say.req_channel, channel, CHANNEL_MAX);
+  strncpy(say.req_channel, current_channel, CHANNEL_MAX);
 
   if (sendto(client_socket, &say, sizeof(say), 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
     Error("client: failed to send message\n");
@@ -186,6 +187,27 @@ int SendJoin(const char *channel) {
 }
 
 
+// Switches to a channel the user has already joined.
+int SwitchChannel(const char *channel) {
+  bool isSubscribed = false;
+
+  if (channels.size() > 0) {
+    for (auto c: channels) {
+      if (channel == c) {
+        current_channel = (char *) channel;
+        isSubscribed = true;
+      }
+    }
+  }
+
+  if (!isSubscribed) {
+    std::cout << "You have not subscribed to channel " << channel << std::endl;
+  }
+
+  return 0;
+}
+
+
 // Handles TXT-SAY server messages.
 void HandleTextSay(char *receive_buffer, char *output) {
   struct text_say say;
@@ -205,28 +227,27 @@ void HandleTextSay(char *receive_buffer, char *output) {
 // Processes the input string to decide what type of command it is.
 bool ProcessInput(std::string input) {
   std::vector<std::string> inputs = StringSplit(input);
-  bool result = true;
 
   if (inputs[0] == "/exit") {
     SendLogout();
     cooked_mode();
-    result = false;
+    return false;
   } else if (inputs[0] == "/list") {
 
   } else if (inputs[0] == "/join" && inputs.size() > 1) {
     SendJoin(inputs[1].c_str());
-    PrintPrompt();
   } else if (inputs[0] == "/leave") {
 
   } else if (inputs[0] == "/who") {
 
-  } else if (inputs[0] == "/switch") {
-
+  } else if (inputs[0] == "/switch" && inputs.size() > 1) {
+    SwitchChannel(inputs[1].c_str());
   } else {
     std::cout << "\n*Unknown command" << std::endl;
   }
 
-  return result;
+  PrintPrompt();
+  return true;
 }
 
 
@@ -237,12 +258,12 @@ int main(int argc, char *argv[]) {
   char *username;
   char *input;
   char *output = (char *) "";
+  fd_set read_set;
+  int result;
 
   char stdin_buffer[SAY_MAX + 1];
   char *stdin_buffer_pointer = stdin_buffer;
 
-  fd_set read_set;
-  int result;
   char receive_buffer[kBufferSize];
   memset(&receive_buffer, 0, kBufferSize);
 
@@ -271,8 +292,9 @@ int main(int argc, char *argv[]) {
 
   SendLogin(username);
 
-  channel = (char *) "Common";
-  SendJoin(channel);
+  current_channel = (char *) "Common";
+  channels.push_back(current_channel);
+  SendJoin(current_channel);
 
   if (raw_mode() != 0){
     Error("client: error using raw mode");
@@ -329,7 +351,7 @@ int main(int argc, char *argv[]) {
         }
       } else if (FD_ISSET(client_socket, &read_set)) {
         // Socket has data.
-        int read_size = read(client_socket, receive_buffer, kBufferSize);
+        ssize_t read_size = read(client_socket, receive_buffer, kBufferSize);
 
         if (read_size != 0) {
           struct text message;
