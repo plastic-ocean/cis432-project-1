@@ -28,7 +28,7 @@ struct sockaddr_in server_addr;
 int client_socket;
 struct addrinfo *server_info;
 char *current_channel;
-std::vector<char *> channels;
+std::vector<const char *> channels;
 
 
 // Prints an error message and exits the program.
@@ -186,7 +186,7 @@ int SendJoin(const char *channel) {
 
     channels.push_back(channel);
 
-    for (std::vector<char *>::iterator it = channels.begin(); it != channels.end(); ++it) {
+    for (std::vector<const char *>::iterator it = channels.begin(); it != channels.end(); ++it) {
       std::cout << "channel in channels: " << *it << std::endl;
     }
   }
@@ -302,7 +302,6 @@ int main(int argc, char *argv[]) {
   SendLogin(username);
 
   current_channel = (char *) "Common";
-  channels.push_back(current_channel);
   SendJoin(current_channel);
 
   if (raw_mode() != 0){
