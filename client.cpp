@@ -172,24 +172,23 @@ int SendLogout() {
 
 // Sends join requests to the server.
 int SendJoin(const char *channel) {
+  if (std::find(channels.begin(), channels.end(), channel) != channels.end()) {
+    struct request_join join;
+    memset((char *) &join, 0, sizeof(join));
+    join.req_type = REQ_JOIN;
+    strncpy(join.req_channel, channel, CHANNEL_MAX);
 
-  std::cout << "join channel: " << channel << std::endl;
+    size_t message_size = sizeof(struct request_join);
 
-  struct request_join join;
-  memset((char *) &join, 0, sizeof(join));
-  join.req_type = REQ_JOIN;
-  strncpy(join.req_channel, channel, CHANNEL_MAX);
+    if (sendto(client_socket, &join, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+      Error("client: failed to request join\n");
+    }
 
-  size_t message_size = sizeof(struct request_join);
+    channels.push_back((char *) channel);
 
-  if (sendto(client_socket, &join, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
-    Error("client: failed to request join\n");
-  }
-
-  channels.push_back((char *) channel);
-
-  for (auto c : channels) {
-    std::cout << "channel in channels: " << c << std::endl;
+    for (auto c : channels) {
+      std::cout << "channel in channels: " << c << std::endl;
+    }
   }
 
   return 0;
