@@ -172,7 +172,7 @@ int SendLogout() {
 
 // Sends join requests to the server.
 int SendJoin(const char *channel) {
-  if (std::find(channels.begin(), channels.end(), channel) != channels.end()) {
+  if (!(std::find(channels.begin(), channels.end(), channel) != channels.end())) {
     struct request_join join;
     memset((char *) &join, 0, sizeof(join));
     join.req_type = REQ_JOIN;
@@ -186,8 +186,8 @@ int SendJoin(const char *channel) {
 
     channels.push_back((char *) channel);
 
-    for (auto c : channels) {
-      std::cout << "channel in channels: " << c << std::endl;
+    for (std::vector<char *>::iterator it = channels.begin(); it != channels.end(); ++it) {
+      std::cout << "channel in channels: " << *it << std::endl;
     }
   }
 
