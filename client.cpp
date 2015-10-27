@@ -183,6 +183,8 @@ int SendJoin(const char *channel) {
     Error("client: failed to request join\n");
   }
 
+  channels.push_back(channel);
+
   return 0;
 }
 
