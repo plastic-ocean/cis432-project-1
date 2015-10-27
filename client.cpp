@@ -195,6 +195,7 @@ int SwitchChannel(const char *channel) {
 
   if (channels.size() > 0) {
     for (auto c: channels) {
+      std::cout << "c: " << c << " channel: " << channel << std::endl;
       if (channel == c) {
         current_channel = (char *) channel;
         isSubscribed = true;
@@ -245,7 +246,7 @@ bool ProcessInput(std::string input) {
   } else if (inputs[0] == "/switch" && inputs.size() > 1) {
     SwitchChannel(inputs[1].c_str());
   } else {
-    std::cout << "\n*Unknown command" << std::endl;
+    std::cout << "*Unknown command" << std::endl;
   }
 
   PrintPrompt();
