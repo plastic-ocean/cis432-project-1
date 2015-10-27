@@ -184,7 +184,7 @@ int SendJoin(const char *channel) {
       Error("client: failed to request join\n");
     }
 
-    channels.push_back((char *) channel);
+    channels.push_back(channel);
 
     for (std::vector<char *>::iterator it = channels.begin(); it != channels.end(); ++it) {
       std::cout << "channel in channels: " << *it << std::endl;
