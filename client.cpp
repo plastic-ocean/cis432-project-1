@@ -170,6 +170,19 @@ int SendLogout() {
 }
 
 
+int SendList(){
+  struct request_list list;
+  list.req_type = REQ_LIST;
+  size_t list_size = sizeof(struct request_list);
+
+  if (sendto(client_socket, &list, list_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to request list \n");
+  }
+
+  return 0;
+}
+
+
 // Sends join requests to the server.
 int SendJoin(std::string channel) {
   bool contains_channel = false;
@@ -193,10 +206,6 @@ int SendJoin(std::string channel) {
     if (sendto(client_socket, &join, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
       Error("client: failed to request join\n");
     }
-
-    for (std::vector<std::string>::iterator it = channels.begin(); it != channels.end(); ++it) {
-      std::cout << "channel in channels: " << *it << std::endl;
-    }
   }
 
   return 0;
@@ -209,7 +218,6 @@ int SwitchChannel(std::string channel) {
 
   if (channels.size() > 0) {
     for (auto c: channels) {
-      std::cout << "c: " << c << " channel: " << channel << std::endl;
       if (channel == c) {
         current_channel = channel;
         isSubscribed = true;
@@ -222,6 +230,26 @@ int SwitchChannel(std::string channel) {
   }
 
   return 0;
+}
+
+
+void HandleTextList(char *receive_buffer, char *output) {
+  struct text_list list;
+  memcpy(&list, receive_buffer, sizeof(struct text_list));
+
+  std::string backspaces = "";
+  for (int i = 0; i < SAY_MAX; i++) {
+    backspaces.append("\b");
+  }
+  std::cout << backspaces;
+
+  std::cout << "Existing channels:" << std::endl;
+  for(int i = 0; i < list.txt_nchannels; i++){
+    std::cout << " " << list.txt_channels[i] << std::endl;
+  }
+  
+  PrintPrompt();
+  std::cout << output << std::flush;
 }
 
 
@@ -250,7 +278,7 @@ bool ProcessInput(std::string input) {
     cooked_mode();
     return false;
   } else if (inputs[0] == "/list") {
-
+    SendList();
   } else if (inputs[0] == "/join" && inputs.size() > 1) {
     SendJoin(inputs[1].c_str());
   } else if (inputs[0] == "/leave") {
@@ -378,6 +406,9 @@ int main(int argc, char *argv[]) {
           switch (text_type) {
             case TXT_SAY:
               HandleTextSay(receive_buffer, output);
+              break;
+            case TXT_LIST:
+              HandleTextList(receive_buffer, output);
               break;
             default:
               break;
