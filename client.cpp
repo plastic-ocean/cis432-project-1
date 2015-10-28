@@ -187,9 +187,6 @@ int SendLeave(std::string channel) {
   bool contains_channel = false;
   std::vector<std::string>::iterator it;
   for (it = channels.begin(); it != channels.end(); ++it) {
-    std::cout << "checking channel: " << *it << std::endl;
-    std::cout << "trying to leave channel: " << channel << std::endl;
-
     if (*it == channel) {
       contains_channel = true;
       break;
@@ -197,6 +194,9 @@ int SendLeave(std::string channel) {
   }
 
   if (contains_channel) {
+    if(channel == current_channel){
+      current_channel = "";
+    }
     channels.erase(it);
 
     struct request_leave leave;
@@ -291,17 +291,21 @@ void HandleTextList(char *receive_buffer, char *output) {
 
 // Handles TXT-SAY server messages.
 void HandleTextSay(char *receive_buffer, char *output) {
-  struct text_say say;
-  memcpy(&say, receive_buffer, sizeof(struct text_say));
+  if (current_channel == ""){
+    PrintPrompt();
+  } else {
+    struct text_say say;
+    memcpy(&say, receive_buffer, sizeof(struct text_say));
 
-  std::string backspaces = "";
-  for (int i = 0; i < SAY_MAX; i++) {
-    backspaces.append("\b");
+    std::string backspaces = "";
+    for (int i = 0; i < SAY_MAX; i++) {
+      backspaces.append("\b");
+    }
+    std::cout << backspaces;
+    std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
+    PrintPrompt();
+    std::cout << output << std::flush;
   }
-  std::cout << backspaces;
-  std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-  PrintPrompt();
-  std::cout << output << std::flush;
 }
 
 
@@ -318,11 +322,7 @@ bool ProcessInput(std::string input) {
   } else if (inputs[0] == "/join" && inputs.size() > 1) {
     SendJoin(inputs[1]);
   } else if (inputs[0] == "/leave" && inputs.size() > 1) {
-    if (inputs[1] == current_channel){
-      SendLeave(inputs[1]);
-    } else {
-      std::cout << "*Unknown command" << std::endl;
-    }
+    SendLeave(inputs[1]);
   } else if (inputs[0] == "/who") {
 
   } else if (inputs[0] == "/switch" && inputs.size() > 1) {
