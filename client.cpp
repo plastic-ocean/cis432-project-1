@@ -313,7 +313,9 @@ void HandleTextWho(char *receive_buffer, char *output) {
   std::cout << "number of people " << who.txt_nusernames << std::endl;
 
   for(int i = 0; i < who.txt_nusernames + 100; i++){
-    std::cout << " " << who.txt_users[i].us_username << std::endl;
+    struct user_info user;
+    memcpy(&user, who.txt_users, sizeof(struct user_info));
+    std::cout << " " << user.us_username << std::endl;
   }
 
   PrintPrompt();
