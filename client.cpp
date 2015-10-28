@@ -187,6 +187,9 @@ int SendLeave(std::string channel) {
   bool contains_channel = false;
   std::vector<std::string>::iterator it;
   for (it = channels.begin(); it != channels.end(); ++it) {
+    std::cout << "checking channel: " << *it << std::endl;
+    std::cout << "trying to leave channel: " << channel << std::endl;
+
     if (*it == channel) {
       contains_channel = true;
       break;
