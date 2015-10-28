@@ -294,8 +294,11 @@ void HandleTextWho(char *receive_buffer, char *output) {
   std::cout << backspaces;
 
   std::cout << "Users on channel " << who.txt_channel << ":" << std::endl;
-  for(int i = 0; i < who.txt_nusernames + 10; i++){
-    std::cout << " " << who.txt_users[i] << std::endl;
+  std::cout << "number of people " << who.txt_nusernames << std::endl;
+  std::cout << "first  " << who.txt_users[0].us_username << std::endl;
+
+  for(int i = 0; i < who.txt_nusernames + 2; i++){
+    std::cout << " " << who.txt_users[i].us_username << std::endl;
   }
 
   PrintPrompt();
