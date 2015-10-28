@@ -207,10 +207,6 @@ int SendLeave(std::string channel) {
     }
   }
 
-  if (contains_channel) {
-    channels.erase(it);
-  }
-
   if(channel == current_channel){
     current_channel = "";
   }
@@ -226,8 +222,11 @@ int SendLeave(std::string channel) {
     Error("client: failed to request leave\n");
   }
 
-  for (it = channels.begin(); it != channels.end(); ++it) {
-    std::cout << *it << std::endl;
+  if (contains_channel) {
+    channels.erase(it);
+    for (it = channels.begin(); it != channels.end(); ++it) {
+      std::cout << *it << std::endl;
+    }
   }
 
   return 0;
@@ -292,7 +291,7 @@ void HandleError(char *receive_buffer, char *output){
     backspaces.append("\b");
   }
   std::cout << backspaces;
-  std::cout << error.txt_error << std::endl;
+  std::cout << "Error:" << error.txt_error << std::endl;
   PrintPrompt();
   std::cout << output << std::flush;
 }
