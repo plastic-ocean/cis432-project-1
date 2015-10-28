@@ -27,8 +27,8 @@ struct sockaddr_in client_addr;
 struct sockaddr_in server_addr;
 int client_socket;
 struct addrinfo *server_info;
-char *current_channel;
-std::vector<const char *> channels;
+std::string current_channel;
+std::vector<std::string> channels;
 
 
 // Prints an error message and exits the program.
@@ -122,12 +122,12 @@ void CreateSocket(char *domain, const char *port) {
 
 
 // Sends a message to all users in on the active channel.
-int SendSay(const char *message) {
+int SendSay(std::string message) {
   struct request_say say;
   memset(&say, 0, sizeof(say));
   say.req_type = REQ_SAY;
-  strncpy(say.req_text, message, SAY_MAX);
-  strncpy(say.req_channel, current_channel, CHANNEL_MAX);
+  strncpy(say.req_text, message.c_str(), SAY_MAX);
+  strncpy(say.req_channel, current_channel.c_str(), CHANNEL_MAX);
 
   if (sendto(client_socket, &say, sizeof(say), 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
     Error("client: failed to send message\n");
@@ -171,9 +171,9 @@ int SendLogout() {
 
 
 // Sends join requests to the server.
-int SendJoin(const char *channel) {
+int SendJoin(std::string channel) {
   bool contains_channel = false;
-  for (std::vector<const char *>::iterator it = channels.begin(); it != channels.end(); ++it) {
+  for (std::vector<std::string>::iterator it = channels.begin(); it != channels.end(); ++it) {
     if (*it == channel) {
       contains_channel = true;
       break;
@@ -181,10 +181,12 @@ int SendJoin(const char *channel) {
   }
 
   if (!contains_channel) {
+    channels.push_back(channel);
+
     struct request_join join;
     memset((char *) &join, 0, sizeof(join));
     join.req_type = REQ_JOIN;
-    strncpy(join.req_channel, channel, CHANNEL_MAX);
+    strncpy(join.req_channel, channel.c_str(), CHANNEL_MAX);
 
     size_t message_size = sizeof(struct request_join);
 
@@ -192,9 +194,7 @@ int SendJoin(const char *channel) {
       Error("client: failed to request join\n");
     }
 
-    channels.push_back(channel);
-
-    for (std::vector<const char *>::iterator it = channels.begin(); it != channels.end(); ++it) {
+    for (std::vector<std::string>::iterator it = channels.begin(); it != channels.end(); ++it) {
       std::cout << "channel in channels: " << *it << std::endl;
     }
   }
@@ -204,14 +204,14 @@ int SendJoin(const char *channel) {
 
 
 // Switches to a channel the user has already joined.
-int SwitchChannel(const char *channel) {
+int SwitchChannel(std::string channel) {
   bool isSubscribed = false;
 
   if (channels.size() > 0) {
     for (auto c: channels) {
       std::cout << "c: " << c << " channel: " << channel << std::endl;
       if (channel == c) {
-        current_channel = (char *) channel;
+        current_channel = channel;
         isSubscribed = true;
       }
     }
@@ -273,7 +273,7 @@ int main(int argc, char *argv[]) {
   char *port_str;
   int port_num;
   char *username;
-  char *input;
+  std::string input;
   char *output = (char *) "";
   fd_set read_set;
   int result;
@@ -309,7 +309,7 @@ int main(int argc, char *argv[]) {
 
   SendLogin(username);
 
-  current_channel = (char *) "Common";
+  current_channel = "Common";
   SendJoin(current_channel);
 
   if (raw_mode() != 0){
@@ -343,7 +343,8 @@ int main(int argc, char *argv[]) {
           // Prevents output from printing on the new prompt after a newline char.
           output = (char *) "";
 
-          input = stdin_buffer;
+          input.assign(stdin_buffer, stdin_buffer + strlen(stdin_buffer));
+
           if (input[0] == '/') {
             if (!ProcessInput(input)) {
               break;
