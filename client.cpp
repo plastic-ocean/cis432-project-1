@@ -282,6 +282,19 @@ int SwitchChannel(std::string channel) {
   return 0;
 }
 
+void HandleError(char *receive_buffer, char *output){
+  struct text_error error;
+  memcpy(&error, receive_buffer, sizeof(struct text_error));
+
+  std::string backspaces = "";
+  for (int i = 0; i < SAY_MAX; i++) {
+    backspaces.append("\b");
+  }
+  std::cout << backspaces;
+  std::cout << error.txt_error << std::endl;
+  PrintPrompt();
+  std::cout << output << std::flush;
+}
 
 void HandleTextWho(char *receive_buffer, char *output) {
   struct text_who who;
@@ -489,6 +502,9 @@ int main(int argc, char *argv[]) {
               break;
             case TXT_WHO:
               HandleTextWho(receive_buffer, output);
+              break;
+            case TXT_ERROR:
+              HandleError(receive_buffer, output);
               break;
             default:
               break;
