@@ -194,6 +194,11 @@ int SendLeave(std::string channel) {
   }
 
   if (contains_channel) {
+    std::cout << "attempting to leave " << std::endl;
+
+    std::cout << current_channel << std::endl;
+    std::cout << channel << std::endl;
+
     if(channel == current_channel){
       current_channel = "";
     }
@@ -291,6 +296,7 @@ void HandleTextList(char *receive_buffer, char *output) {
 
 // Handles TXT-SAY server messages.
 void HandleTextSay(char *receive_buffer, char *output) {
+  std::cout << "current channel: " << current_channel << std::endl;
   if (current_channel == ""){
     PrintPrompt();
   } else {
