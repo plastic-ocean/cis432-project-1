@@ -296,22 +296,17 @@ void HandleTextList(char *receive_buffer, char *output) {
 
 // Handles TXT-SAY server messages.
 void HandleTextSay(char *receive_buffer, char *output) {
-  std::cout << "current channel: " << current_channel << std::endl;
-  if (current_channel == ""){
-    PrintPrompt();
-  } else {
-    struct text_say say;
-    memcpy(&say, receive_buffer, sizeof(struct text_say));
+  struct text_say say;
+  memcpy(&say, receive_buffer, sizeof(struct text_say));
 
-    std::string backspaces = "";
-    for (int i = 0; i < SAY_MAX; i++) {
-      backspaces.append("\b");
-    }
-    std::cout << backspaces;
-    std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
-    PrintPrompt();
-    std::cout << output << std::flush;
+  std::string backspaces = "";
+  for (int i = 0; i < SAY_MAX; i++) {
+    backspaces.append("\b");
   }
+  std::cout << backspaces;
+  std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
+  PrintPrompt();
+  std::cout << output << std::flush;
 }
 
 
@@ -425,7 +420,11 @@ int main(int argc, char *argv[]) {
             }
           } else {
             // Sends chat messages.
-            SendSay(input);
+            if (current_channel != ""){
+              SendSay(input);
+            } else {
+              PrintPrompt();
+            }
           }
         } else if (stdin_buffer_pointer != stdin_buffer + SAY_MAX) {
           // Increments pointer and adds char c.
