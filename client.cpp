@@ -316,13 +316,13 @@ bool ProcessInput(std::string input) {
   } else if (inputs[0] == "/list") {
     SendList();
   } else if (inputs[0] == "/join" && inputs.size() > 1) {
-    SendJoin(inputs[1].c_str());
+    SendJoin(inputs[1]);
   } else if (inputs[0] == "/leave") {
-
+    SendLeave(inputs[1]);
   } else if (inputs[0] == "/who") {
 
   } else if (inputs[0] == "/switch" && inputs.size() > 1) {
-    SwitchChannel(inputs[1].c_str());
+    SwitchChannel(inputs[1]);
   } else {
     std::cout << "*Unknown command" << std::endl;
   }
