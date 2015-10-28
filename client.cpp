@@ -11,8 +11,8 @@
 // Client reads lines from the user and parses commands.
 // Client correctly sends Say message.
 // Client uses select() to wait for input from the user and the server.
-// Client correctly sends Join, Leave, Login, and Logout and TODO handles Switch.
-// TODO Client correctly sends List and Who.
+// Client correctly sends Join, Leave, Login, and Logout and handles Switch.
+// Client correctly sends List and TODO Who.
 // TODO Server can accept connections.
 // TODO Server handles Login and Logout from users, and keeps records of which users are logged in.
 // TODO Server handles Join and Leave from users, keeps records of which channels a user belongs to,
@@ -291,10 +291,13 @@ void HandleError(char *receive_buffer, char *output){
     backspaces.append("\b");
   }
   std::cout << backspaces;
-  std::cout << "Error:" << error.txt_error << std::endl;
+  std::cout << "Error: " << error.txt_error << std::endl;
   PrintPrompt();
   std::cout << output << std::flush;
 }
+
+
+
 
 void HandleTextWho(char *receive_buffer, char *output) {
   struct text_who who;
@@ -308,15 +311,16 @@ void HandleTextWho(char *receive_buffer, char *output) {
 
   std::cout << "Users on channel " << who.txt_channel << ":" << std::endl;
   std::cout << "number of people " << who.txt_nusernames << std::endl;
-  std::cout << "first  " << who.txt_users[1].us_username << std::endl;
 
-  for(int i = 0; i < who.txt_nusernames + 2; i++){
+  for(int i = 0; i < who.txt_nusernames + 100; i++){
     std::cout << " " << who.txt_users[i].us_username << std::endl;
   }
 
   PrintPrompt();
   std::cout << output << std::flush;
 }
+
+
 
 
 void HandleTextList(char *receive_buffer, char *output) {
