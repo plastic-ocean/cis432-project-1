@@ -183,6 +183,20 @@ int SendList(){
 }
 
 
+int SendWho(std::string channel){
+  struct request_who who;
+  who.req_type = REQ_WHO;
+  strncpy(who.req_channel, channel.c_str(), CHANNEL_MAX);
+  size_t who_size = sizeof(struct request_who);
+
+  if (sendto(client_socket, &who, who_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to request list \n");
+  }
+
+  return 0;
+}
+
+
 int SendLeave(std::string channel) {
   bool contains_channel = false;
   std::vector<std::string>::iterator it;
@@ -194,11 +208,6 @@ int SendLeave(std::string channel) {
   }
 
   if (contains_channel) {
-    std::cout << "attempting to leave " << std::endl;
-
-    std::cout << current_channel << std::endl;
-    std::cout << channel << std::endl;
-
     if(channel == current_channel){
       current_channel = "";
     }
@@ -274,6 +283,26 @@ int SwitchChannel(std::string channel) {
 }
 
 
+void HandleTextWho(char *receive_buffer, char *output) {
+  struct text_who who;
+  memcpy(&who, receive_buffer, sizeof(struct text_who));
+
+  std::string backspaces = "";
+  for (int i = 0; i < SAY_MAX; i++) {
+    backspaces.append("\b");
+  }
+  std::cout << backspaces;
+
+  std::cout << "Users on channel " << who.txt_channel<< ":" << std::endl;
+  for(int i = 0; i < who.txt_nusernames; i++){
+    std::cout << " " << who.txt_users[i].us_username << std::endl;
+  }
+
+  PrintPrompt();
+  std::cout << output << std::flush;
+}
+
+
 void HandleTextList(char *receive_buffer, char *output) {
   struct text_list list;
   memcpy(&list, receive_buffer, sizeof(struct text_list));
@@ -324,8 +353,8 @@ bool ProcessInput(std::string input) {
     SendJoin(inputs[1]);
   } else if (inputs[0] == "/leave" && inputs.size() > 1) {
     SendLeave(inputs[1]);
-  } else if (inputs[0] == "/who") {
-
+  } else if (inputs[0] == "/who" && inputs.size() > 1) {
+    SendWho(inputs[1]);
   } else if (inputs[0] == "/switch" && inputs.size() > 1) {
     SwitchChannel(inputs[1]);
   } else {
@@ -454,6 +483,9 @@ int main(int argc, char *argv[]) {
               break;
             case TXT_LIST:
               HandleTextList(receive_buffer, output);
+              break;
+            case TXT_WHO:
+              HandleTextWho(receive_buffer, output);
               break;
             default:
               break;
