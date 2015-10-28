@@ -318,7 +318,7 @@ bool ProcessInput(std::string input) {
   } else if (inputs[0] == "/join" && inputs.size() > 1) {
     SendJoin(inputs[1]);
   } else if (inputs[0] == "/leave" && inputs.size() > 1) {
-    if (input[1] == current_channel){
+    if (inputs[1] == current_channel){
       SendLeave(inputs[1]);
     } else {
       std::cout << "*Unknown command" << std::endl;
