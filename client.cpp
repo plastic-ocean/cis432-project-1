@@ -183,6 +183,39 @@ int SendList(){
 }
 
 
+int SendLeave(std::string channel) {
+  bool contains_channel = false;
+  std::vector<std::string>::iterator it;
+  for (it = channels.begin(); it != channels.end(); ++it) {
+    if (*it == channel) {
+      contains_channel = true;
+      break;
+    }
+  }
+
+  if (contains_channel) {
+    channels.erase(it);
+
+    struct request_leave leave;
+    memset((char *) &leave, 0, sizeof(leave));
+    leave.req_type = REQ_LEAVE;
+    strncpy(leave.req_channel, channel.c_str(), CHANNEL_MAX);
+
+    size_t leave_size = sizeof(struct request_leave);
+
+    if (sendto(client_socket, &leave, leave_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+      Error("client: failed to request leave\n");
+    }
+
+    for (it = channels.begin(); it != channels.end(); ++it) {
+      std::cout << *it << std::endl;
+    }
+  }
+
+  return 0;
+}
+
+
 // Sends join requests to the server.
 int SendJoin(std::string channel) {
   bool contains_channel = false;
