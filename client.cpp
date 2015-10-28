@@ -200,14 +200,14 @@ int SendWho(std::string channel){
 int SendLeave(std::string channel) {
   bool contains_channel = false;
   std::vector<std::string>::iterator it;
-  for (it = channels.begin(); it != channels.end(); ++it) {
-    if (*it == channel) {
-      contains_channel = true;
-      break;
-    }
-  }
+//  for (it = channels.begin(); it != channels.end(); ++it) {
+//    if (*it == channel) {
+//      contains_channel = true;
+//      break;
+//    }
+//  }
 
-  if (contains_channel) {
+//  if (contains_channel) {
     if(channel == current_channel){
       current_channel = "";
     }
@@ -227,7 +227,7 @@ int SendLeave(std::string channel) {
     for (it = channels.begin(); it != channels.end(); ++it) {
       std::cout << *it << std::endl;
     }
-  }
+//  }
 
   return 0;
 }
