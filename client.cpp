@@ -198,36 +198,37 @@ int SendWho(std::string channel){
 
 
 int SendLeave(std::string channel) {
-//  bool contains_channel = false;
+  bool contains_channel = false;
   std::vector<std::string>::iterator it;
-//  for (it = channels.begin(); it != channels.end(); ++it) {
-//    if (*it == channel) {
-//      contains_channel = true;
-//      break;
-//    }
-//  }
-
-//  if (contains_channel) {
-    if(channel == current_channel){
-      current_channel = "";
+  for (it = channels.begin(); it != channels.end(); ++it) {
+    if (*it == channel) {
+      contains_channel = true;
+      break;
     }
+  }
+
+  if (contains_channel) {
     channels.erase(it);
+  }
 
-    struct request_leave leave;
-    memset((char *) &leave, 0, sizeof(leave));
-    leave.req_type = REQ_LEAVE;
-    strncpy(leave.req_channel, channel.c_str(), CHANNEL_MAX);
+  if(channel == current_channel){
+    current_channel = "";
+  }
 
-    size_t leave_size = sizeof(struct request_leave);
+  struct request_leave leave;
+  memset((char *) &leave, 0, sizeof(leave));
+  leave.req_type = REQ_LEAVE;
+  strncpy(leave.req_channel, channel.c_str(), CHANNEL_MAX);
 
-    if (sendto(client_socket, &leave, leave_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
-      Error("client: failed to request leave\n");
-    }
+  size_t leave_size = sizeof(struct request_leave);
 
-    for (it = channels.begin(); it != channels.end(); ++it) {
-      std::cout << *it << std::endl;
-    }
-//  }
+  if (sendto(client_socket, &leave, leave_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to request leave\n");
+  }
+
+  for (it = channels.begin(); it != channels.end(); ++it) {
+    std::cout << *it << std::endl;
+  }
 
   return 0;
 }
