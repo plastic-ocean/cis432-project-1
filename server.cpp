@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
   while (1) {
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
-    std::cout << "before recvfrom" << std::endl;
+//    std::cout << "before recvfrom" << std::endl;
     receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
     if (receive_len > 0) {
       buffer[receive_len] = 0;
