@@ -13,14 +13,7 @@
 // Client uses select() to wait for input from the user and the server.
 // Client correctly sends Join, Leave, Login, and Logout and handles Switch.
 // Client correctly sends List and TODO Who.
-// TODO Server can accept connections.
-// TODO Server handles Login and Logout from users, and keeps records of which users are logged in.
-// TODO Server handles Join and Leave from users, keeps records of which channels a user belongs to,
-// and keeps records of which users are in a channel.
-// TODO Server handles the Say message.
-// TODO Server correctly handles List and Who.
-// TODO Create copies of your client and server source. Modify them to send invalid packets to your good client
-// and server, to see if you can make your client or server crash. Fix any bugs you find.
+
 
 // Variables
 struct sockaddr_in client_addr;
@@ -282,7 +275,7 @@ int SwitchChannel(std::string channel) {
   return 0;
 }
 
-void HandleError(char *receive_buffer, char *output){
+void HandleError(char *receive_buffer, char *output) {
   struct text_error error;
   memcpy(&error, receive_buffer, sizeof(struct text_error));
 
@@ -334,7 +327,7 @@ void HandleTextList(char *receive_buffer, char *output) {
   std::cout << backspaces;
 
   std::cout << "Existing channels:" << std::endl;
-  for(int i = 2; i < list.txt_nchannels + 2; i++){
+  for (int i = 2; i < list.txt_nchannels + 2; i++) {
     std::cout << " " << list.txt_channels[i].ch_channel << std::endl;
   }
 

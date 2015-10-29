@@ -6,12 +6,48 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
+#include <list>
+#include <map>
 
 #include "server.h"
 #include "duckchat.h"
 
 
+// TODO Server can accept connections.
+// TODO Server handles Login and Logout from users, and keeps records of which users are logged in.
+// TODO Server handles Join and Leave from users, keeps records of which channels a user belongs to,
+// and keeps records of which users are in a channel.
+// TODO Server handles the Say message.
+// TODO Server correctly handles List and Who.
+// TODO Create copies of your client and server source. Modify them to send invalid packets to your good client
+// and server, to see if you can make your client or server crash. Fix any bugs you find.
+
+
 std::string user;
+
+
+class User {
+public:
+  std::string name;
+  int port;
+  struct sockaddr_in *address;
+  std::list<Channel *> channels;
+
+  User(std::string name, int port, struct sockaddr_in *address): name(name), port(port), address(address) {};
+};
+
+
+class Channel {
+public:
+  std::string name;
+  std::list<User *> users;
+
+  Channel(std::string name): name(name) {};
+};
+
+
+std::map<std::string, User *> users;
+std::map<std::string, Channel *> channels;
 
 
 void Error(const char *msg) {
@@ -52,8 +88,6 @@ void ProcessRequest(void *buffer) {
 
 int main(int argc, char *argv[]) {
   struct sockaddr_in server_addr;
-  struct sockaddr_in client_addr;
-  socklen_t client_addr_len = sizeof(client_addr);
 
   int server_socket;
   int receive_len;
@@ -84,6 +118,9 @@ int main(int argc, char *argv[]) {
 
   printf("server: waiting on port %d\n", port);
   while (1) {
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_len = sizeof(client_addr);
+    std::cout << "before recvfrom" << std::endl;
     receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
     if (receive_len > 0) {
       buffer[receive_len] = 0;
