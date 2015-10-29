@@ -63,7 +63,7 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
       memcpy(&login_request, buffer, sizeof(struct request_login));
 
       User new_user = User(login_request.req_username, address);
-      users.insert(std::string(login_request.req_username), &new_user);
+      users.insert({std::string(login_request.req_username), &new_user});
 
       for (auto user : users) {
         std::cout << user.first << " " << user.second->name << std::endl;
