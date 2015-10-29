@@ -23,7 +23,7 @@
 // and server, to see if you can make your client or server crash. Fix any bugs you find.
 
 
-std::string user;
+//std::string user;
 
 class Channel {
 public:
@@ -36,11 +36,10 @@ public:
 class User {
 public:
   std::string name;
-  int port;
   struct sockaddr_in *address;
   std::list<Channel *> channels;
 
-  User(std::string name, int port, struct sockaddr_in *address): name(name), port(port), address(address) {};
+  User(std::string name, struct sockaddr_in *address): name(name), address(address) {};
 };
 
 std::map<std::string, User *> users;
@@ -52,7 +51,7 @@ void Error(const char *msg) {
 }
 
 
-void ProcessRequest(void *buffer) {
+void ProcessRequest(void *buffer, struct sockaddr_in *address) {
   struct request current_request;
   memcpy(&current_request, buffer, sizeof(struct request));
   std::cout << "request type: " << current_request.req_type << std::endl;
@@ -62,18 +61,25 @@ void ProcessRequest(void *buffer) {
     case REQ_LOGIN:
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
-      user = login_request.req_username;
+
+      User *new_user = new User(login_request.req_username, address);
+      users.insert(login_request.req_username, new_user);
+
+      for (auto user : users) {
+        std::cout << user.first << " " << user.second << std::endl;
+      }
+
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
       break;
     case REQ_LOGOUT:
       struct request_logout logout_request;
       memcpy(&logout_request, buffer, sizeof(struct request_logout));
-      std::cout << "server: " << user << " logs out" << std::endl;
+//      std::cout << "server: " << username << " logs out" << std::endl;
       break;
     case REQ_JOIN:
       struct request_join join_request;
       memcpy(&join_request, buffer, sizeof(struct request_join));
-      std::cout << "server: " << user << " joins channel " << join_request.req_channel << std::endl;
+//      std::cout << "server: " << username << " joins channel " << join_request.req_channel << std::endl;
       break;
     default:
       break;
@@ -90,7 +96,7 @@ int main(int argc, char *argv[]) {
   void* buffer[kBufferSize];
   int port;
 
-  user = "";
+//  user = "";
 
   if (argc < 2) {
     std::cerr << "server: no port provided" << std::endl;
@@ -120,7 +126,7 @@ int main(int argc, char *argv[]) {
     receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
     if (receive_len > 0) {
       buffer[receive_len] = 0;
-      ProcessRequest(buffer);
+      ProcessRequest(buffer, &client_addr);
     }
   }
 }
