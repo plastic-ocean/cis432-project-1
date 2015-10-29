@@ -25,10 +25,26 @@
 
 std::string user;
 
+class Channel {
+public:
+  std::string name;
+  std::list<User *> users;
+
+  Channel(std::string name): name(name) {};
+};
+
+class User {
+public:
+  std::string name;
+  int port;
+  struct sockaddr_in *address;
+  std::list<Channel *> channels;
+
+  User(std::string name, int port, struct sockaddr_in *address): name(name), port(port), address(address) {};
+};
 
 std::map<std::string, User *> users;
 std::map<std::string, Channel *> channels;
-
 
 void Error(const char *msg) {
   perror(msg);
