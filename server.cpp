@@ -62,7 +62,7 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
 
-      User new_user = User(login_request.req_username, address);
+      User *new_user = new User(login_request.req_username, address);
       users.insert({std::string(login_request.req_username), &new_user});
 
       for (auto user : users) {
@@ -71,16 +71,16 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
 
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
       break;
-    case REQ_LOGOUT:
-      struct request_logout logout_request;
-      memcpy(&logout_request, buffer, sizeof(struct request_logout));
-//      std::cout << "server: " << username << " logs out" << std::endl;
-      break;
-    case REQ_JOIN:
-      struct request_join join_request;
-      memcpy(&join_request, buffer, sizeof(struct request_join));
-//      std::cout << "server: " << username << " joins channel " << join_request.req_channel << std::endl;
-      break;
+//    case REQ_LOGOUT:
+//      struct request_logout logout_request;
+//      memcpy(&logout_request, buffer, sizeof(struct request_logout));
+////      std::cout << "server: " << username << " logs out" << std::endl;
+//      break;
+//    case REQ_JOIN:
+//      struct request_join join_request;
+//      memcpy(&join_request, buffer, sizeof(struct request_join));
+////      std::cout << "server: " << username << " joins channel " << join_request.req_channel << std::endl;
+//      break;
     default:
       break;
   }
