@@ -53,17 +53,18 @@ void Error(const char *msg) {
 
 void ProcessRequest(void *buffer, struct sockaddr_in *address) {
   struct request current_request;
+  User *new_user;
   memcpy(&current_request, buffer, sizeof(struct request));
   std::cout << "request type: " << current_request.req_type << std::endl;
   request_t request_type = current_request.req_type;
 
-  switch(request_type){
+  switch(request_type) {
     case REQ_LOGIN:
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
 
-      User new_user = User(login_request.req_username, address);
-      users.insert({std::string(login_request.req_username), &new_user});
+      new_user = new User(login_request.req_username, address);
+      users.insert({std::string(login_request.req_username), new_user});
 
       for (auto user : users) {
         std::cout << user.first << " " << user.second->name << std::endl;
@@ -71,16 +72,16 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
 
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
       break;
-//    case REQ_LOGOUT:
-//      struct request_logout logout_request;
-//      memcpy(&logout_request, buffer, sizeof(struct request_logout));
-////      std::cout << "server: " << username << " logs out" << std::endl;
-//      break;
-//    case REQ_JOIN:
-//      struct request_join join_request;
-//      memcpy(&join_request, buffer, sizeof(struct request_join));
-////      std::cout << "server: " << username << " joins channel " << join_request.req_channel << std::endl;
-//      break;
+    case REQ_LOGOUT:
+      struct request_logout logout_request;
+      memcpy(&logout_request, buffer, sizeof(struct request_logout));
+//      std::cout << "server: " << username << " logs out" << std::endl;
+      break;
+    case REQ_JOIN:
+      struct request_join join_request;
+      memcpy(&join_request, buffer, sizeof(struct request_join));
+//      std::cout << "server: " << username << " joins channel " << join_request.req_channel << std::endl;
+      break;
     default:
       break;
   }
