@@ -66,7 +66,7 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
       users.insert(login_request.req_username, new_user);
 
       for (auto user : users) {
-        std::cout << user.first << " " << user.second << std::endl;
+        std::cout << user.first << " " << user.second->name << std::endl;
       }
 
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
