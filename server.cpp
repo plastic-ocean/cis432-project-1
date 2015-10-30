@@ -74,15 +74,18 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
 
       std::cout << "there" << std::endl;
 
-//      for (auto user : users) {
-//        unsigned short user_port = user.second->address->sin_port;
+      for (auto user : users) {
+        std::string user_port = user.second->name;
+        std::cout << user_port << " accessed" << std::endl;
+        in_addr_t user_address = user.second->address->sin_addr.s_addr;
+        std::cout << user_address << " accessed" << std::endl;
 //        in_addr_t user_address = user.second->address->sin_addr.s_addr;
 //
 //        std::cout << user.first << " " << user_address << ":" << user_port << std::endl;
 //        std::cout << std::endl;
-//      }
-//
-//      std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
+      }
+
+      std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
       break;
     case REQ_LOGOUT:
       struct request_logout logout_request;
@@ -147,7 +150,7 @@ int main(int argc, char *argv[]) {
 
   printf("server: waiting on port %d\n", port);
   while (1) {
-    struct sockaddr_in *client_addr;
+    struct sockaddr_in *client_addr = new struct sockaddr_in;
     socklen_t client_addr_len = sizeof(client_addr);
 //    std::cout << "before recvfrom" << std::endl;
     receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
