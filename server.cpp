@@ -9,7 +9,6 @@
 #include <list>
 #include <map>
 #include <set>
-#include <vector>
 
 #include "server.h"
 #include "duckchat.h"
@@ -30,7 +29,7 @@
 class Channel {
 public:
   std::string name;
-  std::vector<User *> users;
+  std::list<User *> users;
 
   Channel(std::string name): name(name) {};
 };
@@ -115,7 +114,7 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
         if (current_port == user_port && current_address == user_address) {
           std::cout << "server: " << user.first << " joins channel "<< channel->name << std::endl;
 
-          channel->users.push_back(user);
+          channel->users.push_back(user.second);
 
           // Otherwise
           if (isNewChannel) {
