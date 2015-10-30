@@ -42,7 +42,7 @@ public:
   User(std::string name, struct sockaddr_in *address): name(name), address(address) {};
 };
 
-std::map<std::string, User *> users;
+std::map<std::string, User> users;
 std::map<std::string, Channel *> channels;
 
 void Error(const char *msg) {
@@ -53,7 +53,7 @@ void Error(const char *msg) {
 
 void ProcessRequest(void *buffer, struct sockaddr_in *address) {
   struct request current_request;
-  User *new_user;
+  User new_user;
   std::map<std::string, User *>::iterator it;
 
   memcpy(&current_request, buffer, sizeof(struct request));
@@ -65,12 +65,12 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
 
-      new_user = new User(login_request.req_username, address);
+      new_user = User(login_request.req_username, address);
       users.insert({std::string(login_request.req_username), new_user});
 
       for (auto user : users) {
-        unsigned short user_port = user.second->address->sin_port;
-        in_addr_t user_address = user.second->address->sin_addr.s_addr;
+        unsigned short user_port = user.second.address->sin_port;
+        in_addr_t user_address = user.second.address->sin_addr.s_addr;
 
         std::cout << user.first << " " << user_address << ":" << user_port << std::endl;
         std::cout << std::endl;
@@ -83,8 +83,8 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
       memcpy(&logout_request, buffer, sizeof(struct request_logout));
 
       for (auto user : users) {
-        unsigned short user_port = user.second->address->sin_port;
-        in_addr_t user_address = user.second->address->sin_addr.s_addr;
+        unsigned short user_port = user.second.address->sin_port;
+        in_addr_t user_address = user.second.address->sin_addr.s_addr;
 
         unsigned short request_port = address->sin_port;
         in_addr_t request_address = address->sin_addr.s_addr;
