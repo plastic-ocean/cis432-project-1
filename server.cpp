@@ -53,8 +53,8 @@ void Error(const char *msg) {
 
 void ProcessRequest(void *buffer, struct sockaddr_in *address) {
   struct request current_request;
-//  User *new_user;
-  std::map<std::string, User *>::iterator it;
+  User *new_user;
+//  std::map<std::string, User *>::iterator it;
 
   memcpy(&current_request, buffer, sizeof(struct request));
   std::cout << "request type: " << current_request.req_type << std::endl;
@@ -62,11 +62,12 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
 
   switch(request_type) {
     case REQ_LOGIN:
+      std::cout << "login" << std::endl;
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
 
-//      new_user = new User(login_request.req_username, address);
-      users.insert({std::string(login_request.req_username), new User(login_request.req_username, address)});
+      new_user = new User(login_request.req_username, address);
+      users.insert({std::string(login_request.req_username), new_user});
 
       for (auto user : users) {
         unsigned short user_port = user.second->address->sin_port;
