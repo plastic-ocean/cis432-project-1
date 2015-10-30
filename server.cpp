@@ -123,7 +123,7 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
 
           // Test print
           for (auto u : channel->users) {
-            std::cout << "user: " << u << std::endl;
+            std::cout << "user: " << u->name << std::endl;
           }
           break;
         }
