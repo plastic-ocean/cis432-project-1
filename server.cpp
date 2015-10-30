@@ -68,10 +68,6 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
       new_user = new User(login_request.req_username, address);
       users.insert({std::string(login_request.req_username), new_user});
 
-//      for (auto user : users) {
-//        std::cout << user.first << " " << user.second->name << std::endl;
-//      }
-
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
       break;
     case REQ_LOGOUT:
@@ -81,6 +77,8 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
       for (auto user : users) {
         unsigned short user_port = user.second->address->sin_port;
         in_addr_t user_address = user.second->address->sin_addr.s_addr;
+
+        std::cout << user.first << " " << user_address << ":" << user_port << std::endl;
 
         unsigned short request_port = address->sin_port;
         in_addr_t request_address = address->sin_addr.s_addr;
