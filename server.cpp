@@ -8,13 +8,14 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <set>
 
 #include "server.h"
 #include "duckchat.h"
 
 
-// TODO Server can accept connections.
-// TODO Server handles Login and Logout from users, and keeps records of which users are logged in.
+// Server can accept connections.
+// Server handles Login and Logout from users, and keeps records of which users are logged in.
 // TODO Server handles Join and Leave from users, keeps records of which channels a user belongs to,
 // and keeps records of which users are in a channel.
 // TODO Server handles the Say message.
@@ -38,13 +39,13 @@ public:
   std::string name;
   in_addr_t address;
   unsigned short port;
-  std::list<Channel *> channels;
+//  std::set<Channel *> channels;
 
   User(std::string name, in_addr_t address, unsigned short port): name(name), address(address), port(port) {};
 };
 
-std::map<std::string, User *> users;
-std::map<std::string, Channel *> channels;
+std::map<std::string, User *> kUsers;
+std::map<std::string, Channel *> kChannels;
 
 void Error(const char *msg) {
   perror(msg);
@@ -55,7 +56,7 @@ void Error(const char *msg) {
 void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_port) {
   struct request current_request;
   User *new_user;
-  std::map<std::string, User *>::iterator it;
+  Channel *channel;
 
   memcpy(&current_request, buffer, sizeof(struct request));
   std::cout << "request type: " << current_request.req_type << std::endl;
@@ -67,15 +68,7 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
       memcpy(&login_request, buffer, sizeof(struct request_login));
 
       new_user = new User(login_request.req_username, user_address, user_port);
-      users.insert({std::string(login_request.req_username), new_user});
-
-      for (auto user : users) {
-        unsigned short current_port = user.second->port;
-        in_addr_t current_address = user.second->address;
-
-        std::cout << user.first << " " << current_address << ":" << current_port << std::endl;
-        std::cout << std::endl;
-      }
+      kUsers.insert({std::string(login_request.req_username), new_user});
 
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
       break;
@@ -83,18 +76,13 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
       struct request_logout logout_request;
       memcpy(&logout_request, buffer, sizeof(struct request_logout));
 
-      for (auto user : users) {
+      for (auto user : kUsers) {
         unsigned short current_port = user.second->port;
         in_addr_t current_address = user.second->address;
 
-//        unsigned short request_port = address->sin_port;
-//        in_addr_t request_address = address->sin_addr.s_addr;
-
-//        std::cout << user_port << " == " << user_port << " && " << user_address << " == " << request_address << std::endl;
-
         if (current_port == user_port && current_address == user_address) {
           std::cout << "server: " << user.first << " logs out" << std::endl;
-          users.erase(user.first);
+          kUsers.erase(user.first);
           break;
         }
       }
@@ -102,7 +90,44 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
     case REQ_JOIN:
       struct request_join join_request;
       memcpy(&join_request, buffer, sizeof(struct request_join));
-//      std::cout << "server: " << username << " joins channel " << join_request.req_channel << std::endl;
+      bool isNewChannel = true;
+
+      // If channel does exists in global map, set local channel to channel from kChannels
+      for (auto ch : kChannels) {
+        if (join_request.req_channel == ch.second->name) {
+          isNewChannel = false;
+          channel = ch.second;
+          break;
+        }
+      }
+
+      // If channel is new create a new channel
+      if (isNewChannel) {
+        channel = new Channel(join_request.req_channel);
+      }
+
+      for (auto user : kUsers) {
+        unsigned short current_port = user.second->port;
+        in_addr_t current_address = user.second->address;
+
+        if (current_port == user_port && current_address == user_address) {
+          std::cout << "server: " << user.first << " joins channel "<< channel->name << std::endl;
+
+          channel->users.push_back(user);
+
+          // Otherwise
+          if (isNewChannel) {
+            kChannels.insert({channel->name, channel});
+          }
+
+          // Test print
+          for (auto u : channel->users) {
+            std::cout << "user: " << u << std::endl;
+          }
+          break;
+        }
+
+      }
       break;
     default:
       break;
