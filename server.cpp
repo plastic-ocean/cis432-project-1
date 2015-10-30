@@ -62,12 +62,17 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
 
   switch(request_type) {
     case REQ_LOGIN:
-      std::cout << "login" << std::endl;
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
 
+
+      std::cout << "here" << std::endl;
+
       new_user = new User(login_request.req_username, address);
       users.insert({std::string(login_request.req_username), new_user});
+
+
+      std::cout << "there" << std::endl;
 
       for (auto user : users) {
         unsigned short user_port = user.second->address->sin_port;
