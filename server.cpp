@@ -74,15 +74,15 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
 
       std::cout << "there" << std::endl;
 
-      for (auto user : users) {
-        unsigned short user_port = user.second->address->sin_port;
-        in_addr_t user_address = user.second->address->sin_addr.s_addr;
-
-        std::cout << user.first << " " << user_address << ":" << user_port << std::endl;
-        std::cout << std::endl;
-      }
-
-      std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
+//      for (auto user : users) {
+//        unsigned short user_port = user.second->address->sin_port;
+//        in_addr_t user_address = user.second->address->sin_addr.s_addr;
+//
+//        std::cout << user.first << " " << user_address << ":" << user_port << std::endl;
+//        std::cout << std::endl;
+//      }
+//
+//      std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
       break;
     case REQ_LOGOUT:
       struct request_logout logout_request;
