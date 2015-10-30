@@ -53,8 +53,8 @@ void Error(const char *msg) {
 
 void ProcessRequest(void *buffer, struct sockaddr_in *address) {
   struct request current_request;
-  User *new_user;
-//  std::map<std::string, User *>::iterator it;
+//  User *new_user;
+  std::map<std::string, User *>::iterator it;
 
   memcpy(&current_request, buffer, sizeof(struct request));
   std::cout << "request type: " << current_request.req_type << std::endl;
@@ -65,24 +65,15 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
 
-
-      std::cout << "here" << std::endl;
-
-      new_user = new User(login_request.req_username, address);
-      users.insert({std::string(login_request.req_username), new_user});
-
-
-      std::cout << "there" << std::endl;
+//      new_user = new User(login_request.req_username, address);
+      users.insert({std::string(login_request.req_username), new User(login_request.req_username, address)});
 
       for (auto user : users) {
-        std::string user_port = user.second->name;
-        std::cout << user_port << " accessed" << std::endl;
+        unsigned short user_port = user.second->address->sin_port;
         in_addr_t user_address = user.second->address->sin_addr.s_addr;
-        std::cout << user_address << " accessed" << std::endl;
-//        in_addr_t user_address = user.second->address->sin_addr.s_addr;
-//
-//        std::cout << user.first << " " << user_address << ":" << user_port << std::endl;
-//        std::cout << std::endl;
+
+        std::cout << user.first << " " << user_address << ":" << user_port << std::endl;
+        std::cout << std::endl;
       }
 
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
@@ -150,13 +141,16 @@ int main(int argc, char *argv[]) {
 
   printf("server: waiting on port %d\n", port);
   while (1) {
-    struct sockaddr_in *client_addr = new struct sockaddr_in;
+    struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
 //    std::cout << "before recvfrom" << std::endl;
     receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
     if (receive_len > 0) {
       buffer[receive_len] = 0;
-      ProcessRequest(buffer, client_addr);
+
+      std::cout << "port " << client_addr.sin_port << std::endl;
+
+      ProcessRequest(buffer, &client_addr);
     }
   }
 }
