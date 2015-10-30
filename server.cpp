@@ -87,7 +87,7 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
 
         if (user_port == request_port && user_address == request_address) {
           std::cout << "server: " << user.first << " logs out" << std::endl;
-          users.erase(user);
+          users.erase(user.first);
           break;
         }
       }
