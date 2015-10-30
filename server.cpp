@@ -9,6 +9,7 @@
 #include <list>
 #include <map>
 #include <set>
+#include <vector>
 
 #include "server.h"
 #include "duckchat.h"
@@ -29,7 +30,7 @@
 class Channel {
 public:
   std::string name;
-  std::list<User *> users;
+  std::vector<User *> users;
 
   Channel(std::string name): name(name) {};
 };
@@ -57,6 +58,7 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
   struct request current_request;
   User *new_user;
   Channel *channel;
+  bool isNewChannel;
 
   memcpy(&current_request, buffer, sizeof(struct request));
   std::cout << "request type: " << current_request.req_type << std::endl;
@@ -90,7 +92,7 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
     case REQ_JOIN:
       struct request_join join_request;
       memcpy(&join_request, buffer, sizeof(struct request_join));
-      bool isNewChannel = true;
+      isNewChannel = true;
 
       // If channel does exists in global map, set local channel to channel from kChannels
       for (auto ch : kChannels) {
