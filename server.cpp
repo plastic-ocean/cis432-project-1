@@ -53,7 +53,7 @@ void Error(const char *msg) {
 
 void ProcessRequest(void *buffer, struct sockaddr_in *address) {
   struct request current_request;
-  User *new_user;
+//  User *new_user;
   std::map<std::string, User *>::iterator it;
 
   memcpy(&current_request, buffer, sizeof(struct request));
@@ -65,8 +65,8 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
 
-      new_user = new User(login_request.req_username, address);
-      users.insert({std::string(login_request.req_username), new_user});
+//      new_user = new User(login_request.req_username, address);
+      users.insert({std::string(login_request.req_username), new User(login_request.req_username, address)});
 
       for (auto user : users) {
         unsigned short user_port = user.second->address->sin_port;
