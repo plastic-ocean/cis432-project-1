@@ -36,10 +36,11 @@ public:
 class User {
 public:
   std::string name;
-  struct sockaddr_in *address;
+  in_addr_t address;
+  unsigned short port;
   std::list<Channel *> channels;
 
-  User(std::string name, struct sockaddr_in *address): name(name), address(address) {};
+  User(std::string name, in_addr_t address, unsigned short port): name(name), address(address), port(port) {};
 };
 
 std::map<std::string, User *> users;
@@ -51,9 +52,9 @@ void Error(const char *msg) {
 }
 
 
-void ProcessRequest(void *buffer, struct sockaddr_in *address) {
+void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_port) {
   struct request current_request;
-//  User *new_user;
+  User *new_user;
   std::map<std::string, User *>::iterator it;
 
   memcpy(&current_request, buffer, sizeof(struct request));
@@ -65,14 +66,14 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
 
-//      new_user = new User(login_request.req_username, address);
-      users.insert({std::string(login_request.req_username), new User(login_request.req_username, address)});
+      new_user = new User(login_request.req_username, user_address, user_port);
+      users.insert({std::string(login_request.req_username), new_user});
 
       for (auto user : users) {
-        unsigned short user_port = user.second->address->sin_port;
-        in_addr_t user_address = user.second->address->sin_addr.s_addr;
+        unsigned short current_port = user.second->port;
+        in_addr_t current_address = user.second->address;
 
-        std::cout << user.first << " " << user_address << ":" << user_port << std::endl;
+        std::cout << user.first << " " << current_address << ":" << current_port << std::endl;
         std::cout << std::endl;
       }
 
@@ -82,21 +83,21 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
       struct request_logout logout_request;
       memcpy(&logout_request, buffer, sizeof(struct request_logout));
 
-      for (auto user : users) {
-        unsigned short user_port = user.second->address->sin_port;
-        in_addr_t user_address = user.second->address->sin_addr.s_addr;
+//      for (auto user : users) {
+//        unsigned short user_port = user.second->address->sin_port;
+//        in_addr_t user_address = user.second->address->sin_addr.s_addr;
+//
+//        unsigned short request_port = address->sin_port;
+//        in_addr_t request_address = address->sin_addr.s_addr;
 
-        unsigned short request_port = address->sin_port;
-        in_addr_t request_address = address->sin_addr.s_addr;
-
-        std::cout << user_port << " == " << request_port << " && " << user_address << " == " << request_address << std::endl;
-
-        if (user_port == request_port && user_address == request_address) {
-          std::cout << "server: " << user.first << " logs out" << std::endl;
-          users.erase(user.first);
-          break;
-        }
-      }
+//        std::cout << user_port << " == " << request_port << " && " << user_address << " == " << request_address << std::endl;
+//
+//        if (user_port == request_port && user_address == request_address) {
+//          std::cout << "server: " << user.first << " logs out" << std::endl;
+//          users.erase(user.first);
+//          break;
+//        }
+//      }
       break;
     case REQ_JOIN:
       struct request_join join_request;
@@ -148,9 +149,9 @@ int main(int argc, char *argv[]) {
     if (receive_len > 0) {
       buffer[receive_len] = 0;
 
-      std::cout << "port " << client_addr.sin_port << std::endl;
+//      std::cout << "port " << client_addr.sin_port << std::endl;
 
-      ProcessRequest(buffer, &client_addr);
+      ProcessRequest(buffer, client_addr.sin_addr.s_addr, client_addr.sin_port);
     }
   }
 }
