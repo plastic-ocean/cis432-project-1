@@ -81,6 +81,8 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
         unsigned short request_port = address->sin_port;
         in_addr_t request_address = address->sin_addr.s_addr;
 
+        std::cout << user_port << " == " << request_port << " && " << user_address << " == " << request_address << std::endl;
+
         if (user_port == request_port && user_address == request_address) {
           std::cout << "server: " << user.first << " logs out" << std::endl;
           users.erase(user.first);
@@ -96,13 +98,13 @@ void ProcessRequest(void *buffer, struct sockaddr_in *address) {
     default:
       break;
   }
-
-  for (auto user : users) {
-    unsigned short user_port = user.second->address->sin_port;
-    in_addr_t user_address = user.second->address->sin_addr.s_addr;
-
-    std::cout << user.first << " " << user_address << ":" << user_port << std::endl;
-  }
+//
+//  for (auto user : users) {
+//    unsigned short user_port = user.second->address->sin_port;
+//    in_addr_t user_address = user.second->address->sin_addr.s_addr;
+//
+//    std::cout << user.first << " " << user_address << ":" << user_port << std::endl;
+//  }
 }
 
 
