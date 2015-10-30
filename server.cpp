@@ -83,21 +83,21 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
       struct request_logout logout_request;
       memcpy(&logout_request, buffer, sizeof(struct request_logout));
 
-//      for (auto user : users) {
-//        unsigned short user_port = user.second->address->sin_port;
-//        in_addr_t user_address = user.second->address->sin_addr.s_addr;
-//
+      for (auto user : users) {
+        unsigned short current_port = user.second->port;
+        in_addr_t current_address = user.second->address;
+
 //        unsigned short request_port = address->sin_port;
 //        in_addr_t request_address = address->sin_addr.s_addr;
 
-//        std::cout << user_port << " == " << request_port << " && " << user_address << " == " << request_address << std::endl;
-//
-//        if (user_port == request_port && user_address == request_address) {
-//          std::cout << "server: " << user.first << " logs out" << std::endl;
-//          users.erase(user.first);
-//          break;
-//        }
-//      }
+//        std::cout << user_port << " == " << user_port << " && " << user_address << " == " << request_address << std::endl;
+
+        if (current_port == user_port && current_address == user_address) {
+          std::cout << "server: " << user.first << " logs out" << std::endl;
+          users.erase(user.first);
+          break;
+        }
+      }
       break;
     case REQ_JOIN:
       struct request_join join_request;
