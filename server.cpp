@@ -112,7 +112,7 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
           }
 
           if( it != channel->users.end()){
-            channel->users.erase(it);
+            channel->users.remove(*it);
             std::cout << user.first << " leaves channel " << channel->name << std::endl;
             if (channel->users.size() == 0) {
               kChannels.erase(channel->name);
