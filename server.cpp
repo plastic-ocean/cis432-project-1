@@ -59,7 +59,8 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
   Channel *channel;
   std::string current_channel;
   std::list<User *>::const_iterator it;
-  bool isNewChannel;
+  bool is_new_channel;
+  bool is_channel;
 
 
 
@@ -103,47 +104,59 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
         in_addr_t current_address = user.second->address;
 
         if (current_port == user_port && current_address == user_address) {
-          channel = kChannels[current_channel];
-          std::cout << "to test seg fault, channel name: " << channel->name << std::endl;
-          for (it = channel->users.begin(); it != channel->users.end(); ++it){
-            if((*it)->name == user.first){
+          is_channel = false;
+          for(auto ch : kChannels){
+            if(ch== current_channel){
+              std::cout << "channel found" << std::endl;
+              is_channel = true;
               break;
             }
           }
 
-          if( it != channel->users.end()){
-            channel->users.remove(*it);
-            std::cout << user.first << " leaves channel " << channel->name << std::endl;
-            if (channel->users.size() == 0) {
-              kChannels.erase(channel->name);
-              std::cout << "server: removing empty channel " << channel->name << std::endl;
+          if(is_channel){
+            channel = kChannels[current_channel];
+
+            for (it = channel->users.begin(); it != channel->users.end(); ++it){
+              if((*it)->name == user.first){
+                break;
+              }
             }
+
+            if( it != channel->users.end()){
+              channel->users.remove(*it);
+              std::cout << user.first << " leaves channel " << channel->name << std::endl;
+              if (channel->users.size() == 0) {
+                kChannels.erase(channel->name);
+                std::cout << "server: removing empty channel " << channel->name << std::endl;
+              }
+            }
+            for (auto u : channel->users) {
+              std::cout << "user: " << u->name << std::endl;
+            }
+            break;
           } else {
             std::cout << "server: " << user.first << " trying to leave non-existent channel " << channel->name << std::endl;
           }
-          for (auto u : channel->users) {
-            std::cout << "user: " << u->name << std::endl;
-          }
-          break;
+
         }
       }
       break;
     case REQ_JOIN:
       struct request_join join_request;
       memcpy(&join_request, buffer, sizeof(struct request_join));
-      isNewChannel = true;
+      is_new_channel = true;
 
       // If channel does exists in global map, set local channel to channel from kChannels
       for (auto ch : kChannels) {
         if (join_request.req_channel == ch.second->name) {
-          isNewChannel = false;
+          is_new_channel = false;
           channel = ch.second;
           break;
         }
       }
 
       // If channel is new create a new channel
-      if (isNewChannel) {
+      if (is_new_channel) {
         channel = new Channel(join_request.req_channel);
       }
 
@@ -157,7 +170,7 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
           channel->users.push_back(user.second);
 
           // Otherwise
-          if (isNewChannel) {
+          if (is_new_channel) {
             kChannels.insert({channel->name, channel});
           }
 
