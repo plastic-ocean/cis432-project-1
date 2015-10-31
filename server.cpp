@@ -58,6 +58,7 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
   User *current_user;
   Channel *channel;
   std::string current_channel;
+  std::list<User *>::const_iterator it;
   bool isNewChannel;
 
 
@@ -103,7 +104,12 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
 
         if (current_port == user_port && current_address == user_address) {
           channel = kChannels[current_channel];
-          auto it = std::find(channel->users.begin(), channel->users.end(), user.first);
+
+          for (it = channel->users.begin(); it != channel->users.end(); ++it){
+            if((*it)->name == user.first){
+              break;
+            }
+          }
 
           if( it != channel->users.end()){
             channel->users.erase(it);
