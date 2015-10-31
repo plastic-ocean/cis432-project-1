@@ -56,7 +56,7 @@ void Error(const char *msg) {
 }
 
 
-void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, unsigned short user_port) {
+void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request current_request;
   User *current_user;
   Channel *channel;
@@ -74,7 +74,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, uns
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
 
-      current_user = new User(login_request.req_username, user_address, user_port);
+      current_user = new User(login_request.req_username, request_address, request_port);
       kUsers.insert({std::string(login_request.req_username), current_user});
 
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
@@ -88,7 +88,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, uns
         unsigned short current_port = user.second->port;
         in_addr_t current_address = user.second->address;
 
-        if (current_port == user_port && current_address == user_address) {
+        if (current_port == request_port && current_address == request_address) {
           std::cout << "server: " << user.first << " logs out" << std::endl;
           kUsers.erase(user.first);
           break;
@@ -104,7 +104,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, uns
         unsigned short current_port = user.second->port;
         in_addr_t current_address = user.second->address;
 
-        if (current_port == user_port && current_address == user_address) {
+        if (current_port == request_port && current_address == request_address) {
           is_channel = false;
           for(auto ch : kChannels){
             if(ch.first == current_channel){
@@ -165,7 +165,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, uns
         unsigned short current_port = user.second->port;
         in_addr_t current_address = user.second->address;
 
-        if (current_port == user_port && current_address == user_address) {
+        if (current_port == request_port && current_address == request_address) {
           std::cout << "server: " << user.first << " joins channel "<< channel->name << std::endl;
 
           channel->users.push_back(user.second);
@@ -188,9 +188,18 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, uns
       struct request_say say_request;
       memcpy(&say_request, buffer, sizeof(struct request_say));
 
-      std::cout << "user said: " << say_request.req_text << std::endl;
+      for (auto user : kUsers) {
+        unsigned short current_port = user.second->port;
+        in_addr_t current_address = user.second->address;
+
+        if (current_port == request_port && current_address == request_address) {
+          current_user = user.second;
+          break;
+        }
+      }
+
       for(auto user : kChannels[say_request.req_channel]->users){
-        std::cout << "server sending message to: " << user->name << std::endl;
+//        std::cout << "server sending message to: " << user->name << std::endl;
         struct sockaddr_in client_addr;
         struct text_say say;
         memcpy(&say, buffer, sizeof(struct text_say));
@@ -204,14 +213,14 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, uns
         strncpy(say.txt_channel, say_request.req_channel, CHANNEL_MAX);
         strncpy(say.txt_text, say_request.req_text, SAY_MAX);
         say.txt_type = TXT_SAY;
-        strncpy(say.txt_username, user->name.c_str(), USERNAME_MAX);
+        strncpy(say.txt_username, current_user->name.c_str(), USERNAME_MAX);
 
         size_t message_size = sizeof(struct text_say);
 
         if (sendto(server_socket, &say, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
           Error("server: failed to send say\n");
         }
-
+        std::cout << current_user->name << " sends day message in " << say_request.req_channel << std::endl;
       }
       break;
     default:
