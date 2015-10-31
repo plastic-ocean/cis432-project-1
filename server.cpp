@@ -63,7 +63,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, uns
   bool is_channel;
 
   memcpy(&current_request, buffer, sizeof(struct request));
-  std::cout << "request type: " << current_request.req_type << std::endl;
+//  std::cout << "request type: " << current_request.req_type << std::endl;
   request_t request_type = current_request.req_type;
 
   switch(request_type) {
@@ -199,7 +199,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, uns
         strncpy(say.txt_channel, say_request.req_channel, CHANNEL_MAX);
         strncpy(say.txt_text, say_request.req_text, SAY_MAX);
         say.txt_type = TXT_SAY;
-        strncpy(say.txt_username, user->name, USERNAME_MAX);
+        strncpy(say.txt_username, user->name.c_str(), USERNAME_MAX);
 
         size_t message_size = sizeof(struct text_say);
 
