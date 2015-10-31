@@ -104,7 +104,7 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
 
         if (current_port == user_port && current_address == user_address) {
           channel = kChannels[current_channel];
-
+          std::cout << "to test seg fault, channel name: " << channel->name << std::endl;
           for (it = channel->users.begin(); it != channel->users.end(); ++it){
             if((*it)->name == user.first){
               break;
