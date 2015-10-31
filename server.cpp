@@ -191,15 +191,16 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, uns
       std::cout << "user said: " << say_request.req_text << std::endl;
       for(auto user : kChannels[say_request.req_channel]->users){
         std::cout << "server sending message to: " << user->name << std::endl;
-//        struct sockaddr_in client_addr;
+        struct sockaddr_in client_addr;
         struct text_say say;
         memcpy(&say, buffer, sizeof(struct text_say));
 
-//        memset(&client_addr, 0, sizeof(struct sockaddr_in));
-//        client_addr.sin_family = AF_INET;
-//        client_addr.sin_port = htons(user->port);
-//        client_addr.sin_addr.s_addr = htonl(user->address);
+        memset(&client_addr, 0, sizeof(struct sockaddr_in));
+        client_addr.sin_family = AF_INET;
+        client_addr.sin_port = user->port;
+        client_addr.sin_addr.s_addr = user->address;
 
+        // copy message into struct being sent
         strncpy(say.txt_channel, say_request.req_channel, CHANNEL_MAX);
         strncpy(say.txt_text, say_request.req_text, SAY_MAX);
         say.txt_type = TXT_SAY;
@@ -207,7 +208,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, uns
 
         size_t message_size = sizeof(struct text_say);
 
-        if (sendto(server_socket, &say, message_size, 0, (struct sockaddr*) &most_recent_client_addr, sizeof(most_recent_client_addr)) < 0) {
+        if (sendto(server_socket, &say, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
           Error("server: failed to send say\n");
         }
 
