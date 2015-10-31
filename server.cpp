@@ -62,7 +62,6 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
   bool is_new_channel;
   bool is_channel;
   bool is_channel_user;
-  bool is_user;
 
   memcpy(&current_request, buffer, sizeof(struct request));
 //  std::cout << "request type: " << current_request.req_type << std::endl;
@@ -75,18 +74,14 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
 
       current_user = new User(login_request.req_username, request_address, request_port);
-      is_user = false;
       for (map_it = kUsers.begin(); map_it != kUsers.end(); ++map_it){
         if((*map_it).first == current_user->name){
-          (*map_it).second = current_user;
-          is_user = true;
+            kUsers.erase(current_user->name);
           break;
         }
       }
 
-      if(!is_user){
-        kUsers.insert({std::string(login_request.req_username), current_user});
-      }
+      kUsers.insert({std::string(login_request.req_username), current_user});
 
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
       break;
