@@ -44,8 +44,11 @@ public:
   User(std::string name, in_addr_t address, unsigned short port): name(name), address(address), port(port) {};
 };
 
+
+struct sockaddr_in most_recent_client_addr;
 std::map<std::string, User *> kUsers;
 std::map<std::string, Channel *> kChannels;
+
 
 void Error(const char *msg) {
   perror(msg);
@@ -252,6 +255,9 @@ int main(int argc, char *argv[]) {
     socklen_t client_addr_len = sizeof(client_addr);
 //    std::cout << "before recvfrom" << std::endl;
     receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
+    memcpy(&most_recent_client_addr, &client_addr, sizeof(most_recent_client_addr));
+    std::cout << "port " << most_recent_client_addr.sin_port << std::endl;
+
     if (receive_len > 0) {
       buffer[receive_len] = 0;
 
