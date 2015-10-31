@@ -185,8 +185,9 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, uns
       struct request_say say_request;
       memcpy(&say_request, buffer, sizeof(struct request_say));
 
-      std::cout << " user said: " << say_request.req_text << std::endl;
+      std::cout << "user said: " << say_request.req_text << std::endl;
       for(auto user : kChannels[say_request.req_channel]->users){
+        std::cout << "server sending message to: " << user->name << std::endl;
         struct sockaddr_in client_addr;
         struct text_say say;
         memcpy(&say, buffer, sizeof(struct text_say));
