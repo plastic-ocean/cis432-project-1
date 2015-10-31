@@ -52,6 +52,23 @@ void Error(const char *msg) {
 }
 
 
+void RemoveUser(User *user){
+  for(auto channel : kChannels){
+    for(auto channel_user : channel.second->users){
+      if(channel_user->name == user->name){
+        channel.second->users.remove(channel_user);
+        break;
+      }
+    }
+  }
+  for(auto current_user : kUsers){
+    if(current_user.second->name == user->name){
+      kUsers.erase(user->name);
+    }
+  }
+}
+
+
 void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request current_request;
   User *current_user;
@@ -74,13 +91,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
 
       current_user = new User(login_request.req_username, request_address, request_port);
-      for (map_it = kUsers.begin(); map_it != kUsers.end(); ++map_it){
-        if((*map_it).first == current_user->name){
-            kUsers.erase(current_user->name);
-          break;
-        }
-      }
-
+      RemoveUser(current_user);
       kUsers.insert({std::string(login_request.req_username), current_user});
 
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
