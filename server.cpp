@@ -161,7 +161,10 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       for (auto user : kUsers) {
         unsigned short current_port = user.second->port;
         in_addr_t current_address = user.second->address;
-
+        std::cout << std::endl;
+        std::cout << "port: " << current_port << " address "<< current_address << std::endl;
+        std::cout << "port: " << request_port << " address "<< request_address << std::endl;
+        std::cout << std::endl;
         if (current_port == request_port && current_address == request_address) {
           std::cout << "server: " << user.first << " joins channel "<< channel->name << std::endl;
 
