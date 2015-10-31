@@ -55,9 +55,13 @@ void Error(const char *msg) {
 
 void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_port) {
   struct request current_request;
-  User *new_user;
+  User *current_user;
   Channel *channel;
+  std::string current_channel;
   bool isNewChannel;
+
+
+
 
   memcpy(&current_request, buffer, sizeof(struct request));
   std::cout << "request type: " << current_request.req_type << std::endl;
@@ -68,8 +72,8 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
       struct request_login login_request;
       memcpy(&login_request, buffer, sizeof(struct request_login));
 
-      new_user = new User(login_request.req_username, user_address, user_port);
-      kUsers.insert({std::string(login_request.req_username), new_user});
+      current_user = new User(login_request.req_username, user_address, user_port);
+      kUsers.insert({std::string(login_request.req_username), current_user});
 
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
       break;
@@ -84,6 +88,36 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
         if (current_port == user_port && current_address == user_address) {
           std::cout << "server: " << user.first << " logs out" << std::endl;
           kUsers.erase(user.first);
+          break;
+        }
+      }
+      break;
+
+    case REQ_LEAVE:
+      struct request_leave leave_request;
+      memcpy(&leave_request, buffer, sizeof(struct request_leave));
+      current_channel = leave_request.req_channel;
+      for (auto user : kUsers) {
+        unsigned short current_port = user.second->port;
+        in_addr_t current_address = user.second->address;
+
+        if (current_port == user_port && current_address == user_address) {
+          channel = kChannels[current_channel];
+          auto it = std::find(channel->users.begin(), channel->users.end(), user.first);
+
+          if( it != channel->users.end()){
+            channel->users.erase(it);
+            std::cout << user.first << " leaves channel " << channel->name << std::endl;
+            if (channel->users.size() == 0) {
+              kChannels.erase(channel->name);
+              std::cout << "server: removing empty channel " << channel->name << std::endl;
+            }
+          } else {
+            std::cout << "server: " << user.first << " trying to leave non-existent channel " << channel->name << std::endl;
+          }
+          for (auto u : channel->users) {
+            std::cout << "user: " << u->name << std::endl;
+          }
           break;
         }
       }
