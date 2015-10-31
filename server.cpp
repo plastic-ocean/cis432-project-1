@@ -78,12 +78,12 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       is_user = false;
       for (map_it = kUsers.begin(); map_it != kUsers.end(); ++map_it){
         if((*map_it).first == current_user->name){
-          (*map_it).second == current_user;
+          (*map_it).second = current_user;
           is_user = true;
           break;
         }
       }
-          
+
       if(!is_user){
         kUsers.insert({std::string(login_request.req_username), current_user});
       }
