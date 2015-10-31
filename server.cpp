@@ -13,10 +13,10 @@
 #include "server.h"
 #include "duckchat.h"
 
-
+// TODO Handle domain
 // Server can accept connections.
 // Server handles Login and Logout from users, and keeps records of which users are logged in.
-// Server handles Join and TODO Leave from users, keeps records of which channels a user belongs to,
+// Server handles Join and Leave from users, keeps records of which channels a user belongs to,
 // and keeps records of which users are in a channel.
 // TODO Server handles the Say message.
 // TODO Server correctly handles List and Who.
@@ -53,7 +53,7 @@ void Error(const char *msg) {
 }
 
 
-void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_port) {
+void ProcessRequest(int server_socket, void *buffer, in_addr_t user_address, unsigned short user_port) {
   struct request current_request;
   User *current_user;
   Channel *channel;
@@ -61,9 +61,6 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
   std::list<User *>::const_iterator it;
   bool is_new_channel;
   bool is_channel;
-
-
-
 
   memcpy(&current_request, buffer, sizeof(struct request));
   std::cout << "request type: " << current_request.req_type << std::endl;
@@ -79,6 +76,7 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
 
       std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
       break;
+
     case REQ_LOGOUT:
       struct request_logout logout_request;
       memcpy(&logout_request, buffer, sizeof(struct request_logout));
@@ -183,6 +181,34 @@ void ProcessRequest(void *buffer, in_addr_t user_address, unsigned short user_po
 
       }
       break;
+    case REQ_SAY:
+      struct request_say say_request;
+      memcpy(&say_request, buffer, sizeof(struct request_say));
+
+      std::cout << " user said: " << say_request.req_text << std::endl;
+      for(auto user : kChannels[say_request.req_channel]->users){
+        struct sockaddr_in client_addr;
+        struct text_say say;
+        memcpy(&say, buffer, sizeof(struct text_say));
+
+        memset(&client_addr, 0, sizeof(struct sockaddr_in));
+        client_addr.sin_family = AF_INET;
+        client_addr.sin_port = htons(user->port);
+        client_addr.sin_addr.s_addr = htonl(user->address);
+
+        strncpy(say.txt_channel, say_request.req_channel, CHANNEL_MAX);
+        strncpy(say.txt_text, say_request.req_text, SAY_MAX);
+        say.txt_type = TXT_SAY;
+        strncpy(say.txt_username, user->name, USERNAME_MAX);
+
+        size_t message_size = sizeof(struct text_say);
+
+        if (sendto(server_socket, &say, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+          Error("server: failed to send say\n");
+        }
+
+      }
+      break;
     default:
       break;
   }
@@ -196,15 +222,15 @@ int main(int argc, char *argv[]) {
   int receive_len;
   void* buffer[kBufferSize];
   int port;
+//  std::string domain;
 
-//  user = "";
-
-  if (argc < 2) {
-    std::cerr << "server: no port provided" << std::endl;
+  if (argc < 3) {
+    std::cerr << "Usage: ./server domain_name port_num" << std::endl;
     exit(1);
   }
 
-  port = atoi(argv[1]);
+//  domain = argv[1];
+  port = atoi(argv[2]);
 
   memset((char *) &server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
@@ -230,7 +256,7 @@ int main(int argc, char *argv[]) {
 
 //      std::cout << "port " << client_addr.sin_port << std::endl;
 
-      ProcessRequest(buffer, client_addr.sin_addr.s_addr, client_addr.sin_port);
+      ProcessRequest(server_socket, buffer, client_addr.sin_addr.s_addr, client_addr.sin_port);
     }
   }
 }
