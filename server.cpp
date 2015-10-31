@@ -167,7 +167,8 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
           is_channel_user = false;
           for(auto u : channel->users){
-            if(u->name != user.second->name){
+            std::cout << "comparing " << u->name << " to " << user.second->name << std::endl;
+            if(u->name == user.second->name){
               is_channel_user = true;
               break;
             }
