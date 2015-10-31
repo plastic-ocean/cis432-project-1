@@ -167,7 +167,6 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
           is_channel_user = false;
           for(auto u : channel->users){
-            std::cout << "comparing " << u->name << " to " << user.second->name << std::endl;
             if(u->name == user.second->name){
               is_channel_user = true;
               break;
@@ -202,6 +201,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
         if (current_port == request_port && current_address == request_address) {
           current_user = user.second;
+          std::cout << "user found : " << current_user->name << std::endl;
           break;
         }
       }
