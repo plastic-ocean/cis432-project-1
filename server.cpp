@@ -24,8 +24,6 @@
 // and server, to see if you can make your client or server crash. Fix any bugs you find.
 
 
-//std::string user;
-
 class Channel {
 public:
   std::string name;
@@ -39,13 +37,11 @@ public:
   std::string name;
   in_addr_t address;
   unsigned short port;
-//  std::set<Channel *> channels;
 
   User(std::string name, in_addr_t address, unsigned short port): name(name), address(address), port(port) {};
 };
 
 
-struct sockaddr_in most_recent_client_addr;
 std::map<std::string, User *> kUsers;
 std::map<std::string, Channel *> kChannels;
 
@@ -199,7 +195,6 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       }
 
       for(auto user : kChannels[say_request.req_channel]->users){
-//        std::cout << "server sending message to: " << user->name << std::endl;
         struct sockaddr_in client_addr;
         struct text_say say;
         memcpy(&say, buffer, sizeof(struct text_say));
@@ -220,8 +215,8 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
         if (sendto(server_socket, &say, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
           Error("server: failed to send say\n");
         }
-        std::cout << current_user->name << " sends day message in " << say_request.req_channel << std::endl;
       }
+      std::cout << current_user->name << " sends day message in " << say_request.req_channel << std::endl;
       break;
     default:
       break;
@@ -263,15 +258,10 @@ int main(int argc, char *argv[]) {
   while (1) {
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
-//    std::cout << "before recvfrom" << std::endl;
     receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
-    memcpy(&most_recent_client_addr, &client_addr, sizeof(most_recent_client_addr));
-    std::cout << "port " << most_recent_client_addr.sin_port << std::endl;
 
     if (receive_len > 0) {
       buffer[receive_len] = 0;
-
-//      std::cout << "port " << client_addr.sin_port << std::endl;
 
       ProcessRequest(server_socket, buffer, client_addr.sin_addr.s_addr, client_addr.sin_port);
     }
