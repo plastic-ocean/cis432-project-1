@@ -167,7 +167,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
           is_channel_user = false;
           for(auto u : channel->users){
-            if(u != user.second){
+            if(u->name != user.second->name){
               is_channel_user = true;
               break;
             }
