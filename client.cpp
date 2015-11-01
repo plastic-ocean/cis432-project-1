@@ -227,6 +227,27 @@ int SendLeave(std::string channel) {
 }
 
 
+// Switches to a channel the user has already joined.
+int SwitchChannel(std::string channel) {
+  bool isSubscribed = false;
+
+  if (kChannels.size() > 0) {
+    for (auto c: kChannels) {
+      if (channel == c) {
+        current_channel = channel;
+        isSubscribed = true;
+      }
+    }
+  }
+
+  if (!isSubscribed) {
+    std::cout << "You have not subscribed to channel " << channel << std::endl;
+  }
+
+  return 0;
+}
+
+
 // Sends join requests to the server.
 int SendJoin(std::string channel) {
   bool contains_channel = false;
@@ -252,29 +273,11 @@ int SendJoin(std::string channel) {
     }
   }
 
-  return 0;
-}
-
-
-// Switches to a channel the user has already joined.
-int SwitchChannel(std::string channel) {
-  bool isSubscribed = false;
-
-  if (kChannels.size() > 0) {
-    for (auto c: kChannels) {
-      if (channel == c) {
-        current_channel = channel;
-        isSubscribed = true;
-      }
-    }
-  }
-
-  if (!isSubscribed) {
-    std::cout << "You have not subscribed to channel " << channel << std::endl;
-  }
+  SwitchChannel(channel);
 
   return 0;
 }
+
 
 void HandleError(char *receive_buffer, char *output) {
   struct text_error error;
