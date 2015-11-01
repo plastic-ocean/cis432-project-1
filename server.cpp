@@ -104,7 +104,7 @@ void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short 
   struct request_login login_request;
   memcpy(&login_request, buffer, sizeof(struct request_login));
 
-  std::shared_ptr<User> current_user(new User(login_request.req_username, request_address, request_port));
+  std::shared_ptr<User> current_user = std::make_shared<User>(login_request.req_username, request_address, request_port);
 //  current_user = new User(login_request.req_username, request_address, request_port);
 //  User *current_user = new User(login_request.req_username, request_address, request_port);
 //  RemoveUser(current_user);
