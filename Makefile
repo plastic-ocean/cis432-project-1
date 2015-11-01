@@ -8,6 +8,9 @@ all: client server
 client: client.cpp raw.cpp
 	$(CC) client.cpp raw.cpp $(CFLAGS) -o client
 
+client_bad: client_bad.cpp raw.cpp
+	$(CC) client_bad.cpp raw.cpp $(CFLAGS) -o client_bad
+
 server: server.cpp
 	$(CC) server.cpp $(CFLAGS) -o server
 
