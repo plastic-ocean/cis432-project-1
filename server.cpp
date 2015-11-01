@@ -320,12 +320,11 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   // Fills the packet's channels array.
   int i = 0;
   for (auto ch : kChannels) {
-    std::cout << "about to copy channel" << std::endl;
     strncpy(list->txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
   }
 
   // TODO Print test
-  std::cout << "type: " << list->txt_type << std::endl << std::endl;
+  std::cout << "type: " << ntohl(list->txt_type) << std::endl << std::endl;
   std::cout << "Channels:" << std::endl;
   for (i = 0; i < (int) kChannels.size(); i++) {
     std::cout << list->txt_channels[i].ch_channel << std::endl;
