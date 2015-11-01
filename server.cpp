@@ -19,12 +19,10 @@
 // Server handles Login and Logout from users, and keeps records of which users are logged in.
 // Server handles Join and Leave from users, keeps records of which channels a user belongs to,
 // and keeps records of which users are in a channel.
-// TODO Server handles the Say message.
-// TODO Server correctly handles List and Who.
+// Server handles the Say message.
+// Server correctly handles List and Who.
 // TODO Create copies of your client and server source. Modify them to send invalid packets to your good client
 // and server, to see if you can make your client or server crash. Fix any bugs you find.
-
-// TODO should users always receive messages on Common?
 
 
 class Channel {
