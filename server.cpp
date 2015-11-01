@@ -133,7 +133,6 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
       kUsers.erase(user.first);
       for (auto c : kChannels) {
         for (auto u : c.second->users) {
-          std::cout << u->name << std::endl;
           if (u->name == user.first) {
             c.second->users.remove(u);
             break;
@@ -330,12 +329,6 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
     strncpy(list->txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
   }
 
-  // TODO Print test
-  std::cout << "Channels:" << std::endl;
-  for (i = 0; i < (int) kChannels.size(); i++) {
-    std::cout << list->txt_channels[i].ch_channel << std::endl;
-  }
-
   // Finds the requesting users address and port and sends the packet.
   for (auto user : kUsers) {
     unsigned short port = user.second->port;
@@ -397,12 +390,6 @@ void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address
       }
       break;
     }
-  }
-
-  // TODO Print test
-  std::cout << "Users:" << std::endl;
-  for (i = 0; i < user_list_size; i++) {
-    std::cout << who->txt_users[i].us_username << std::endl;
   }
 
   // Finds the requesting users address and port and sends the packet.
@@ -500,7 +487,6 @@ int main(int argc, char *argv[]) {
     Error("server: bind failed\n");
   }
 
-  printf("server: waiting on port %d\n", port);
   while (1) {
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);

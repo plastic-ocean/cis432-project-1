@@ -78,7 +78,6 @@ void StripChar(char *input, char c) {
 
 // Gets the address info of the server at a the given port and creates the client's socket.
 void CreateSocket(char *domain, const char *port) {
-  std::cout << "Connecting to " << domain << std::endl;
 
   struct addrinfo hints;
   struct addrinfo *server_info_tmp;
@@ -218,9 +217,6 @@ int SendLeave(std::string channel) {
 
   if (contains_channel) {
     kChannels.erase(it);
-    for (it = kChannels.begin(); it != kChannels.end(); ++it) {
-      std::cout << *it << std::endl;
-    }
   }
 
   return 0;
@@ -326,7 +322,6 @@ void HandleTextList(char *receive_buffer, char *output) {
   }
   std::cout << backspaces;
 
-  std::cout << "Channels count: " << list.txt_nchannels << std::endl;
   std::cout << "Existing channels:" << std::endl;
   for (int i = 2; i < list.txt_nchannels + 2; i++) {
     std::cout << " " << list.txt_channels[i].ch_channel << std::endl;
@@ -490,8 +485,6 @@ int main(int argc, char *argv[]) {
           struct text message;
           memcpy(&message, receive_buffer, sizeof(struct text));
           text_t text_type = message.txt_type;
-
-          std::cout << "text type: " << text_type << std::endl;
 
           switch (text_type) {
             case TXT_SAY:
