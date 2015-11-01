@@ -32,6 +32,7 @@ public:
   Channel(std::string name): name(name) {};
 };
 
+
 class User {
 public:
   std::string name;
@@ -46,12 +47,20 @@ std::map<std::string, User *> kUsers;
 std::map<std::string, Channel *> kChannels;
 
 
-void Error(const char *msg) {
-  perror(msg);
+/**
+ * Prints an error message and exists.
+ */
+void Error(const char *message) {
+  perror(message);
   exit(1);
 }
 
 
+/**
+ * Removes a users from every channel and from the global users list.
+ *
+ * @user is the user to remove.
+ */
 void RemoveUser(User *user) {
   for (auto channel : kChannels) {
     for (auto channel_user : channel.second->users) {
@@ -66,6 +75,16 @@ void RemoveUser(User *user) {
       kUsers.erase(user->name);
     }
   }
+}
+
+
+struct sockaddr_in* CreateSockAddr(unsigned short port, in_addr_t address) {
+  struct sockaddr_in *client_addr;
+  memset(&client_addr, 0, sizeof(struct sockaddr_in));
+  client_addr->sin_family = AF_INET;
+  client_addr->sin_port = port;
+  client_addr->sin_addr.s_addr = address;
+  return client_addr;
 }
 
 
@@ -331,16 +350,26 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
 }
 
 
-struct sockaddr_in* CreateSockAddr(unsigned short port, in_addr_t address) {
-  struct sockaddr_in *client_addr;
-  memset(&client_addr, 0, sizeof(struct sockaddr_in));
-  client_addr->sin_family = AF_INET;
-  client_addr->sin_port = port;
-  client_addr->sin_addr.s_addr = address;
-  return client_addr;
+/**
+ * Sends a list of every user on the requested channel.
+ *
+ * @server_socket is the socket to send on.
+ * @request_address is the address to send to.
+ * @request_port is the port to send to.
+ */
+void HandleWhoRequest(int server_socket, in_addr_t request_address, unsigned short request_port) {
+  std::cout << "Not implemented yet." << std::endl;
 }
 
 
+/**
+ * Processes a reqest.
+ *
+ * @server_socket is the socket to send on.
+ * @buffer is the request
+ * @request_address is the address to send to.
+ * @request_port is the port to send to.
+ */
 void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request current_request;
   memcpy(&current_request, buffer, sizeof(struct request));
@@ -364,6 +393,9 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       break;
     case REQ_LIST:
       HandleListRequest(server_socket, request_address, request_port);
+      break;
+    case REQ_WHO:
+      HandleWhoRequest(server_socket, request_address, request_port);
       break;
     default:
       break;
