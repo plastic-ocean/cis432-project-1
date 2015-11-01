@@ -135,8 +135,9 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
       for (auto c : kChannels) {
         std::cout << "Channels: " << c.first << std::endl;
         for (auto u : c.second->users) {
+          std::cout << user.first << std::endl;
           if (u->name == user.first) {
-            std::cout << user.first << std::endl;
+//            std::cout << user.first << std::endl;
 //            c.second->users.e(user.second);
 //            delete(user.second);;
           }
