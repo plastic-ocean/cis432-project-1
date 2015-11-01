@@ -307,7 +307,7 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   memset(list, '\0', list_size);;
 
   list->txt_type = htonl(TXT_LIST);
-  list->txt_nchannels = htonl((int) kChannels.size());
+  list->txt_nchannels = htonl(kChannels.size());
 
   // Fills the packet's channels array.
   int i = 0;
@@ -316,10 +316,10 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   }
 
   // TODO Print test
-  std::cout << "Channels:" << std::endl;
-  for (i = 0; i < list->txt_nchannels; i++) {
-    std::cout << list->txt_channels[i].ch_channel << std::endl;
-  }
+//  std::cout << "Channels:" << std::endl;
+//  for (i = 0; i < list->txt_nchannels; i++) {
+//    std::cout << list->txt_channels[i].ch_channel << std::endl;
+//  }
 
   // Finds the requesting users address and port and sends the packet.
   for (auto user : kUsers) {
