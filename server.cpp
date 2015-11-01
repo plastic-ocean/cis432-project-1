@@ -72,7 +72,7 @@ void SendTextList(int server_socket, in_addr_t request_address, unsigned short r
   // Fills the packet's channels array.
   int i = 0;
   for (auto ch : kChannels) {
-    strncpy(list->txt_channels[i++].ch_channel, ch.first, CHANNEL_MAX);
+    strncpy(list->txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
     std::cout << "channel name: " << list->txt_channels[i].ch_channel << std::endl;
   }
 
