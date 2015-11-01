@@ -250,7 +250,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
           std::cout << user.first << " leaves channel " << channel->name << std::endl;
           if (channel->users.size() == 0) {
             kChannels.erase(channel->name);
-            delete(channel);
+//            delete(channel);
             std::cout << "server: removing empty channel " << channel->name << std::endl;
           }
         }
