@@ -268,7 +268,8 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
  */
 void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request_say say_request;
-  memcpy(&say_request, buffer, sizeof(struct request_say));
+  say_request.req_type = REQ_SAY;
+//  memcpy(&say_request, buffer, sizeof(struct request_say));
 
   for (auto user : kUsers) {
     unsigned short current_port = user.second->port;
@@ -319,13 +320,13 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   memset(list, '\0', list_size);;
 
   list->txt_type = TXT_LIST;
-//  list->txt_nchannels = (int) kChannels.size();
-//
-//  // Fills the packet's channels array.
-//  int i = 0;
-//  for (auto ch : kChannels) {
-//    strncpy(list->txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
-//  }
+  list->txt_nchannels = (int) kChannels.size();
+
+  // Fills the packet's channels array.
+  int i = 0;
+  for (auto ch : kChannels) {
+    strncpy(list->txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
+  }
 
   // Finds the requesting users address and port and sends the packet.
   for (auto user : kUsers) {
