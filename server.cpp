@@ -366,7 +366,7 @@ void HandleWhoRequest(int server_socket, in_addr_t request_address, unsigned sho
 
 
 /**
- * Processes a reqest.
+ * Processes a request.
  *
  * @server_socket is the socket to send on.
  * @buffer is the request
