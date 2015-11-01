@@ -291,11 +291,12 @@ void HandleError(char *receive_buffer, char *output) {
 
 
 void HandleTextWho(char *receive_buffer, char *output) {
-  struct text_who tmp;
+  size_t who_size = sizeof(text_who) + (1 * sizeof(user_info));
+  struct text_who *tmp = (text_who *) malloc(who_size);;
   memcpy(&tmp, receive_buffer, sizeof(text_who) + sizeof(user_info));
 
-  int user_info_size = tmp.txt_nusernames;
-  size_t who_size = sizeof(text_who) + (user_info_size * sizeof(user_info));
+//  int user_info_size = tmp.txt_nusernames;
+//  size_t who_size = sizeof(text_who) + (user_info_size * sizeof(user_info));
 //  struct text_who *who = (text_who *) malloc(who_size);
 //  memset(who, '\0', who_size);
 //
@@ -312,8 +313,8 @@ void HandleTextWho(char *receive_buffer, char *output) {
   std::cout << backspaces;
 
   std::cout << "who size: " << who_size << std::endl;
-  std::cout << "tmp size: " << tmp.txt_nusernames << std::endl;
-  std::cout << "first user in tmp " << tmp.txt_users->us_username << std::endl;
+  std::cout << "tmp size: " << tmp->txt_nusernames << std::endl;
+  std::cout << "first user in tmp " << tmp->txt_users->us_username << std::endl;
 //
 //  std::cout << "after backspaces" << std::endl;
 //
