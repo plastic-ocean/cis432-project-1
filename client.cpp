@@ -16,27 +16,36 @@
 
 
 // Variables
-struct sockaddr_in client_addr;
-struct sockaddr_in server_addr;
 int client_socket;
 struct addrinfo *server_info;
 std::string current_channel;
 std::vector<std::string> kChannels;
 
 
-// Prints an error message and exits the program.
+/**
+ * Prints an error message and exits the program.
+ *
+ * @msg is the error message to print.
+ */
 void Error(const char *msg) {
   std::cerr << msg << std::endl;
   exit(1);
 }
 
 
+/**
+ * Prints the prompt.
+ */
 void PrintPrompt() {
   std::cout << "> " << std::flush;
 }
 
 
-// Splits strings around spaces.
+/**
+ * Splits strings around spaces.
+ *
+ * @input is the input to split around.
+ */
 std::vector<std::string> StringSplit(std::string input) {
   std::istringstream iss(input);
   std::vector<std::string> result{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
@@ -45,37 +54,15 @@ std::vector<std::string> StringSplit(std::string input) {
 }
 
 
-// Splits strings around spaces.
-std::vector<std::string> SplitString(char *input, char delimiter) {
-  std::vector<std::string> result;
-  std::string word = "";
-
-  size_t input_size = strlen(input);
-  for (size_t i = 0; i < input_size; i++) {
-    if (input[i] != delimiter) {
-      word += input[i];
-    } else {
-      result.push_back(word);
-      word = "";
-    }
-  }
-  result.push_back(word);
-
-  return result;
-}
-
-
-void StripChar(char *input, char c) {
-  size_t size = strlen(input);
-  for (size_t i = 0; i < size; i++) {
-    if (input[i] == c) {
-      input[i] = '\0';
-    }
-  }
-}
-
-
-// Gets the address info of the server at a the given port and creates the client's socket.
+/**
+ * Checks the address info of the server at a the given port. Prints error if not found.
+ * getaddrinfo() returns a list of address structures into server_info_tmp.
+ * Tries each address until a successful connect().
+ * If socket() (or connect()) fails, closes the socket and tries the next address.
+ *
+ * @domain is the domain to connect to.
+ * @port is the port to connect on.
+ */
 void CreateSocket(char *domain, const char *port) {
   struct addrinfo hints;
   struct addrinfo *server_info_tmp;
@@ -90,10 +77,6 @@ void CreateSocket(char *domain, const char *port) {
     std::cerr << "client: unable to resolve address: " << gai_strerror(status) << std::endl;
     exit(1);
   }
-
-  // getaddrinfo() returns a list of address structures into server_info_tmp.
-  // Tries each address until a successful connect().
-  // If socket() (or connect()) fails, closes the socket and tries the next address.
 
   for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
     if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
@@ -112,7 +95,11 @@ void CreateSocket(char *domain, const char *port) {
 }
 
 
-// Sends a message to all users in on the active channel.
+/**
+ * Sends a message to all users in on the active channel.
+ *
+ * @message is the text message to send.
+ */
 int SendSay(std::string message) {
   if (message.size() > SAY_MAX) {
     std::cout << "Message exceeds the maximum message length." << std::endl;
@@ -133,7 +120,11 @@ int SendSay(std::string message) {
 }
 
 
-// Sends login requests to the server.
+/**
+ * Sends login requests to the server.
+ *
+ * @username is the name of the user to login.
+ */
 int SendLogin(char *username) {
   if (strlen(username) > USERNAME_MAX) {
     Error("User name exceeds the maximum username length.");
@@ -154,7 +145,9 @@ int SendLogin(char *username) {
 }
 
 
-// Sends logout requests to the server.
+/**
+ * Sends logout request to the server.
+ */
 int SendLogout() {
   struct request_logout logout;
   memset((char *) &logout, 0, sizeof(logout));
@@ -170,6 +163,9 @@ int SendLogout() {
 }
 
 
+/**
+ * Sends requests for the list of channels to the server.
+ */
 int SendList() {
   struct request_list list;
   list.req_type = REQ_LIST;
@@ -183,6 +179,11 @@ int SendList() {
 }
 
 
+/**
+ * Sends requests for the list of users in the given channel.
+ *
+ * @channel is the channel to request users from.
+ */
 int SendWho(std::string channel) {
   struct request_who who;
   who.req_type = REQ_WHO;
@@ -197,6 +198,11 @@ int SendWho(std::string channel) {
 }
 
 
+/**
+ * Sends requests to leave the given channel.
+ *
+ * @channel is the channel to leave.
+ */
 int SendLeave(std::string channel) {
   bool contains_channel = false;
   std::vector<std::string>::iterator it;
@@ -230,7 +236,11 @@ int SendLeave(std::string channel) {
 }
 
 
-// Switches to a channel the user has already joined.
+/**
+ * Switches to a channel the user has already joined.
+ *
+ * @channel is the channel to switch to.
+ */
 int SwitchChannel(std::string channel) {
   bool isSubscribed = false;
 
@@ -251,10 +261,12 @@ int SwitchChannel(std::string channel) {
 }
 
 
-// Sends join requests to the server.
+/**
+ * Sends a join requests to the server.
+ *
+ * @channel is the channel to join.
+ */
 int SendJoin(std::string channel) {
-//  channel[CHANNEL_MAX] = '\0';
-
   if (channel.size() > CHANNEL_MAX) {
     std::cout << "Channel name exceeds the maximum channel length." << std::endl;
     return 0;
@@ -290,6 +302,12 @@ int SendJoin(std::string channel) {
 }
 
 
+/**
+ * Handles error packets from the server.
+ *
+ * @receive_buffer is the packet.
+ * @output is the users input that must be rewritten back to the prompt.
+ */
 void HandleError(char *receive_buffer, char *output) {
   struct text_error error;
   memcpy(&error, receive_buffer, sizeof(struct text_error));
@@ -305,6 +323,12 @@ void HandleError(char *receive_buffer, char *output) {
 }
 
 
+/**
+ * Handles text_who packets from the server.
+ *
+ * @receive_buffer is the packet.
+ * @output is the users input that must be rewritten back to the prompt.
+ */
 void HandleTextWho(char *receive_buffer, char *output) {
   struct text_who who;
   memcpy(&who, receive_buffer, sizeof(text_who));
@@ -335,6 +359,12 @@ void HandleTextWho(char *receive_buffer, char *output) {
 }
 
 
+/**
+ * Handles text_list packets from the server.
+ *
+ * @receive_buffer is the packet.
+ * @output is the users input that must be rewritten back to the prompt.
+ */
 void HandleTextList(char *receive_buffer, char *output) {
   struct text_list list;
   memcpy(&list, receive_buffer, sizeof(struct text_list));
@@ -355,7 +385,12 @@ void HandleTextList(char *receive_buffer, char *output) {
 }
 
 
-// Handles TXT-SAY server messages.
+/**
+ * Handles text_say packets from the server.
+ *
+ * @receive_buffer is the packet.
+ * @output is the users input that must be rewritten back to the prompt.
+ */
 void HandleTextSay(char *receive_buffer, char *output) {
   struct text_say say;
   memcpy(&say, receive_buffer, sizeof(struct text_say));
@@ -372,7 +407,11 @@ void HandleTextSay(char *receive_buffer, char *output) {
 }
 
 
-// Processes the input string to decide what type of command it is.
+/**
+ * Processes the input string to decide what type of command it is.
+ *
+ * @input is the string to process.
+ */
 bool ProcessInput(std::string input) {
   std::vector<std::string> inputs = StringSplit(input);
 
