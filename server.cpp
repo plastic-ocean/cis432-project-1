@@ -269,46 +269,52 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
     case REQ_LIST:
       struct sockaddr_in client_addr;
       struct text_list list;
+
       list.txt_type = TXT_LIST;
       list.txt_nchannels = (int) kChannels.size();
-
-//      list.txt_channels[list.txt_nchannels * sizeof(struct channel_info)];
-      for (i = 0; i < list.txt_nchannels; i++) {
-        memset(&list.txt_channels[i], 0, sizeof(struct channel_info));
+      channel_info *channel_list = new channel_info[list.txt_nchannels];
+      i = 0;
+      for(auto ch : kChannels){
+        struct channel_info new_info;
+        strcpy(new_info.ch_channel, ch.second->name, CHANNEL_MAX);
+        memcpy(&channel_list[i], &new_info, sizeof(struct channel_info));
+        std::cout << "channel name: " << channel_list[i].ch_channel << std::endl;
+        i++;
       }
-      std::cout << "size of array: " << sizeof(list.txt_channels) / sizeof(struct channel_info) << std::endl;
+
+//      std::cout << "size of array: " << sizeof(list.txt_channels) / sizeof(struct channel_info) << std::endl;
 
 //      std::cout << "length of list nchannels : " << list.txt_nchannels << std::endl;
 //      memset(list.txt_channels, 0, list.txt_nchannels * sizeof(struct channel_info));
-      i = 0;
-      for(auto ch : kChannels){
-        struct channel_info new_channel;
-        memset(new_channel.ch_channel, 0, CHANNEL_MAX);
-        strncpy(new_channel.ch_channel, ch.second->name.c_str(), CHANNEL_MAX);
-        std::cout << "channel: " << new_channel.ch_channel << std::endl;
-//        std::cout << "size of array: " << sizeof(list.txt_channels) / sizeof(struct channel_info) << std::endl;
-//        list.txt_channels[i++] = new_channel;
-        memcpy(&list.txt_channels[i++], &new_channel, sizeof(new_channel));
-      }
-      for (auto user : kUsers) {
-        std::cout << "user loop" << std::endl;
-        unsigned short current_port = user.second->port;
-        in_addr_t current_address = user.second->address;
-        if (current_port == request_port && current_address == request_address) {
-          std::cout << "server: " << user.first << " lists channels" << std::endl;
-          current_user = user.second;
-          memset(&client_addr, 0, sizeof(struct sockaddr_in));
-          client_addr.sin_family = AF_INET;
-          client_addr.sin_port = current_user->port;
-          client_addr.sin_addr.s_addr = current_user->address;
-          size_t message_size = sizeof(struct text_list);
-
-          if (sendto(server_socket, &list, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
-            Error("server: failed to send say\n");
-          }
-          break;
-        }
-      }
+//      i = 0;
+//      for(auto ch : kChannels){
+//        struct channel_info new_channel;
+//        memset(new_channel.ch_channel, 0, CHANNEL_MAX);
+//        strncpy(new_channel.ch_channel, ch.second->name.c_str(), CHANNEL_MAX);
+//        std::cout << "channel: " << new_channel.ch_channel << std::endl;
+////        std::cout << "size of array: " << sizeof(list.txt_channels) / sizeof(struct channel_info) << std::endl;
+////        list.txt_channels[i++] = new_channel;
+//        memcpy(&list.txt_channels[i++], &new_channel, sizeof(new_channel));
+//      }
+//      for (auto user : kUsers) {
+//        std::cout << "user loop" << std::endl;
+//        unsigned short current_port = user.second->port;
+//        in_addr_t current_address = user.second->address;
+//        if (current_port == request_port && current_address == request_address) {
+//          std::cout << "server: " << user.first << " lists channels" << std::endl;
+//          current_user = user.second;
+//          memset(&client_addr, 0, sizeof(struct sockaddr_in));
+//          client_addr.sin_family = AF_INET;
+//          client_addr.sin_port = current_user->port;
+//          client_addr.sin_addr.s_addr = current_user->address;
+//          size_t message_size = sizeof(struct text_list);
+//
+//          if (sendto(server_socket, &list, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+//            Error("server: failed to send say\n");
+//          }
+//          break;
+//        }
+//      }
 
       break;
     default:
