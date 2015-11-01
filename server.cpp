@@ -314,8 +314,8 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
 
   struct text_list *list = new text_list;
 
-  list->txt_type = TXT_LIST;
-  list->txt_nchannels = (int) kChannels.size();
+  list->txt_type = htonl(TXT_LIST);
+  list->txt_nchannels = htonl(kChannels.size());
 
   // Fills the packet's channels array.
   int i = 0;
