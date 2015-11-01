@@ -72,13 +72,13 @@ void SendTextList(int server_socket, in_addr_t request_address, unsigned short r
   // Fills the packet's channels array.
   int i = 0;
   for (auto ch : kChannels) {
-    strncpy(list->txt_channels[i].ch_channel, ch.first.c_str(), CHANNEL_MAX);
-    std::cout << "channel name: " << list->txt_channels[i].ch_channel << std::endl;
-    i++;
+    strncpy(list->txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
   }
-//  for (auto it = kChannels.begin(); it != kChannels.end(); ++it) {
-//    strncpy(list->txt_channels[i++].ch_channel, (*it).second->name.c_str(), CHANNEL_MAX);
-//  }
+
+  std::cout << "Channels" << std::endl;
+  for (auto ch : list->txt_channels) {
+    std::cout << ch.ch_channel << std::endl;
+  }
 
   // Finds the requesting users address and port and sends the packet.
   for (auto user : kUsers) {
@@ -102,6 +102,8 @@ void SendTextList(int server_socket, in_addr_t request_address, unsigned short r
       break;
     }
   }
+
+  free(list);
 }
 
 
