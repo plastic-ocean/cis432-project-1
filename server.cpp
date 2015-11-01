@@ -312,6 +312,7 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   // Fills the packet's channels array.
   int i = 0;
   for (auto ch : kChannels) {
+    std::cout << "about to copy channel" << std::endl;
     strncpy(list.txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
   }
 
