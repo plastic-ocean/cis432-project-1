@@ -277,8 +277,9 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
         struct channel_info new_channel;
         memset(new_channel.ch_channel, 0, CHANNEL_MAX);
         strncpy(new_channel.ch_channel, ch.second->name.c_str(), CHANNEL_MAX);
-        std::cout << "channel loop" << std::endl;
-        memcpy(&list.txt_channels[i++], &new_channel, sizeof(new_channel));
+        std::cout << "channel: " << new_channel.ch_channel << std::endl;
+        list.txt_channels[i] = new_channel;
+//        memcpy(&list.txt_channels[i++], &new_channel, sizeof(new_channel));
       }
       for (auto user : kUsers) {
         std::cout << "user loop" << std::endl;
