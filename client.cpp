@@ -309,7 +309,7 @@ void HandleTextWho(char *receive_buffer, char *output) {
   std::cout << "Channel: " << who.txt_channel << std::endl;
   std::cout << "User count: " << who.txt_nusernames << std::endl;
 
-  for (int i = 0; i < who.txt_nusernames + 2; i++) {
+  for (int i = 10; i < who.txt_nusernames + 10; i++) {
     std::cout << " " << who.txt_users[i].us_username << std::endl;
   }
 
