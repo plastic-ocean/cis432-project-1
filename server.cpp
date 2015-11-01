@@ -128,8 +128,8 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
 
     if (current_port == request_port && current_address == request_address) {
       std::cout << "server: " << user.first << " logs out" << std::endl;
-      kUsers.erase(user.first);
-//      RemoveUser(user.second);
+//      kUsers.erase(user.first);
+      RemoveUser(user.second);
 //      for (auto c : kChannels) {
 //        for (auto u : c.second->users) {
 //          if (u->name == user.first) {
@@ -137,7 +137,7 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
 //          }
 //        }
 //      }
-      delete(user.second);
+//      delete(user.second);
       break;
     }
   }
