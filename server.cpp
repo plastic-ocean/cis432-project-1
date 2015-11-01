@@ -66,6 +66,7 @@ void RemoveUser(User *user) {
     for (auto channel_user : channel.second->users) {
       if (channel_user->name == user->name) {
         channel.second->users.remove(channel_user);
+        delete(user);
         break;
       }
     }
@@ -73,6 +74,7 @@ void RemoveUser(User *user) {
   for (auto current_user : kUsers) {
     if (current_user.second->name == user->name) {
       kUsers.erase(user->name);
+      delete(user);
     }
   }
 }
@@ -125,6 +127,7 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
     if (current_port == request_port && current_address == request_address) {
       std::cout << "server: " << user.first << " logs out" << std::endl;
       kUsers.erase(user.first);
+      delete(user.second);
       break;
     }
   }
@@ -231,6 +234,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
           std::cout << user.first << " leaves channel " << channel->name << std::endl;
           if (channel->users.size() == 0) {
             kChannels.erase(channel->name);
+            delete(channel);
             std::cout << "server: removing empty channel " << channel->name << std::endl;
           }
         }
