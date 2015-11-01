@@ -427,6 +427,8 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
   memcpy(&current_request, buffer, sizeof(struct request));
   request_t request_type = current_request.req_type;
 
+  std::cout << "type: " << request_type << std::endl;
+
   switch(request_type) {
     case REQ_LOGIN:
       HandleLoginRequest(buffer, request_address, request_port);
