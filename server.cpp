@@ -133,14 +133,14 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
       std::cout << "server: " << user.first << " logs out" << std::endl;
       kUsers.erase(user.first);
 //      RemoveUser(user.second);
-      for (auto c : kChannels) {
-        for (auto u : c.second->users) {
-          if (u->name == user.first) {
-            c.second->users.remove(user.second);
-//            delete(user.second);;
-          }
-        }
-      }
+//      for (auto c : kChannels) {
+//        for (auto u : c.second->users) {
+//          if (u->name == user.first) {
+//            c.second->users.remove(user.second);
+////            delete(user.second);;
+//          }
+//        }
+//      }
 //      delete(user.second);
       break;
     }
