@@ -69,6 +69,13 @@ void RemoveUser(User *user){
 }
 
 
+/**
+ * Logs in a user.
+ *
+ * @buffer is the login_request
+ * @request_address is the user's address.
+ * @request_port is the user's port.
+ */
 void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request_login login_request;
   memcpy(&login_request, buffer, sizeof(struct request_login));
@@ -78,6 +85,30 @@ void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short 
   kUsers.insert({std::string(login_request.req_username), current_user});
 
   std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
+}
+
+
+/**
+ * Logs out a user.
+ *
+ * @buffer is the logout_request
+ * @request_address is the user's address.
+ * @request_port is the user's port.
+ */
+void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short request_port) {
+  struct request_logout logout_request;
+  memcpy(&logout_request, buffer, sizeof(struct request_logout));
+
+  for (auto user : kUsers) {
+    unsigned short current_port = user.second->port;
+    in_addr_t current_address = user.second->address;
+
+    if (current_port == request_port && current_address == request_address) {
+      std::cout << "server: " << user.first << " logs out" << std::endl;
+      kUsers.erase(user.first);
+      break;
+    }
+  }
 }
 
 
@@ -162,21 +193,8 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       HandleLoginRequest(buffer, request_address, request_port);
       break;
     case REQ_LOGOUT:
-      struct request_logout logout_request;
-      memcpy(&logout_request, buffer, sizeof(struct request_logout));
-
-      for (auto user : kUsers) {
-        unsigned short current_port = user.second->port;
-        in_addr_t current_address = user.second->address;
-
-        if (current_port == request_port && current_address == request_address) {
-          std::cout << "server: " << user.first << " logs out" << std::endl;
-          kUsers.erase(user.first);
-          break;
-        }
-      }
+      HandleLogoutRequest(buffer, request_address, request_port);
       break;
-
     case REQ_LEAVE:
       struct request_leave leave_request;
       memcpy(&leave_request, buffer, sizeof(struct request_leave));
