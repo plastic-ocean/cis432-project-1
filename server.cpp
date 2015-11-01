@@ -257,7 +257,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
         size_t message_size = sizeof(struct text_say);
 
-        if (sendto(server_socket, &say, message_size, 0, (struct sockaddr*) client_addr, sizeof(client_addr)) < 0) {
+        if (sendto(server_socket, &say, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
           Error("server: failed to send say\n");
         }
       }
