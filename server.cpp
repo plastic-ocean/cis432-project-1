@@ -283,7 +283,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
         memcpy(&channel_list[i], &new_info, sizeof(struct channel_info));
         memcpy(&list.txt_channels[i].ch_channel, &channel_list[i].ch_channel, CHANNEL_MAX);
         std::cout << "channel name: " << list.txt_channels[i].ch_channel << std::endl;
-        i++;
+//        i++;
       }
           std::cout << "at end "<< std::endl;
 
