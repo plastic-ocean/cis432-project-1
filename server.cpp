@@ -9,6 +9,7 @@
 #include <list>
 #include <map>
 #include <set>
+#include <memory>
 
 #include "server.h"
 #include "duckchat.h"
