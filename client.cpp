@@ -246,6 +246,8 @@ int SwitchChannel(std::string channel) {
 
 // Sends join requests to the server.
 int SendJoin(std::string channel) {
+  channel[CHANNEL_MAX] = '\0';
+  
   bool contains_channel = false;
   for (std::vector<std::string>::iterator it = kChannels.begin(); it != kChannels.end(); ++it) {
     if (*it == channel) {
@@ -260,7 +262,7 @@ int SendJoin(std::string channel) {
     struct request_join join;
     memset((char *) &join, 0, sizeof(join));
     join.req_type = REQ_JOIN;
-    channel[CHANNEL_MAX] = '\0';
+
     strncpy(join.req_channel, channel.c_str(), CHANNEL_MAX);
 
     size_t message_size = sizeof(struct request_join);
