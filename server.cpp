@@ -285,6 +285,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
         std::cout << "channel name: " << list.txt_channels[i].ch_channel << std::endl;
         i++;
       }
+          std::cout << "at end "<< std::endl;
 
 //      std::cout << "size of array: " << sizeof(list.txt_channels) / sizeof(struct channel_info) << std::endl;
 
