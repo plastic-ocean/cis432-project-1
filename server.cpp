@@ -92,7 +92,7 @@ void SendTextList(int server_socket, in_addr_t request_address, unsigned short r
       client_addr.sin_port = current_user->port;
       client_addr.sin_addr.s_addr = current_user->address;
 
-      size_t message_size = sizeof(struct text_list);
+      size_t message_size = sizeof(list);
 
       if (sendto(server_socket, &list, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
         Error("server: failed to send say\n");
