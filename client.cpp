@@ -294,7 +294,7 @@ void HandleTextWho(char *receive_buffer, char *output) {
   struct text_who tmp;
   memcpy(&tmp, receive_buffer, sizeof(struct text_who) + (10 * sizeof(user_info)));
 
-  std::cout << "first user in tmp" << tmp.txt_users->us_username[0] << std::endl;
+  std::cout << "first user in tmp " << tmp.txt_users->us_username << std::endl;
 
 //  int user_info_size = tmp.txt_nusernames;
 //  size_t who_size = sizeof(text_who) + (user_info_size * sizeof(user_info));
