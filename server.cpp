@@ -274,12 +274,14 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       memset(list.txt_channels, 0, list.txt_nchannels * sizeof(channel_info));
       i = 0;
       for(auto ch : kChannels){
+        std::cout << "channel loop" << std::endl;
         struct channel_info new_channel;
         memset(new_channel.ch_channel, 0, CHANNEL_MAX);
         strncpy(new_channel.ch_channel, ch.second->name.c_str(), CHANNEL_MAX);
         memcpy(&list.txt_channels[i++], &new_channel, sizeof(new_channel));
       }
       for (auto user : kUsers) {
+        std::cout << "user loop" << std::endl;
         unsigned short current_port = user.second->port;
         in_addr_t current_address = user.second->address;
         if (current_port == request_port && current_address == request_address) {
