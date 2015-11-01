@@ -12,6 +12,7 @@
 #include <memory>
 #include <netdb.h>
 #include <sys/fcntl.h>
+#include <unistd.h>
 
 #include "server.h"
 #include "duckchat.h"
