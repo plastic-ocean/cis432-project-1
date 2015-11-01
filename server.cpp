@@ -17,17 +17,22 @@
 #include "server.h"
 #include "duckchat.h"
 
-// TODO Handle domain
 // Server can accept connections.
 // Server handles Login and Logout from users, and keeps records of which users are logged in.
 // Server handles Join and Leave from users, keeps records of which channels a user belongs to,
 // and keeps records of which users are in a channel.
 // Server handles the Say message.
 // Server correctly handles List and Who.
-// TODO Create copies of your client and server source. Modify them to send invalid packets to your good client
+// Create copies of your client and server source. Modify them to send invalid packets to your good client
 // and server, to see if you can make your client or server crash. Fix any bugs you find.
 
 
+/**
+ * A class used to keep track of a channel
+ *
+ * @name is the name of the channel
+ * @users is a list of users currently in channel
+ */
 class Channel {
 public:
   std::string name;
@@ -36,7 +41,13 @@ public:
   Channel(std::string name): name(name) {};
 };
 
-
+/**
+ * A class used to keep track of a user
+ *
+ * @name is the users name
+ * @address is the users IP address
+ * @port is the port the user is on
+ */
 class User {
 public:
   std::string name;
@@ -47,7 +58,9 @@ public:
 };
 
 
+/* kUsers is a global map of all the users connected to the server */
 std::map<std::string, std::shared_ptr<User>> kUsers;
+/* kChannels is a glbal map of all the channels that currently exist & have users in them */
 std::map<std::string, std::shared_ptr<Channel>> kChannels;
 
 
@@ -60,7 +73,7 @@ void Error(const char *message) {
 }
 
 
-// Gets the address info of the server at a the given port and creates the client's socket.
+
 void CreateSocket(char *domain, const char *port) {
   struct addrinfo hints;
   struct addrinfo *server_info_tmp;
@@ -77,10 +90,6 @@ void CreateSocket(char *domain, const char *port) {
     std::cerr << "server: unable to resolve address: " << gai_strerror(status) << std::endl;
     exit(1);
   }
-
-  // getaddrinfo() returns a list of address structures into server_info_tmp.
-  // Tries each address until a successful connect().
-  // If socket() (or connect()) fails, closes the socket and tries the next address.
 
   for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
     if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
@@ -120,16 +129,6 @@ void RemoveUser(User *user) {
       delete(user);
     }
   }
-}
-
-
-struct sockaddr_in* CreateSockAddr(unsigned short port, in_addr_t address) {
-  struct sockaddr_in *client_addr;
-  memset(&client_addr, 0, sizeof(struct sockaddr_in));
-  client_addr->sin_family = AF_INET;
-  client_addr->sin_port = port;
-  client_addr->sin_addr.s_addr = address;
-  return client_addr;
 }
 
 
