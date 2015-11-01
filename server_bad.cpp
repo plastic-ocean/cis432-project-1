@@ -281,7 +281,7 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
         memset(&client_addr, 0, sizeof(struct sockaddr_in));
 
         struct text_say say;
-        memcpy(&say, buffer, sizeof(struct text_say));
+//        memcpy(&say, buffer, sizeof(struct text_say));
 
         client_addr.sin_family = AF_INET;
         client_addr.sin_port = channel_user->port;
