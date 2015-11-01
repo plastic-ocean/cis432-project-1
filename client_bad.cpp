@@ -132,15 +132,15 @@ int SendSay(std::string message) {
 
 // Sends login requests to the server.
 int SendLogin(char *username) {
-  struct request_login login;
-  memset(&login, 0, sizeof(login));
-//  login.req_type = REQ_LOGIN;
-  strncpy(login.req_username, username, USERNAME_MAX);
+  std::cout << username << std::endl;
+  struct request_logout logout;
+  memset((char *) &logout, 0, sizeof(logout));
+  logout.req_type = REQ_LOGOUT;
 
-  size_t message_size = sizeof(struct request_login);
+  size_t message_size = sizeof(struct request_logout);
 
-  if (sendto(client_socket, &login, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
-    Error("client: failed to request login\n");
+  if (sendto(client_socket, &logout, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to request logout\n");
   }
 
   return 0;
