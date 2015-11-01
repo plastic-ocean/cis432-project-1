@@ -218,9 +218,9 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
           }
 
           // Test print
-          for (auto u : channel->users) {
-            std::cout << "user: " << u->name << std::endl;
-          }
+//          for (auto u : channel->users) {
+//            std::cout << "user: " << u->name << std::endl;
+//          }
           break;
         }
 
@@ -277,6 +277,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       channel_list = new channel_info[list.txt_nchannels];
       i = 0;
       for(auto ch : kChannels){
+        std::cout << "at beginning "<< std::endl;
         struct channel_info new_info;
         strncpy(new_info.ch_channel, ch.second->name.c_str(), CHANNEL_MAX);
         memcpy(&channel_list[i], &new_info, sizeof(struct channel_info));
