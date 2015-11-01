@@ -269,7 +269,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
 
     case REQ_LIST:
-      struct sockaddr_in client_addr;
+//      struct sockaddr_in client_addr;
       struct text_list list;
 
       list.txt_type = TXT_LIST;
@@ -278,7 +278,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       i = 0;
       for(auto ch : kChannels){
         struct channel_info new_info;
-        strcpy(new_info.ch_channel, ch.second->name, CHANNEL_MAX);
+        strncpy(new_info.ch_channel, ch.second->name.c_str(), CHANNEL_MAX);
         memcpy(&channel_list[i], &new_info, sizeof(struct channel_info));
         std::cout << "channel name: " << channel_list[i].ch_channel << std::endl;
         i++;
