@@ -306,28 +306,28 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
    // = (text_list *) malloc(list_size);
 //  memset(list, '\0', sizeof(text_list));;
 
-//  struct text_list {
-//    text_t txt_type; /* = TXT_LIST */
-//    int txt_nchannels;
-//    struct channel_info txt_channels[kChannels.size() * sizeof(channel_info)];
-//  } packed;
+  struct text_list {
+    text_t txt_type; /* = TXT_LIST */
+    int txt_nchannels;
+    struct channel_info txt_channels[kChannels.size() * sizeof(channel_info)];
+  } packed;
 
-  struct text_list *list = new text_list;
+  text_list list;
 
-  list->txt_type = htonl(TXT_LIST);
-  list->txt_nchannels = htonl(kChannels.size());
+  list.txt_type = htonl(TXT_LIST);
+  list.txt_nchannels = htonl(kChannels.size());
 
   // Fills the packet's channels array.
   int i = 0;
   for (auto ch : kChannels) {
-    strncpy(list->txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
+    strncpy(list.txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
   }
 
   // TODO Print test
-  std::cout << "type: " << ntohl(list->txt_type) << std::endl << std::endl;
+  std::cout << "type: " << ntohl(list.txt_type) << std::endl << std::endl;
   std::cout << "Channels:" << std::endl;
   for (i = 0; i < (int) kChannels.size(); i++) {
-    std::cout << list->txt_channels[i].ch_channel << std::endl;
+    std::cout << list.txt_channels[i].ch_channel << std::endl;
   }
 
   // Finds the requesting users address and port and sends the packet.
