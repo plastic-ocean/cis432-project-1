@@ -164,7 +164,7 @@ int SendLogout() {
 }
 
 
-int SendList(){
+int SendList() {
   struct request_list list;
   list.req_type = REQ_LIST;
   size_t list_size = sizeof(struct request_list);
@@ -177,7 +177,7 @@ int SendList(){
 }
 
 
-int SendWho(std::string channel){
+int SendWho(std::string channel) {
   struct request_who who;
   who.req_type = REQ_WHO;
   strncpy(who.req_channel, channel.c_str(), CHANNEL_MAX);
@@ -201,7 +201,7 @@ int SendLeave(std::string channel) {
     }
   }
 
-  if(channel == current_channel){
+  if (channel == current_channel) {
     current_channel = "";
   }
 
@@ -291,8 +291,6 @@ void HandleError(char *receive_buffer, char *output) {
 }
 
 
-
-
 void HandleTextWho(char *receive_buffer, char *output) {
   struct text_who who;
   memcpy(&who, receive_buffer, sizeof(struct text_who));
@@ -306,15 +304,13 @@ void HandleTextWho(char *receive_buffer, char *output) {
   std::cout << "Users on channel " << who.txt_channel << ":" << std::endl;
   std::cout << "number of people " << who.txt_nusernames << std::endl;
 
-  for(int i = 3; i < who.txt_nusernames + 3; i++){
+  for (int i = 3; i < who.txt_nusernames + 3; i++) {
     std::cout << " " << who.txt_users[i].us_username << std::endl;
   }
 
   PrintPrompt();
   std::cout << output << std::flush;
 }
-
-
 
 
 void HandleTextList(char *receive_buffer, char *output) {
@@ -424,7 +420,7 @@ int main(int argc, char *argv[]) {
   current_channel = "Common";
   SendJoin(current_channel);
 
-  if (raw_mode() != 0){
+  if (raw_mode() != 0) {
     Error("client: error using raw mode");
   }
 
@@ -463,7 +459,7 @@ int main(int argc, char *argv[]) {
             }
           } else {
             // Sends chat messages.
-            if (current_channel != ""){
+            if (current_channel != "") {
               SendSay(input);
             } else {
               PrintPrompt();
