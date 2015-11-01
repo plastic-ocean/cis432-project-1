@@ -285,7 +285,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 //        std::cout << "channel name: " << list.txt_channels[i].ch_channel << std::endl;
         i++;
       }
-        memcpy(&list.txt_channels, channel_list, sizeof(channel_list));
+        memcpy(&list.txt_channels, channel_list, sizeof(*channel_list));
       std::cout << "at end "<< std::endl;
           std::cout << "channel name: " << list.txt_channels[0].ch_channel << std::endl;
 
