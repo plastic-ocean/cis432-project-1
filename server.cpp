@@ -30,7 +30,7 @@
 class Channel {
 public:
   std::string name;
-  std::list<User *> users;
+  std::list<std::shared_ptr<User>> users;
 
   Channel(std::string name): name(name) {};
 };
@@ -218,7 +218,7 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
 void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short request_port) {
   Channel *channel;
   std::string current_channel;
-  std::list<User *>::const_iterator it;
+  std::list<std::shared_ptr<User>>::const_iterator it;
   bool is_channel;
   struct request_leave leave_request;
   
@@ -276,7 +276,6 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
  * @request_port is the user's port.
  */
 void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
-  User *current_user;
   struct request_say say_request;
   memcpy(&say_request, buffer, sizeof(struct request_say));
 
@@ -285,7 +284,7 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
     in_addr_t current_address = user.second->address;
 
     if (current_port == request_port && current_address == request_address) {
-      current_user = user.second;
+//      current_user = user.second;
       for (auto channel_user : kChannels[say_request.req_channel]->users) {
         struct sockaddr_in client_addr;
         memset(&client_addr, 0, sizeof(struct sockaddr_in));
@@ -301,7 +300,7 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
         strncpy(say.txt_channel, say_request.req_channel, CHANNEL_MAX);
         strncpy(say.txt_text, say_request.req_text, SAY_MAX);
         say.txt_type = TXT_SAY;
-        strncpy(say.txt_username, current_user->name.c_str(), USERNAME_MAX);
+        strncpy(say.txt_username, user.second->name.c_str(), USERNAME_MAX);
 
         size_t message_size = sizeof(struct text_say);
 
@@ -309,7 +308,7 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
           Error("server: failed to send say\n");
         }
       }
-      std::cout << current_user->name << " sends say message in " << say_request.req_channel << std::endl;
+      std::cout << user.second->name << " sends say message in " << say_request.req_channel << std::endl;
       break;
     }
   }
@@ -511,10 +510,10 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  for (auto user : kUsers) {
-    delete(user.second);
-  }
-  for (auto channel : kChannels) {
-    delete(channel.second);
-  }
+//  for (auto user : kUsers) {
+//    delete(user.second);
+//  }
+//  for (auto channel : kChannels) {
+//    delete(channel.second);
+//  }
 }
