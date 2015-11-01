@@ -486,25 +486,25 @@ int main(int argc, char *argv[]) {
           struct text message;
           memcpy(&message, receive_buffer, sizeof(struct text));
           text_t text_type = message.txt_type;
-
-          std::cout << "type: " << text_type << std::endl;
-
-          switch (text_type) {
-            case TXT_SAY:
-              HandleTextSay(receive_buffer, output);
-              break;
-            case TXT_LIST:
-              HandleTextList(receive_buffer, output);
-              break;
-            case TXT_WHO:
-              HandleTextWho(receive_buffer, output);
-              break;
-            case TXT_ERROR:
-              HandleError(receive_buffer, output);
-              break;
-            default:
-              break;
-          }
+          HandleTextList(receive_buffer, output);
+//          std::cout << "type: " << text_type << std::endl;
+//
+//          switch (text_type) {
+//            case TXT_SAY:
+//              HandleTextSay(receive_buffer, output);
+//              break;
+//            case TXT_LIST:
+//              HandleTextList(receive_buffer, output);
+//              break;
+//            case TXT_WHO:
+//              HandleTextWho(receive_buffer, output);
+//              break;
+//            case TXT_ERROR:
+//              HandleError(receive_buffer, output);
+//              break;
+//            default:
+//              break;
+//          }
         }
 
         memset(&receive_buffer, 0, SAY_MAX);
