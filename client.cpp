@@ -116,6 +116,11 @@ void CreateSocket(char *domain, const char *port) {
 
 // Sends a message to all users in on the active channel.
 int SendSay(std::string message) {
+  if (message.size() > SAY_MAX) {
+    std::cout << "Message exceeds the maximum message length." << std::endl;
+    return 0;
+  }
+
   struct request_say say;
   memset(&say, 0, sizeof(say));
   say.req_type = REQ_SAY;
@@ -132,6 +137,10 @@ int SendSay(std::string message) {
 
 // Sends login requests to the server.
 int SendLogin(char *username) {
+  if (strlen(username) > USERNAME_MAX) {
+    Error("User name exceeds the maximum username length.");
+  }
+
   struct request_login login;
   memset(&login, 0, sizeof(login));
   login.req_type = REQ_LOGIN;
@@ -246,8 +255,13 @@ int SwitchChannel(std::string channel) {
 
 // Sends join requests to the server.
 int SendJoin(std::string channel) {
-  channel[CHANNEL_MAX] = '\0';
-  
+//  channel[CHANNEL_MAX] = '\0';
+
+  if (channel.size() > CHANNEL_MAX) {
+    std::cout << "Channel name exceeds the maximum channel length." << std::endl;
+    return 0;
+  }
+
   bool contains_channel = false;
   for (std::vector<std::string>::iterator it = kChannels.begin(); it != kChannels.end(); ++it) {
     if (*it == channel) {
