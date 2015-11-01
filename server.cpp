@@ -487,4 +487,11 @@ int main(int argc, char *argv[]) {
       ProcessRequest(server_socket, buffer, client_addr.sin_addr.s_addr, client_addr.sin_port);
     }
   }
+
+  for (auto user : kUsers) {
+    delete(user);
+  }
+  for (auto channel : kChannels) {
+    delete(channel);
+  }
 }
