@@ -279,7 +279,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
         memset(new_channel.ch_channel, 0, CHANNEL_MAX);
         strncpy(new_channel.ch_channel, ch.second->name.c_str(), CHANNEL_MAX);
         std::cout << "channel: " << new_channel.ch_channel << std::endl;
-        std::cout << "size of array: " << sizeof(list.txt_channels) / sizeof(channel_info) << std::endl;
+        std::cout << "size of array: " << sizeof(list.txt_channels) / sizeof(struct channel_info) << std::endl;
 //        list.txt_channels[i++] = new_channel;
         memcpy(&list.txt_channels[i++], &new_channel, sizeof(new_channel));
       }
