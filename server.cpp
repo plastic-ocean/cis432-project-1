@@ -212,7 +212,6 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
       is_channel = false;
       for (auto ch : kChannels) {
         if (ch.first == current_channel) {
-          std::cout << "channel found" << std::endl;
           is_channel = true;
           break;
         }
@@ -234,9 +233,6 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
             kChannels.erase(channel->name);
             std::cout << "server: removing empty channel " << channel->name << std::endl;
           }
-        }
-        for (auto u : channel->users) {
-          std::cout << "user: " << u->name << std::endl;
         }
         break;
       } else {
