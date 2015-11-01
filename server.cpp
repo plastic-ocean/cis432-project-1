@@ -73,7 +73,15 @@ void Error(const char *message) {
 }
 
 
-
+/**
+ * Checks the address info of the server at a the given port. Prints error if not found.
+ * getaddrinfo() returns a list of address structures into server_info_tmp.
+ * Tries each address until a successful connect().
+ * If socket() (or connect()) fails, closes the socket and tries the next address.
+ *
+ * @domain is the domain to connect to.
+ * @port is the port to connect on.
+ */
 void CreateSocket(char *domain, const char *port) {
   struct addrinfo hints;
   struct addrinfo *server_info_tmp;
@@ -178,7 +186,6 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
           }
         }
       }
-//      delete(user.second);
       break;
     }
   }
@@ -285,7 +292,6 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
           std::cout << user.first << " leaves channel " << channel->name << std::endl;
           if (channel->users.size() == 0) {
             kChannels.erase(channel->name);
-//            delete(channel);
             std::cout << "server: removing empty channel " << channel->name << std::endl;
           }
         }
@@ -541,11 +547,4 @@ int main(int argc, char *argv[]) {
       ProcessRequest(server_socket, buffer, client_addr.sin_addr.s_addr, client_addr.sin_port);
     }
   }
-
-//  for (auto user : kUsers) {
-//    delete(user.second);
-//  }
-//  for (auto channel : kChannels) {
-//    delete(channel.second);
-//  }
 }
