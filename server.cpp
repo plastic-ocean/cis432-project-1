@@ -52,6 +52,35 @@ void Error(const char *msg) {
 }
 
 
+void RemoveUser(User *user){
+  for(auto channel : kChannels){
+    for(auto channel_user : channel.second->users){
+      if(channel_user->name == user->name){
+        channel.second->users.remove(channel_user);
+        break;
+      }
+    }
+  }
+  for(auto current_user : kUsers){
+    if(current_user.second->name == user->name){
+      kUsers.erase(user->name);
+    }
+  }
+}
+
+
+void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short request_port) {
+  struct request_login login_request;
+  memcpy(&login_request, buffer, sizeof(struct request_login));
+
+  User *current_user = new User(login_request.req_username, request_address, request_port);
+  RemoveUser(current_user);
+  kUsers.insert({std::string(login_request.req_username), current_user});
+
+  std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
+}
+
+
 /**
  * Sends a text list packet containing every channel to the requesting user.
  *
@@ -63,7 +92,6 @@ void SendTextList(int server_socket, in_addr_t request_address, unsigned short r
   struct sockaddr_in client_addr;
   const size_t list_size = sizeof(text_list) + (kChannels.size() * sizeof(channel_info));
   struct text_list *list = (text_list *) malloc(list_size);
-  User *current_user;
   memset(list, '\0', list_size);;
 
   list->txt_type = TXT_LIST;
@@ -87,15 +115,14 @@ void SendTextList(int server_socket, in_addr_t request_address, unsigned short r
 
     if (current_port == request_port && current_address == request_address) {
       memset(&client_addr, 0, sizeof(struct sockaddr_in));
-      current_user = user.second;
       client_addr.sin_family = AF_INET;
-      client_addr.sin_port = current_user->port;
-      client_addr.sin_addr.s_addr = current_user->address;
+      client_addr.sin_port = current_port;
+      client_addr.sin_addr.s_addr = current_address;
 
       size_t message_size = sizeof(list);
 
       if (sendto(server_socket, &list, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
-        Error("server: failed to send say\n");
+        Error("server: failed to send list\n");
       }
 
       std::cout << "server: " << user.first << " lists channels" << std::endl;
@@ -106,22 +133,6 @@ void SendTextList(int server_socket, in_addr_t request_address, unsigned short r
   free(list);
 }
 
-
-void RemoveUser(User *user){
-  for(auto channel : kChannels){
-    for(auto channel_user : channel.second->users){
-      if(channel_user->name == user->name){
-        channel.second->users.remove(channel_user);
-        break;
-      }
-    }
-  }
-  for(auto current_user : kUsers){
-    if(current_user.second->name == user->name){
-      kUsers.erase(user->name);
-    }
-  }
-}
 
 struct sockaddr_in* CreateSockAddr(unsigned short port, in_addr_t address){
   struct sockaddr_in *client_addr;
@@ -139,31 +150,17 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
   Channel *channel;
   std::string current_channel;
   std::list<User *>::const_iterator it;
-//  std::map<std::string, User *>::const_iterator map_it;
   bool is_new_channel;
   bool is_channel;
   bool is_channel_user;
-//  int i;
-
-//  channel_info *channel_list;
 
   memcpy(&current_request, buffer, sizeof(struct request));
-//  std::cout << "request type: " << current_request.req_type << std::endl;
   request_t request_type = current_request.req_type;
 
   switch(request_type) {
     case REQ_LOGIN:
-      struct request_login login_request;
-      memcpy(&login_request, buffer, sizeof(struct request_login));
-
-
-      current_user = new User(login_request.req_username, request_address, request_port);
-      RemoveUser(current_user);
-      kUsers.insert({std::string(login_request.req_username), current_user});
-
-      std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
+      HandleLoginRequest(buffer, request_address, request_port);
       break;
-
     case REQ_LOGOUT:
       struct request_logout logout_request;
       memcpy(&logout_request, buffer, sizeof(struct request_logout));
