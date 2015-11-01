@@ -306,7 +306,7 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   struct text_list *list = (text_list *) malloc(list_size);
   memset(list, '\0', list_size);;
 
-  list->txt_type = TXT_LIST;
+  list->txt_type = htonl(TXT_LIST);
   list->txt_nchannels = (int) kChannels.size();
 
   // Fills the packet's channels array.
