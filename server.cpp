@@ -137,6 +137,8 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
         for (auto u : c.second->users) {
           std::cout << u->name << std::endl;
           if (u->name == user.first) {
+            c.second->users.remove(u);
+            break;
 //            std::cout << user.first << std::endl;
 //            c.second->users.e(user.second);
 //            delete(user.second);;
