@@ -314,7 +314,6 @@ void HandleTextWho(char *receive_buffer, char *output) {
 
 
 void HandleTextList(char *receive_buffer, char *output) {
-  std::cout << "handle text list" << std::endl;
   struct text_list list;
   memcpy(&list, receive_buffer, sizeof(struct text_list));
 
@@ -486,9 +485,7 @@ int main(int argc, char *argv[]) {
         if (read_size != 0) {
           struct text message;
           memcpy(&message, receive_buffer, sizeof(struct text));
-          text_t text_type = ntohl(message.txt_type);
-
-          std::cout << "type: " << text_type << std::endl;
+          text_t text_type = message.txt_type;
 
           switch (text_type) {
             case TXT_SAY:
