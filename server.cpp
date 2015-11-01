@@ -316,7 +316,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       HandleLeaveRequest(buffer, request_address, request_port);
       break;
     case REQ_JOIN:
-      HandleJoinRequest();
+      HandleJoinRequest(buffer, request_address, request_port);
       break;
     case REQ_SAY:
       struct request_say say_request;
