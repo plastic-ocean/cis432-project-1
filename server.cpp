@@ -335,10 +335,10 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
       client_addr.sin_port = port;
       client_addr.sin_addr.s_addr = address;
 
-      std::cout << "size of text_list: " << list_size << std::endl << std::endl;
-      std::cout << "size of list: " << sizeof(list) << std::endl << std::endl;
+//      std::cout << "size of text_list: " << list_size << std::endl << std::endl;
+//      std::cout << "size of list: " << sizeof(list) << std::endl << std::endl;
 
-      if (sendto(server_socket, &list, sizeof(list), 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+      if (sendto(server_socket, &list, list_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
         Error("server: failed to send list\n");
       }
 
