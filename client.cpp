@@ -313,6 +313,8 @@ void HandleTextWho(char *receive_buffer, char *output) {
   }
   std::cout << backspaces;
 
+  std::cout << "after backspaces" << std::endl;
+
   std::cout << "Users on channel " << who->txt_channel << ":" << std::endl;
   std::cout << "number of people " << who->txt_nusernames << std::endl;
 
