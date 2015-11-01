@@ -3,7 +3,7 @@ CC=g++
 CFLAGS=-Wall -W -g -Werror -std=c++11
 
 
-all: client server
+all: client server client_bad
 
 client: client.cpp raw.cpp
 	$(CC) client.cpp raw.cpp $(CFLAGS) -o client

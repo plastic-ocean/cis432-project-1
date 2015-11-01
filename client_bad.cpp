@@ -134,7 +134,7 @@ int SendSay(std::string message) {
 int SendLogin(char *username) {
   struct request_login login;
   memset(&login, 0, sizeof(login));
-  login.req_type = 100;
+//  login.req_type = REQ_LOGIN;
   strncpy(login.req_username, username, USERNAME_MAX);
 
   size_t message_size = sizeof(struct request_login);
