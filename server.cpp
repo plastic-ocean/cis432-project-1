@@ -489,9 +489,9 @@ int main(int argc, char *argv[]) {
   }
 
   for (auto user : kUsers) {
-    delete(user);
+    delete(user.second);
   }
   for (auto channel : kChannels) {
-    delete(channel);
+    delete(channel.second);
   }
 }
