@@ -292,7 +292,7 @@ void HandleError(char *receive_buffer, char *output) {
 
 void HandleTextWho(char *receive_buffer, char *output) {
   struct text_who tmp;
-  memcpy(&tmp, receive_buffer, sizeof(struct text_who) + (sizeof(user_info)));
+  memcpy(&tmp, receive_buffer, sizeof(struct text_who));
 
   std::cout << "first user in tmp " << tmp.txt_users->us_username << std::endl;
 
