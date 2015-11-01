@@ -488,8 +488,6 @@ int main(int argc, char *argv[]) {
           memcpy(&message, receive_buffer, sizeof(struct text));
           text_t text_type = message.txt_type;
 
-
-          std::cout << "size: " << sizeof(receive_buffer) << std::endl;
           std::cout << "text type: " << text_type << std::endl;
 
           switch (text_type) {
