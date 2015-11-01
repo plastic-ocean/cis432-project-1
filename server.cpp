@@ -113,6 +113,62 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
 
 
 /**
+ * Adds a user to the requested channel.
+ *
+ * @buffer is the logout_request
+ * @request_address is the user's address.
+ * @request_port is the user's port.
+ */
+void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short request_port) {
+  struct request_join join_request;
+  memcpy(&join_request, buffer, sizeof(struct request_join));
+  bool is_new_channel = true;
+  bool is_channel_user;
+  Channel *channel;
+
+  // If channel does exists in global map, set local channel to channel from kChannels
+  for (auto ch : kChannels) {
+    if (join_request.req_channel == ch.second->name) {
+      is_new_channel = false;
+      channel = ch.second;
+      break;
+    }
+  }
+
+  // If channel is new create a new channel
+  if (is_new_channel) {
+    channel = new Channel(join_request.req_channel);
+  }
+
+  for (auto user : kUsers) {
+    unsigned short current_port = user.second->port;
+    in_addr_t current_address = user.second->address;
+    if (current_port == request_port && current_address == request_address) {
+      std::cout << "server: " << user.first << " joins channel "<< channel->name << std::endl;
+
+      is_channel_user = false;
+      for(auto u : channel->users) {
+        if (u->name == user.second->name) {
+          is_channel_user = true;
+          break;
+        }
+      }
+
+      if (!is_channel_user) {
+        channel->users.push_back(user.second);
+      }
+
+      // Otherwise
+      if (is_new_channel) {
+        kChannels.insert({channel->name, channel});
+      }
+      break;
+    }
+  }
+}
+
+
+/**
  * Removes a user from the requested channel.
  *
  * @buffer is the logout_request
@@ -168,62 +224,6 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
         std::cout << "server: " << user.first << " trying to leave non-existent channel " << current_channel << std::endl;
       }
 
-    }
-  }
-}
-
-
-/**
- * Adds a user to the requested channel.
- *
- * @buffer is the logout_request
- * @request_address is the user's address.
- * @request_port is the user's port.
- */
-void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short request_port) {
-  struct request_join join_request;
-  memcpy(&join_request, buffer, sizeof(struct request_join));
-  bool is_new_channel = true;
-  bool is_channel_user;
-  Channel *channel;
-
-  // If channel does exists in global map, set local channel to channel from kChannels
-  for (auto ch : kChannels) {
-    if (join_request.req_channel == ch.second->name) {
-      is_new_channel = false;
-      channel = ch.second;
-      break;
-    }
-  }
-
-  // If channel is new create a new channel
-  if (is_new_channel) {
-    channel = new Channel(join_request.req_channel);
-  }
-
-  for (auto user : kUsers) {
-    unsigned short current_port = user.second->port;
-    in_addr_t current_address = user.second->address;
-    if (current_port == request_port && current_address == request_address) {
-      std::cout << "server: " << user.first << " joins channel "<< channel->name << std::endl;
-
-      is_channel_user = false;
-      for(auto u : channel->users) {
-        if (u->name == user.second->name) {
-          is_channel_user = true;
-          break;
-        }
-      }
-
-      if (!is_channel_user) {
-        channel->users.push_back(user.second);
-      }
-
-      // Otherwise
-      if (is_new_channel) {
-        kChannels.insert({channel->name, channel});
-      }
-      break;
     }
   }
 }
@@ -353,11 +353,11 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
     case REQ_LOGOUT:
       HandleLogoutRequest(buffer, request_address, request_port);
       break;
-    case REQ_LEAVE:
-      HandleLeaveRequest(buffer, request_address, request_port);
-      break;
     case REQ_JOIN:
       HandleJoinRequest(buffer, request_address, request_port);
+      break;
+    case REQ_LEAVE:
+      HandleLeaveRequest(buffer, request_address, request_port);
       break;
     case REQ_SAY:
       HandleSayRequest(server_socket, buffer, request_address, request_port);
