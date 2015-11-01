@@ -294,11 +294,18 @@ void HandleTextWho(char *receive_buffer, char *output) {
   struct text_who tmp;
   memcpy(&tmp, receive_buffer, sizeof(struct text_who));
 
+  std::cout << "before malloc" << std::endl;
+
   int user_info_size = tmp.txt_nusernames;
   size_t who_size = sizeof(text_who) + (user_info_size * sizeof(user_info));
   struct text_who *who = (text_who *) malloc(who_size);
+
+  std::cout << "after malloc" << std::endl;
+
   memset(who, '\0', who_size);
   memcpy(&who, receive_buffer, who_size);
+
+  std::cout << "after memcpy" << std::endl;
 
   std::string backspaces = "";
   for (int i = 0; i < SAY_MAX; i++) {
