@@ -485,7 +485,7 @@ int main(int argc, char *argv[]) {
         if (read_size != 0) {
           struct text message;
           memcpy(&message, receive_buffer, sizeof(struct text));
-          text_t text_type = message.txt_type;
+          text_t text_type = ntohl(message.txt_type);
 
           std::cout << "text type: " << text_type << std::endl;
 
