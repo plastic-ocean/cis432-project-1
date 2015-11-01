@@ -191,10 +191,10 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       for (auto user : kUsers) {
         unsigned short current_port = user.second->port;
         in_addr_t current_address = user.second->address;
-        std::cout << std::endl;
-        std::cout << "port: " << current_port << " address "<< current_address << std::endl;
-        std::cout << "port: " << request_port << " address "<< request_address << std::endl;
-        std::cout << std::endl;
+//        std::cout << std::endl;
+//        std::cout << "port: " << current_port << " address "<< current_address << std::endl;
+//        std::cout << "port: " << request_port << " address "<< request_address << std::endl;
+//        std::cout << std::endl;
         if (current_port == request_port && current_address == request_address) {
           std::cout << "server: " << user.first << " joins channel "<< channel->name << std::endl;
 
@@ -234,36 +234,40 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
         if (current_port == request_port && current_address == request_address) {
           current_user = user.second;
+          for(auto channel_user : kChannels[say_request.req_channel]->users){
+            struct sockaddr_in client_addr;
+            struct text_say say;
+            memcpy(&say, buffer, sizeof(struct text_say));
+
+//        client_addr = CreateSockAddr(user->port, user->address);
+            memset(&client_addr, 0, sizeof(struct sockaddr_in));
+            client_addr.sin_family = AF_INET;
+            client_addr.sin_port = channel_user->port;
+            client_addr.sin_addr.s_addr = channel_user->address;
+
+            // copy message into struct being sent
+            strncpy(say.txt_channel, say_request.req_channel, CHANNEL_MAX);
+            strncpy(say.txt_text, say_request.req_text, SAY_MAX);
+            say.txt_type = TXT_SAY;
+            strncpy(say.txt_username, current_user->name.c_str(), USERNAME_MAX);
+
+            size_t message_size = sizeof(struct text_say);
+
+            if (sendto(server_socket, &say, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+              Error("server: failed to send say\n");
+            }
+          }
+          std::cout << current_user->name << " sends say message in " << say_request.req_channel << std::endl;
           break;
         }
       }
 
-      for(auto user : kChannels[say_request.req_channel]->users){
-        struct sockaddr_in *client_addr;
-        struct text_say say;
-        memcpy(&say, buffer, sizeof(struct text_say));
 
-        client_addr = CreateSockAddr(user->port, user->address);
-//        memset(&client_addr, 0, sizeof(struct sockaddr_in));
-//        client_addr.sin_family = AF_INET;
-//        client_addr.sin_port = user->port;
-//        client_addr.sin_addr.s_addr = user->address;
-
-        // copy message into struct being sent
-        strncpy(say.txt_channel, say_request.req_channel, CHANNEL_MAX);
-        strncpy(say.txt_text, say_request.req_text, SAY_MAX);
-        say.txt_type = TXT_SAY;
-        strncpy(say.txt_username, current_user->name.c_str(), USERNAME_MAX);
-
-        size_t message_size = sizeof(struct text_say);
-
-        if (sendto(server_socket, &say, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
-          Error("server: failed to send say\n");
-        }
-      }
-      std::cout << current_user->name << " sends say message in " << say_request.req_channel << std::endl;
       break;
+
+
     case REQ_LIST:
+      struct sockaddr_in client_addr;
       struct text_list list;
       list.txt_type = TXT_LIST;
       list.txt_nchannels = (int) kChannels.size();
@@ -274,6 +278,24 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
         memset(new_channel.ch_channel, 0, CHANNEL_MAX);
         strncpy(new_channel.ch_channel, ch.second->name.c_str(), CHANNEL_MAX);
         memcpy(&list.txt_channels[i++], &new_channel, sizeof(new_channel));
+      }
+      for (auto user : kUsers) {
+        unsigned short current_port = user.second->port;
+        in_addr_t current_address = user.second->address;
+        if (current_port == request_port && current_address == request_address) {
+          std::cout << "server: " << user.first << " lists channels" << std::endl;
+          current_user = user.second;
+          memset(&client_addr, 0, sizeof(struct sockaddr_in));
+          client_addr.sin_family = AF_INET;
+          client_addr.sin_port = current_user->port;
+          client_addr.sin_addr.s_addr = current_user->address;
+          size_t message_size = sizeof(struct text_list);
+
+          if (sendto(server_socket, &list, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+            Error("server: failed to send say\n");
+          }
+          break;
+        }
       }
 
       break;
