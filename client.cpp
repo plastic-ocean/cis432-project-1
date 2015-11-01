@@ -13,6 +13,7 @@
 // Client uses select() to wait for input from the user and the server.
 // Client correctly sends Join, Leave, Login, and Logout and handles Switch.
 // Client correctly sends List and TODO Who.
+// TODO general input checking: username, channel name
 
 
 // Variables

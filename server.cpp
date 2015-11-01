@@ -68,6 +68,15 @@ void RemoveUser(User *user){
   }
 }
 
+struct sockaddr_in* CreateSockAddr(unsigned short port, in_addr_t address){
+  struct sockaddr_in *client_addr;
+  memset(&client_addr, 0, sizeof(struct sockaddr_in));
+  client_addr->sin_family = AF_INET;
+  client_addr->sin_port = port;
+  client_addr->sin_addr.s_addr = address;
+  return client_addr;
+}
+
 
 void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request current_request;
@@ -79,6 +88,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
   bool is_new_channel;
   bool is_channel;
   bool is_channel_user;
+  int i;
 
   memcpy(&current_request, buffer, sizeof(struct request));
 //  std::cout << "request type: " << current_request.req_type << std::endl;
@@ -224,20 +234,20 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
         if (current_port == request_port && current_address == request_address) {
           current_user = user.second;
-          std::cout << "user found : " << current_user->name << std::endl;
           break;
         }
       }
 
       for(auto user : kChannels[say_request.req_channel]->users){
-        struct sockaddr_in client_addr;
+        struct sockaddr_in *client_addr;
         struct text_say say;
         memcpy(&say, buffer, sizeof(struct text_say));
 
-        memset(&client_addr, 0, sizeof(struct sockaddr_in));
-        client_addr.sin_family = AF_INET;
-        client_addr.sin_port = user->port;
-        client_addr.sin_addr.s_addr = user->address;
+        client_addr = CreateSockAddr(user->port, user->address);
+//        memset(&client_addr, 0, sizeof(struct sockaddr_in));
+//        client_addr.sin_family = AF_INET;
+//        client_addr.sin_port = user->port;
+//        client_addr.sin_addr.s_addr = user->address;
 
         // copy message into struct being sent
         strncpy(say.txt_channel, say_request.req_channel, CHANNEL_MAX);
@@ -247,11 +257,25 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
         size_t message_size = sizeof(struct text_say);
 
-        if (sendto(server_socket, &say, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+        if (sendto(server_socket, &say, message_size, 0, (struct sockaddr*) client_addr, sizeof(client_addr)) < 0) {
           Error("server: failed to send say\n");
         }
       }
-      std::cout << current_user->name << " sends day message in " << say_request.req_channel << std::endl;
+      std::cout << current_user->name << " sends say message in " << say_request.req_channel << std::endl;
+      break;
+    case REQ_LIST:
+      struct text_list list;
+      list.txt_type = TXT_LIST;
+      list.txt_nchannels = (int) kChannels.size();
+      memset(list.txt_channels, 0, list.txt_nchannels * sizeof(channel_info));
+      i = 0;
+      for(auto ch : kChannels){
+        struct channel_info new_channel;
+        memset(new_channel.ch_channel, 0, CHANNEL_MAX);
+        strncpy(new_channel.ch_channel, ch.second->name.c_str(), CHANNEL_MAX);
+        memcpy(&list.txt_channels[i++], &new_channel, sizeof(new_channel));
+      }
+
       break;
     default:
       break;
