@@ -366,6 +366,7 @@ void HandleTextSay(char *receive_buffer, char *output) {
     backspaces.append("\b");
   }
   std::cout << backspaces;
+
   std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
   PrintPrompt();
   std::cout << output << std::flush;

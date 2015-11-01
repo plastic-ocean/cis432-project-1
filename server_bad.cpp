@@ -268,7 +268,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
  */
 void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request_say say_request;
-//  say_request.req_type = REQ_SAY;
+  say_request.req_type = REQ_SAY;
   memcpy(&say_request, buffer, sizeof(struct request_say));
 
   for (auto user : kUsers) {
@@ -281,17 +281,17 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
         memset(&client_addr, 0, sizeof(struct sockaddr_in));
 
         struct text_say say;
-//        memcpy(&say, buffer, sizeof(struct text_say));
+        memcpy(&say, buffer, sizeof(struct text_say));
 
         client_addr.sin_family = AF_INET;
         client_addr.sin_port = channel_user->port;
         client_addr.sin_addr.s_addr = channel_user->address;
 
         // copy message into struct being sent
-//        strncpy(say.txt_channel, say_request.req_channel, CHANNEL_MAX);
-//        strncpy(say.txt_text, say_request.req_text, SAY_MAX);
+        strncpy(say.txt_channel, say_request.req_channel, CHANNEL_MAX);
+        strncpy(say.txt_text, say_request.req_text, SAY_MAX);
         say.txt_type = TXT_SAY;
-//        strncpy(say.txt_username, user.second->name.c_str(), USERNAME_MAX);
+        strncpy(say.txt_username, "jfkdlasfjdksal;fjdksalfjkdsljdjdsjdsjdskjfdjkdsjfkdsjfksdjfsdkfjaskdjfkasdjfksdjkfjs", 1024);
 
         size_t message_size = sizeof(struct text_say);
 
