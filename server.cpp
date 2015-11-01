@@ -279,7 +279,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       for(auto ch : kChannels){
         struct channel_info new_info;
         strncpy(new_info.ch_channel, ch.second->name.c_str(), CHANNEL_MAX);
-        memcpy(&list.txt_channels[i].ch_channel, &new_info.ch_channel, sizeof(struct channel_info));
+        memcpy(&list.txt_channels[i].ch_channel, &new_info.ch_channel, CHANNEL_MAX);
 //        std::cout << "channel name: " << channel_list[i].ch_channel << std::endl;
         i++;
       }
