@@ -309,7 +309,7 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   struct text_list {
     text_t txt_type; /* = TXT_LIST */
     int txt_nchannels;
-    struct channel_info txt_channels[kChannels.size() * sizeof(channel_info)];
+    struct channel_info txt_channels[(size_t) (kChannels.size() * sizeof(channel_info))];
   } packed;
 
   text_list list;
