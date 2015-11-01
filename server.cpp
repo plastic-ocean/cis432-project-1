@@ -90,6 +90,8 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
   bool is_channel_user;
   int i;
 
+  channel_info *channel_list;
+
   memcpy(&current_request, buffer, sizeof(struct request));
 //  std::cout << "request type: " << current_request.req_type << std::endl;
   request_t request_type = current_request.req_type;
@@ -272,7 +274,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
       list.txt_type = TXT_LIST;
       list.txt_nchannels = (int) kChannels.size();
-      channel_info *channel_list = new channel_info[list.txt_nchannels];
+      channel_list = new channel_info[list.txt_nchannels];
       i = 0;
       for(auto ch : kChannels){
         struct channel_info new_info;
