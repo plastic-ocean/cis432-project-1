@@ -291,8 +291,14 @@ void HandleError(char *receive_buffer, char *output) {
 
 
 void HandleTextWho(char *receive_buffer, char *output) {
-  struct text_who who;
-  memcpy(&who, receive_buffer, sizeof(struct text_who));
+  struct text_who tmp;
+  memcpy(&tmp, receive_buffer, sizeof(struct text_who));
+
+  int user_info_size = tmp.txt_nusernames;
+  size_t who_size = sizeof(text_who) + (user_info_size * sizeof(user_info));
+  struct text_who *who = (text_who *) malloc(who_size);
+  memset(who, '\0', who_size);
+  memcpy(&who, receive_buffer, who_size);
 
   std::string backspaces = "";
   for (int i = 0; i < SAY_MAX; i++) {
@@ -300,15 +306,17 @@ void HandleTextWho(char *receive_buffer, char *output) {
   }
   std::cout << backspaces;
 
-  std::cout << "Users on channel " << who.txt_channel << ":" << std::endl;
-  std::cout << "number of people " << who.txt_nusernames << std::endl;
+  std::cout << "Users on channel " << who->txt_channel << ":" << std::endl;
+  std::cout << "number of people " << who->txt_nusernames << std::endl;
 
-  for (int i = 3; i < who.txt_nusernames + 3; i++) {
-    std::cout << " " << who.txt_users[i].us_username << std::endl;
+  for (int i = 0; i < who->txt_nusernames + 2; i++) {
+    std::cout << " " << who->txt_users[i].us_username << std::endl;
   }
 
   PrintPrompt();
   std::cout << output << std::flush;
+
+  free(who);
 }
 
 
