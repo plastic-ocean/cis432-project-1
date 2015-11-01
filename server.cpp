@@ -52,6 +52,55 @@ void Error(const char *msg) {
 }
 
 
+/**
+ * Sends a text list packet containing every channel to the requesting user.
+ *
+ * @server_socket is the socket to send on.
+ * @request_address is the address to send to.
+ * @request_port is the port to send to.
+ */
+void SendTextList(int server_socket, in_addr_t request_address, unsigned short request_port) {
+  struct sockaddr_in client_addr;
+  const size_t list_size = sizeof(text_list) + (kChannels.size() * sizeof(channel_info));
+  struct text_list *list = (text_list *) malloc(list_size);
+  User *current_user;
+  memset(list, '\0', list_size);;
+
+  list->txt_type = TXT_LIST;
+  list->txt_nchannels = (int) kChannels.size();
+
+  // Fills the packet's channels array.
+  int i = 0;
+  for (auto ch : kChannels) {
+    strncpy(list->txt_channels[i++].ch_channel, ch.first, CHANNEL_MAX);
+    std::cout << "channel name: " << list->txt_channels[i].ch_channel << std::endl;
+  }
+
+  // Finds the requesting users address and port and sends the packet.
+  for (auto user : kUsers) {
+    unsigned short current_port = user.second->port;
+    in_addr_t current_address = user.second->address;
+
+    if (current_port == request_port && current_address == request_address) {
+      memset(&client_addr, 0, sizeof(struct sockaddr_in));
+      current_user = user.second;
+      client_addr.sin_family = AF_INET;
+      client_addr.sin_port = current_user->port;
+      client_addr.sin_addr.s_addr = current_user->address;
+
+      size_t message_size = sizeof(struct text_list);
+
+      if (sendto(server_socket, &list, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+        Error("server: failed to send say\n");
+      }
+
+      std::cout << "server: " << user.first << " lists channels" << std::endl;
+      break;
+    }
+  }
+}
+
+
 void RemoveUser(User *user){
   for(auto channel : kChannels){
     for(auto channel_user : channel.second->users){
@@ -269,19 +318,20 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
 
     case REQ_LIST:
+      SendTextList(server_socket, request_address, request_port);
 //      struct sockaddr_in client_addr;
-      const size_t list_size = sizeof(text_list) + (kChannels.size() * sizeof(channel_info));
-      struct text_list *list = (text_list *) malloc(list_size);
-      memset(list, '\0', list_size);;
-
-      list->txt_type = TXT_LIST;
-      list->txt_nchannels = (int) kChannels.size();
-
-      i = 0;
-      for (auto ch : kChannels) {
-        strncpy(list->txt_channels[i++].ch_channel, ch.first, CHANNEL_MAX);
-        std::cout << "channel name: " << list->txt_channels[i].ch_channel << std::endl;
-      }
+//      const size_t list_size = sizeof(text_list) + (kChannels.size() * sizeof(channel_info));
+//      struct text_list *list = (text_list *) malloc(list_size);
+//      memset(list, '\0', list_size);;
+//
+//      list->txt_type = TXT_LIST;
+//      list->txt_nchannels = (int) kChannels.size();
+//
+//      i = 0;
+//      for (auto ch : kChannels) {
+//        strncpy(list->txt_channels[i++].ch_channel, ch.first, CHANNEL_MAX);
+//        std::cout << "channel name: " << list->txt_channels[i].ch_channel << std::endl;
+//      }
 
 //      channel_list = new channel_info[list.txt_nchannels];
 //      i = 0;
