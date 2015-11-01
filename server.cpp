@@ -271,6 +271,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       struct text_list list;
       list.txt_type = TXT_LIST;
       list.txt_nchannels = (int) kChannels.size();
+      std::cout << "length of list nchannels : " << list.txt_nchannels << std::endl;
       memset(list.txt_channels, 0, list.txt_nchannels * sizeof(channel_info));
       i = 0;
       for(auto ch : kChannels){
