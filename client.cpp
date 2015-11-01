@@ -490,7 +490,7 @@ int main(int argc, char *argv[]) {
 
 
           std::cout << "size: " << sizeof(receive_buffer) << std::endl;
-          std::cout << "text type: " << ntohl(text_type) << std::endl;
+          std::cout << "text type: " << text_type << std::endl;
 
           switch (text_type) {
             case TXT_SAY:

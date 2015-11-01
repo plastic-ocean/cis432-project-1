@@ -308,8 +308,8 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
 
   text_list *list = new text_list;
 
-  list->txt_type = htonl(TXT_LIST);
-  list->txt_nchannels = htonl(kChannels.size());
+  list->txt_type = TXT_LIST;
+  list->txt_nchannels = (int) kChannels.size();
 
   // Fills the packet's channels array.
   int i = 0;
@@ -318,7 +318,7 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   }
 
   // TODO Print test
-  std::cout << "type: " << ntohl(list->txt_type) << std::endl << std::endl;
+  std::cout << "type: " << list->txt_type << std::endl << std::endl;
   std::cout << "Channels:" << std::endl;
   for (i = 0; i < (int) kChannels.size(); i++) {
     std::cout << list->txt_channels[i].ch_channel << std::endl;
