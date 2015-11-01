@@ -359,6 +359,9 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
  */
 void HandleWhoRequest(int server_socket, in_addr_t request_address, unsigned short request_port) {
   std::cout << "Not implemented yet." << std::endl;
+  std::cout << "server_socket: " << server_socket << std::endl;
+  std::cout << "request_address: " << request_address << std::endl;
+  std::cout << "request_port: " << request_port << std::endl;
 }
 
 
