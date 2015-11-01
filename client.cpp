@@ -291,38 +291,27 @@ void HandleError(char *receive_buffer, char *output) {
 
 
 void HandleTextWho(char *receive_buffer, char *output) {
-//  struct text_who tmp;
-//  memcpy(&tmp, receive_buff er, sizeof(text_who) + sizeof(user_info));
+  struct text_who who;
+  memcpy(&who, receive_buffer, sizeof(text_who));
 
 //  int user_info_size = tmp.txt_nusernames;
 //  size_t who_size = sizeof(text_who) + (user_info_size * sizeof(user_info));
 //  struct text_who *who = (text_who *) malloc(who_size);
 //  memset(who, '\0', who_size);
-//
-//  std::cout << "after malloc" << std::endl;
-//
 //  memcpy(&who, receive_buffer, who_size);
-//
-//  std::cout << "after memcpy" << std::endl;
-//
+
   std::string backspaces = "";
   for (int i = 0; i < SAY_MAX; i++) {
     backspaces.append("\b");
   }
   std::cout << backspaces;
 
-//  std::cout << "who size: " << who_size << std::endl;
-//  std::cout << "tmp size: " << tmp.txt_nusernames << std::endl;
-//  std::cout << "first user in tmp " << tmp.txt_users->us_username << std::endl;
-//
-//  std::cout << "after backspaces" << std::endl;
-//
-//  std::cout << "Users on channel " << who->txt_channel << ":" << std::endl;
-//  std::cout << "number of people " << who->txt_nusernames << std::endl;
+  std::cout << "Channel: " << who.txt_channel << std::endl;
+  std::cout << "User count: " << who.txt_nusernames << std::endl;
 
-//  for (int i = 0; i < who->txt_nusernames + 2; i++) {
-//    std::cout << " " << who->txt_users[i].us_username << std::endl;
-//  }
+  for (int i = 2; i < who.txt_nusernames + 500; i++) {
+    std::cout << " " << who.txt_users[i].us_username << std::endl;
+  }
 
   PrintPrompt();
   std::cout << output << std::flush;
