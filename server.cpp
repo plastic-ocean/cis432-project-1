@@ -336,9 +336,9 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
       client_addr.sin_port = current_port;
       client_addr.sin_addr.s_addr = current_address;
 
-      size_t message_size = sizeof(list);
+//      size_t message_size = sizeof(list);
 
-      if (sendto(server_socket, &list, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+      if (sendto(server_socket, &list, list_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
         Error("server: failed to send list\n");
       }
 
