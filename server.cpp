@@ -420,7 +420,7 @@ void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address
         Error("server: failed to send who\n");
       }
 
-//      std::cout << "server: " << user.first << " whos channels" << std::endl;
+      std::cout << "server: " << user.first << " lists users in channel " << who_request.req_channel << std::endl;
       break;
     }
   }
