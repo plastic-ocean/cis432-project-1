@@ -324,6 +324,7 @@ void HandleTextList(char *receive_buffer, char *output) {
   std::cout << backspaces;
 
   std::cout << "Existing channels:" << std::endl;
+  std::cout << "size: " << list.txt_nchannels << std::endl;
   for (int i = 2; i < list.txt_nchannels + 2; i++) {
     std::cout << " " << list.txt_channels[i].ch_channel << std::endl;
   }
