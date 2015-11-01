@@ -487,6 +487,8 @@ int main(int argc, char *argv[]) {
           memcpy(&message, receive_buffer, sizeof(struct text));
           text_t text_type = message.txt_type;
 
+          std::cout << "type: " << text_type << std::endl;
+
           switch (text_type) {
             case TXT_SAY:
               HandleTextSay(receive_buffer, output);
