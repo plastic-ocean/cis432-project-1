@@ -23,6 +23,8 @@
 // TODO Create copies of your client and server source. Modify them to send invalid packets to your good client
 // and server, to see if you can make your client or server crash. Fix any bugs you find.
 
+// TODO should users always receive messages on Common?
+
 
 class Channel {
 public:
@@ -126,7 +128,15 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
 
     if (current_port == request_port && current_address == request_address) {
       std::cout << "server: " << user.first << " logs out" << std::endl;
-      kUsers.erase(user.first);
+//      kUsers.erase(user.first);
+      RemoveUser(user.second);
+//      for (auto c : kChannels) {
+//        for (auto u : c.second->users) {
+//          if (u->name == user.first) {
+//            delete(user.second);
+//          }
+//        }
+//      }
       delete(user.second);
       break;
     }
@@ -225,6 +235,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
 
         for (it = channel->users.begin(); it != channel->users.end(); ++it) {
           if ((*it)->name == user.first) {
+            channel->users.remove(user.second);
             break;
           }
         }
