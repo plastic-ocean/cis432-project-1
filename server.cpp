@@ -47,7 +47,7 @@ public:
 
 
 std::map<std::string, std::shared_ptr<User>> kUsers;
-std::map<std::string, Channel *> kChannels;
+std::map<std::string, std::shared_ptr<Channel>> kChannels;
 
 
 /**
@@ -110,10 +110,6 @@ void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short 
 //  RemoveUser(current_user);
   kUsers.insert({std::string(login_request.req_username), current_user});
 
-  for (auto u : kUsers) {
-    std::cout << u.second->name << std::endl;
-  }
-
   std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
 }
 
@@ -164,7 +160,7 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
   memcpy(&join_request, buffer, sizeof(struct request_join));
   bool is_new_channel = true;
   bool is_channel_user;
-  Channel *channel;
+  std::shared_ptr<Channel> channel;
 
   // If channel does exists in global map, set local channel to channel from kChannels
   for (auto ch : kChannels) {
@@ -216,7 +212,7 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
  * @request_port is the user's port.
  */
 void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short request_port) {
-  Channel *channel;
+  std::shared_ptr<Channel> channel;
   std::string current_channel;
   std::list<std::shared_ptr<User>>::const_iterator it;
   bool is_channel;
