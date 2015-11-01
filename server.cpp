@@ -152,7 +152,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
           }
         }
 
-        if ( it != channel->users.end()) {
+        if (it != channel->users.end()) {
           channel->users.remove(*it);
           std::cout << user.first << " leaves channel " << channel->name << std::endl;
           if (channel->users.size() == 0) {
@@ -165,7 +165,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
         }
         break;
       } else {
-        std::cout << "server: " << user.first << " trying to leave non-existent channel " << channel->name << std::endl;
+        std::cout << "server: " << user.first << " trying to leave non-existent channel " << current_channel << std::endl;
       }
 
     }
@@ -240,10 +240,10 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
   struct request current_request;
   User *current_user;
   Channel *channel;
-  std::string current_channel;
-  std::list<User *>::const_iterator it;
+//  std::string current_channel;
+//  std::list<User *>::const_iterator it;
   bool is_new_channel;
-  bool is_channel;
+//  bool is_channel;
   bool is_channel_user;
 
   memcpy(&current_request, buffer, sizeof(struct request));
