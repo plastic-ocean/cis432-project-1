@@ -306,12 +306,6 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
    // = (text_list *) malloc(list_size);
 //  memset(list, '\0', sizeof(text_list));;
 
-  struct text_list {
-    text_t txt_type; /* = TXT_LIST */
-    int txt_nchannels;
-    struct channel_info txt_channels[(size_t) (kChannels.size() * sizeof(channel_info))];
-  } packed;
-
   text_list list;
 
   list.txt_type = htonl(TXT_LIST);
