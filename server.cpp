@@ -341,6 +341,7 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
     }
   }
 
+  delete(list);
 //  free(list);
 }
 
