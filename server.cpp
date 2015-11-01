@@ -174,6 +174,62 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
 
 
 /**
+ * Adds a user to the requested channel.
+ *
+ * @buffer is the logout_request
+ * @request_address is the user's address.
+ * @request_port is the user's port.
+ */
+void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short request_port) {
+  struct request_join join_request;
+  memcpy(&join_request, buffer, sizeof(struct request_join));
+  bool is_new_channel = true;
+  bool is_channel_user;
+  Channel *channel;
+
+  // If channel does exists in global map, set local channel to channel from kChannels
+  for (auto ch : kChannels) {
+    if (join_request.req_channel == ch.second->name) {
+      is_new_channel = false;
+      channel = ch.second;
+      break;
+    }
+  }
+
+  // If channel is new create a new channel
+  if (is_new_channel) {
+    channel = new Channel(join_request.req_channel);
+  }
+
+  for (auto user : kUsers) {
+    unsigned short current_port = user.second->port;
+    in_addr_t current_address = user.second->address;
+    if (current_port == request_port && current_address == request_address) {
+      std::cout << "server: " << user.first << " joins channel "<< channel->name << std::endl;
+
+      is_channel_user = false;
+      for(auto u : channel->users) {
+        if (u->name == user.second->name) {
+          is_channel_user = true;
+          break;
+        }
+      }
+
+      if (!is_channel_user) {
+        channel->users.push_back(user.second);
+      }
+
+      // Otherwise
+      if (is_new_channel) {
+        kChannels.insert({channel->name, channel});
+      }
+      break;
+    }
+  }
+}
+
+
+/**
  * Sends a text list packet containing every channel to the requesting user.
  *
  * @server_socket is the socket to send on.
@@ -239,12 +295,12 @@ struct sockaddr_in* CreateSockAddr(unsigned short port, in_addr_t address) {
 void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request current_request;
   User *current_user;
-  Channel *channel;
+//  Channel *channel;
 //  std::string current_channel;
 //  std::list<User *>::const_iterator it;
-  bool is_new_channel;
+//  bool is_new_channel;
 //  bool is_channel;
-  bool is_channel_user;
+
 
   memcpy(&current_request, buffer, sizeof(struct request));
   request_t request_type = current_request.req_type;
@@ -260,50 +316,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       HandleLeaveRequest(buffer, request_address, request_port);
       break;
     case REQ_JOIN:
-      struct request_join join_request;
-      memcpy(&join_request, buffer, sizeof(struct request_join));
-      is_new_channel = true;
-
-      // If channel does exists in global map, set local channel to channel from kChannels
-      for (auto ch : kChannels) {
-        if (join_request.req_channel == ch.second->name) {
-          is_new_channel = false;
-          channel = ch.second;
-          break;
-        }
-      }
-
-      // If channel is new create a new channel
-      if (is_new_channel) {
-        channel = new Channel(join_request.req_channel);
-      }
-
-      for (auto user : kUsers) {
-        unsigned short current_port = user.second->port;
-        in_addr_t current_address = user.second->address;
-        if (current_port == request_port && current_address == request_address) {
-          std::cout << "server: " << user.first << " joins channel "<< channel->name << std::endl;
-
-          is_channel_user = false;
-          for(auto u : channel->users) {
-            if (u->name == user.second->name) {
-              is_channel_user = true;
-              break;
-            }
-          }
-
-          if (!is_channel_user) {
-            channel->users.push_back(user.second);
-          }
-
-          // Otherwise
-          if (is_new_channel) {
-            kChannels.insert({channel->name, channel});
-          }
-          break;
-        }
-
-      }
+      HandleJoinRequest();
       break;
     case REQ_SAY:
       struct request_say say_request;
