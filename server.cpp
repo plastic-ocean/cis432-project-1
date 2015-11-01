@@ -302,9 +302,7 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
  */
 void HandleListRequest(int server_socket, in_addr_t request_address, unsigned short request_port) {
   struct sockaddr_in client_addr;
-//  size_t list_size = sizeof(text_list) + (kChannels.size() * sizeof(channel_info));
-  struct text_list *list = new text_list; // = (text_list *) malloc(list_size);
-//  memset(list, '\0', list_size);;
+  struct text_list *list = new text_list;
 
   list->txt_type = TXT_LIST;
   list->txt_nchannels = (int) kChannels.size();
@@ -342,7 +340,6 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   }
 
   delete(list);
-//  free(list);
 }
 
 
