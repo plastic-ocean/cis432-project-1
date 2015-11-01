@@ -133,13 +133,13 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
   Channel *channel;
   std::string current_channel;
   std::list<User *>::const_iterator it;
-  std::map<std::string, User *>::const_iterator map_it;
+//  std::map<std::string, User *>::const_iterator map_it;
   bool is_new_channel;
   bool is_channel;
   bool is_channel_user;
-  int i;
+//  int i;
 
-  channel_info *channel_list;
+//  channel_info *channel_list;
 
   memcpy(&current_request, buffer, sizeof(struct request));
 //  std::cout << "request type: " << current_request.req_type << std::endl;
