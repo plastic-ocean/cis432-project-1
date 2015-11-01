@@ -14,6 +14,9 @@ client_bad: client_bad.cpp raw.cpp
 server: server.cpp
 	$(CC) server.cpp $(CFLAGS) -o server
 
+server_bad: server_bad.cpp
+	$(CC) server_bad.cpp $(CFLAGS) -o server_bad
+
 clean:
-	rm -f client server *.o
+	rm -f client server client_bad server_bad *.o
 
