@@ -10,6 +10,8 @@
 #include <map>
 #include <set>
 #include <memory>
+#include <netdb.h>
+#include <sys/fcntl.h>
 
 #include "server.h"
 #include "duckchat.h"
@@ -54,6 +56,45 @@ std::map<std::string, std::shared_ptr<Channel>> kChannels;
 void Error(const char *message) {
   perror(message);
   exit(1);
+}
+
+
+// Gets the address info of the server at a the given port and creates the client's socket.
+void CreateSocket(char *domain, const char *port) {
+  struct addrinfo hints;
+  struct addrinfo *server_info_tmp;
+  int status;
+  int client_socket;
+  struct addrinfo *server_info;
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_DGRAM;
+  hints.ai_protocol = 0;
+
+  if ((status = getaddrinfo(domain, port, &hints, &server_info_tmp)) != 0) {
+    std::cerr << "server: unable to resolve address: " << gai_strerror(status) << std::endl;
+    exit(1);
+  }
+
+  // getaddrinfo() returns a list of address structures into server_info_tmp.
+  // Tries each address until a successful connect().
+  // If socket() (or connect()) fails, closes the socket and tries the next address.
+
+  for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
+    if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
+      continue;
+    }
+    if (connect(client_socket, server_info->ai_addr, server_info->ai_addrlen) != -1) {
+      fcntl(client_socket, F_SETFL, O_NONBLOCK);
+      break; // Success
+    }
+    close(client_socket);
+  }
+
+  if (server_info == NULL) {
+    Error("server: all sockets failed to connect");
+  }
 }
 
 
@@ -427,8 +468,6 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
   memcpy(&current_request, buffer, sizeof(struct request));
   request_t request_type = current_request.req_type;
 
-  std::cout << "type: " << request_type << std::endl;
-
   switch(request_type) {
     case REQ_LOGIN:
       HandleLoginRequest(buffer, request_address, request_port);
@@ -464,15 +503,17 @@ int main(int argc, char *argv[]) {
   int receive_len;
   void* buffer[kBufferSize];
   int port;
-//  std::string domain;
+  char *domain;
+  const char *port_str;
 
   if (argc < 3) {
     std::cerr << "Usage: ./server domain_name port_num" << std::endl;
     exit(1);
   }
 
-//  domain = argv[1];
+  domain = argv[1];
   port = atoi(argv[2]);
+  port_str = argv[2];
 
   memset((char *) &server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
@@ -486,6 +527,8 @@ int main(int argc, char *argv[]) {
   if (bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
     Error("server: bind failed\n");
   }
+
+  CreateSocket(domain, port_str);
 
   while (1) {
     struct sockaddr_in client_addr;

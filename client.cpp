@@ -77,7 +77,6 @@ void StripChar(char *input, char c) {
 
 // Gets the address info of the server at a the given port and creates the client's socket.
 void CreateSocket(char *domain, const char *port) {
-
   struct addrinfo hints;
   struct addrinfo *server_info_tmp;
   int status;

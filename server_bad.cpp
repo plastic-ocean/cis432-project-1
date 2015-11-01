@@ -291,7 +291,7 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
         strncpy(say.txt_channel, say_request.req_channel, CHANNEL_MAX);
         strncpy(say.txt_text, say_request.req_text, SAY_MAX);
         say.txt_type = TXT_SAY;
-        strncpy(say.txt_username, "jfkdlasfjdksal;fjdksalfjkdsljdjdsjdsjdskjfdjkdsjfkdsjfksdjfsdkfjaskdjfkasdjfksdjkfjs", 1024);
+        strncpy(say.txt_username, user.second->name.c_str(), USERNAME_MAX);
 
         size_t message_size = sizeof(struct text_say);
 
@@ -427,8 +427,6 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
   struct request current_request;
   memcpy(&current_request, buffer, sizeof(struct request));
   request_t request_type = current_request.req_type;
-
-  std::cout << "type: " << request_type << std::endl;
 
   switch(request_type) {
     case REQ_LOGIN:
