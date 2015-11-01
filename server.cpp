@@ -103,9 +103,15 @@ void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short 
   struct request_login login_request;
   memcpy(&login_request, buffer, sizeof(struct request_login));
 
-  User *current_user = new User(login_request.req_username, request_address, request_port);
-  RemoveUser(current_user);
+  std::shared_ptr<User> current_user(new User(login_request.req_username, request_address, request_port));
+//  current_user = new User(login_request.req_username, request_address, request_port);
+//  User *current_user = new User(login_request.req_username, request_address, request_port);
+//  RemoveUser(current_user);
   kUsers.insert({std::string(login_request.req_username), current_user});
+
+  for (auto u : kUsers) {
+    std::cout << u.second->name << std::endl;
+  }
 
   std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
 }
