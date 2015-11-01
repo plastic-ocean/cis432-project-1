@@ -270,28 +270,36 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
 
     case REQ_LIST:
 //      struct sockaddr_in client_addr;
-      struct text_list list;
+      const size_t list_size = sizeof(text_list) + (kChannels.size() * sizeof(channel_info));
+      struct text_list *list = (text_list *) malloc(list_size);
+      memset(list, '\0', list_size);;
 
-      list.txt_type = TXT_LIST;
-      list.txt_nchannels = (int) kChannels.size();
-      channel_list = new channel_info[list.txt_nchannels];
+      list->txt_type = TXT_LIST;
+      list->txt_nchannels = (int) kChannels.size();
+
       i = 0;
-      for(auto ch : kChannels){
-        std::cout << "at beginning "<< std::endl;
-        struct channel_info new_info;
-        strncpy(new_info.ch_channel, ch.second->name.c_str(), CHANNEL_MAX);
-        memcpy(&channel_list[i], &new_info, sizeof(struct channel_info));
-//        memcpy(&list.txt_channels[i], &channel_list[i], sizeof(struct channel_info));
+      for (auto ch : kChannels) {
+        strncpy(list->txt_channels[i++].ch_channel, ch.first, CHANNEL_MAX);
+        std::cout << "channel name: " << list->txt_channels[i].ch_channel << std::endl;
+      }
+
+//      channel_list = new channel_info[list.txt_nchannels];
+//      i = 0;
+//      for(auto ch : kChannels){
+//        std::cout << "at beginning "<< std::endl;
+//        struct channel_info new_info;
+//        strncpy(new_info.ch_channel, ch.second->name.c_str(), CHANNEL_MAX);
+//        memcpy(&channel_list[i], &new_info, sizeof(struct channel_info));
+////        memcpy(&list.txt_channels[i], &channel_list[i], sizeof(struct channel_info));
+////        std::cout << "channel name: " << list.txt_channels[i].ch_channel << std::endl;
+//        i++;
+//      }
+//
+//      memcpy(&list.txt_channels, channel_list, sizeof(*channel_list));
+//      std::cout << "at end "<< std::endl;
+//      for(i = 0; i < list.txt_nchannels; i++){
 //        std::cout << "channel name: " << list.txt_channels[i].ch_channel << std::endl;
-        i++;
-      }
-
-      memcpy(&list.txt_channels, channel_list, sizeof(*channel_list));
-      std::cout << "at end "<< std::endl;
-      for(i = 0; i < list.txt_nchannels; i++){
-        std::cout << "channel name: " << list.txt_channels[i].ch_channel << std::endl;
-      }
-
+//      }
 //      std::cout << "size of array: " << sizeof(list.txt_channels) / sizeof(struct channel_info) << std::endl;
 
 //      std::cout << "length of list nchannels : " << list.txt_nchannels << std::endl;
