@@ -303,9 +303,9 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
 void HandleListRequest(int server_socket, in_addr_t request_address, unsigned short request_port) {
   struct sockaddr_in client_addr;
 //  struct text_list *list = new text_list;
-  size_t message_size = sizeof(text_list) + (kChannels.size() * sizeof(channel_info));
-  struct text_list *list = (text_list *) malloc(message_size);
-  memset(list, '\0', message_size);;
+  size_t list_size = sizeof(text_list) + (kChannels.size() * sizeof(channel_info));
+  struct text_list *list = (text_list *) malloc(list_size);
+  memset(list, '\0', list_size);;
 
   list->txt_type = TXT_LIST;
   list->txt_nchannels = (int) kChannels.size();
@@ -333,9 +333,7 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
       client_addr.sin_port = port;
       client_addr.sin_addr.s_addr = address;
 
-
-
-      if (sendto(server_socket, list, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+      if (sendto(server_socket, list, list_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
         Error("server: failed to send list\n");
       }
 
