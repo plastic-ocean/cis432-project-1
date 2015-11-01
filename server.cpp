@@ -306,22 +306,23 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
 //  text_list *list = (text_list *) malloc(list_size);
 //  memset(list, '\0', list_size);;
 
-  text_list *list = new text_list;
+//  text_list *list = new text_list;
+  text_list list;
 
-  list->txt_type = TXT_LIST;
-  list->txt_nchannels = (int) kChannels.size();
+  list.txt_type = TXT_LIST;
+  list.txt_nchannels = (int) kChannels.size();
 
   // Fills the packet's channels array.
   int i = 0;
   for (auto ch : kChannels) {
-    strncpy(list->txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
+    strncpy(list.txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
   }
 
   // TODO Print test
-  std::cout << "type: " << list->txt_type << std::endl << std::endl;
+//  std::cout << "type: " << list.txt_type << std::endl << std::endl;
   std::cout << "Channels:" << std::endl;
   for (i = 0; i < (int) kChannels.size(); i++) {
-    std::cout << list->txt_channels[i].ch_channel << std::endl;
+    std::cout << list.txt_channels[i].ch_channel << std::endl;
   }
 
   // Finds the requesting users address and port and sends the packet.
