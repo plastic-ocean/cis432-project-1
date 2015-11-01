@@ -129,19 +129,14 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
 
     if (current_port == request_port && current_address == request_address) {
       std::cout << "server: " << user.first << " logs out" << std::endl;
+      
       kUsers.erase(user.first);
-//      RemoveUser(user.second);
-      std::cout << "Users in channels: " << std::endl;
       for (auto c : kChannels) {
-        std::cout << "Channels: " << c.first << std::endl;
         for (auto u : c.second->users) {
           std::cout << u->name << std::endl;
           if (u->name == user.first) {
             c.second->users.remove(u);
             break;
-//            std::cout << user.first << std::endl;
-//            c.second->users.e(user.second);
-//            delete(user.second);;
           }
         }
       }
@@ -372,11 +367,65 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
  * @request_address is the address to send to.
  * @request_port is the port to send to.
  */
-void HandleWhoRequest(int server_socket, in_addr_t request_address, unsigned short request_port) {
-  std::cout << "Not implemented yet." << std::endl;
-  std::cout << "server_socket: " << server_socket << std::endl;
-  std::cout << "request_address: " << request_address << std::endl;
-  std::cout << "request_port: " << request_port << std::endl;
+void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
+  struct sockaddr_in client_addr;
+  struct request_who who_request;
+  memcpy(&who_request, buffer, sizeof(struct request_who));
+
+  int user_list_size = 0;
+
+  for (auto c : kChannels) {
+    if (c.first == who_request.req_channel) {
+      user_list_size = (int) c.second->users.size();
+    }
+  }
+
+  size_t who_size = sizeof(text_who) + (user_list_size * sizeof(user_info));
+  struct text_who *who = (text_who *) malloc(who_size);
+  memset(who, '\0', who_size);
+
+  who->txt_type = TXT_WHO;
+  strncpy(who->txt_channel, who_request.req_channel, CHANNEL_MAX);
+  who->txt_nusernames = user_list_size;
+
+  // Fills the packet's users array with the usernames.
+  int i = 0;
+  for (auto ch : kChannels) {
+    if (ch.first == who_request.req_channel) {
+      for (auto u : ch.second->users) {
+        strncpy(who->txt_users[i++].us_username, u->name.c_str(), CHANNEL_MAX);
+      }
+      break;
+    }
+  }
+
+  // TODO Print test
+  std::cout << "Users:" << std::endl;
+  for (i = 0; i < user_list_size; i++) {
+    std::cout << who->txt_users[i].us_username << std::endl;
+  }
+
+  // Finds the requesting users address and port and sends the packet.
+  for (auto user : kUsers) {
+    unsigned short port = user.second->port;
+    in_addr_t address = user.second->address;
+
+    if (port == request_port && address == request_address) {
+      memset(&client_addr, 0, sizeof(struct sockaddr_in));
+      client_addr.sin_family = AF_INET;
+      client_addr.sin_port = port;
+      client_addr.sin_addr.s_addr = address;
+
+      if (sendto(server_socket, who, who_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+        Error("server: failed to send who\n");
+      }
+
+//      std::cout << "server: " << user.first << " whos channels" << std::endl;
+      break;
+    }
+  }
+
+  free(who);
 }
 
 
@@ -413,7 +462,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       HandleListRequest(server_socket, request_address, request_port);
       break;
     case REQ_WHO:
-      HandleWhoRequest(server_socket, request_address, request_port);
+      HandleWhoRequest(server_socket, buffer, request_address, request_port);
       break;
     default:
       break;
