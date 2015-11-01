@@ -320,21 +320,21 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   }
 
   // TODO Print test
-  std::cout << "Channels" << std::endl;
+  std::cout << "Channels:" << std::endl;
   for (i = 0; i < list->txt_nchannels; i++) {
     std::cout << list->txt_channels[i].ch_channel << std::endl;
   }
 
   // Finds the requesting users address and port and sends the packet.
   for (auto user : kUsers) {
-    unsigned short current_port = user.second->port;
-    in_addr_t current_address = user.second->address;
+    unsigned short port = user.second->port;
+    in_addr_t address = user.second->address;
 
-    if (current_port == request_port && current_address == request_address) {
+    if (port == request_port && address == request_address) {
       memset(&client_addr, 0, sizeof(struct sockaddr_in));
       client_addr.sin_family = AF_INET;
-      client_addr.sin_port = current_port;
-      client_addr.sin_addr.s_addr = current_address;
+      client_addr.sin_port = port;
+      client_addr.sin_addr.s_addr = address;
 
       if (sendto(server_socket, &list, list_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
         Error("server: failed to send list\n");
