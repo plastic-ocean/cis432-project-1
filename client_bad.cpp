@@ -132,15 +132,30 @@ int SendSay(std::string message) {
 
 // Sends login requests to the server.
 int SendLogin(char *username) {
-  std::cout << username << std::endl;
-  struct request_logout logout;
-  memset((char *) &logout, 0, sizeof(logout));
-  logout.req_type = REQ_LOGOUT;
+  struct request_login login;
+  memset(&login, 0, sizeof(login));
+//  login.req_type = REQ_LOGIN;
+  strncpy(login.req_username, username, USERNAME_MAX);
 
-  size_t message_size = sizeof(struct request_logout);
+  size_t message_size = sizeof(struct request_login);
 
-  if (sendto(client_socket, &logout, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
-    Error("client: failed to request logout\n");
+  if (sendto(client_socket, &login, message_size, 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to request login\n");
+  }
+
+  return 0;
+}
+
+
+int SendBadPacket() {
+  struct bad {
+    char bad_array[10] = "hi";
+  } packed;
+
+  struct bad test;
+
+  if (sendto(client_socket, &test, sizeof(test), 0, server_info->ai_addr, server_info->ai_addrlen) < 0) {
+    Error("client: failed to request login\n");
   }
 
   return 0;
@@ -239,6 +254,8 @@ int SwitchChannel(std::string channel) {
   if (!isSubscribed) {
     std::cout << "You have not subscribed to channel " << channel << std::endl;
   }
+
+  SendBadPacket();
 
   return 0;
 }
