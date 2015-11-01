@@ -316,7 +316,6 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   }
 
   // TODO Print test
-  std::cout << "type: " << list->txt_type << std::endl << std::endl;
   std::cout << "Channels:" << std::endl;
   for (i = 0; i < (int) kChannels.size(); i++) {
     std::cout << list->txt_channels[i].ch_channel << std::endl;
