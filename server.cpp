@@ -45,7 +45,7 @@ public:
 };
 
 
-std::map<std::string, User *> kUsers;
+std::map<std::string, std::shared_ptr<User>> kUsers;
 std::map<std::string, Channel *> kChannels;
 
 
