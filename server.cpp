@@ -76,8 +76,8 @@ void SendTextList(int server_socket, in_addr_t request_address, unsigned short r
   }
 
   std::cout << "Channels" << std::endl;
-  for (auto ch : list->txt_channels) {
-    std::cout << ch.ch_channel << std::endl;
+  for (i = 0; i < list->txt_nchannels; i++) {
+    std::cout << list->txt_channels[i].ch_channel << std::endl;
   }
 
   // Finds the requesting users address and port and sends the packet.
