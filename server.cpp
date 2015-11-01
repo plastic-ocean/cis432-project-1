@@ -53,15 +53,15 @@ void Error(const char *msg) {
 
 
 void RemoveUser(User *user) {
-  for(auto channel : kChannels) {
-    for(auto channel_user : channel.second->users) {
+  for (auto channel : kChannels) {
+    for (auto channel_user : channel.second->users) {
       if (channel_user->name == user->name) {
         channel.second->users.remove(channel_user);
         break;
       }
     }
   }
-  for(auto current_user : kUsers) {
+  for (auto current_user : kUsers) {
     if (current_user.second->name == user->name) {
       kUsers.erase(user->name);
     }
@@ -147,7 +147,7 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
       std::cout << "server: " << user.first << " joins channel "<< channel->name << std::endl;
 
       is_channel_user = false;
-      for(auto u : channel->users) {
+      for (auto u : channel->users) {
         if (u->name == user.second->name) {
           is_channel_user = true;
           break;
@@ -191,7 +191,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
 
     if (current_port == request_port && current_address == request_address) {
       is_channel = false;
-      for(auto ch : kChannels) {
+      for (auto ch : kChannels) {
         if (ch.first == current_channel) {
           std::cout << "channel found" << std::endl;
           is_channel = true;
@@ -248,7 +248,7 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
 
     if (current_port == request_port && current_address == request_address) {
       current_user = user.second;
-      for(auto channel_user : kChannels[say_request.req_channel]->users) {
+      for (auto channel_user : kChannels[say_request.req_channel]->users) {
         struct sockaddr_in client_addr;
         memset(&client_addr, 0, sizeof(struct sockaddr_in));
 
