@@ -306,8 +306,8 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   struct text_list *list = (text_list *) malloc(list_size);
   memset(list, '\0', list_size);;
 
-  list->txt_type = TXT_LIST;
-  list->txt_nchannels = (int) kChannels.size();
+  list->txt_type = htonl(TXT_LIST);
+  list->txt_nchannels = htonl(kChannels.size());
 
   // Fills the packet's channels array.
   int i = 0;
@@ -317,7 +317,7 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
 
   // TODO Print test
   std::cout << "Channels:" << std::endl;
-  for (i = 0; i < list->txt_nchannels; i++) {
+  for (i = 0; i < (int) kChannels.size(); i++) {
     std::cout << list->txt_channels[i].ch_channel << std::endl;
   }
 
