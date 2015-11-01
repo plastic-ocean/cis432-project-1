@@ -307,7 +307,7 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
   memset(list, '\0', list_size);;
 
   list->txt_type = htonl(TXT_LIST);
-  list->txt_nchannels = htonl(kChannels.size());
+  list->txt_nchannels = htonl((int) kChannels.size());
 
   // Fills the packet's channels array.
   int i = 0;
