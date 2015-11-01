@@ -320,10 +320,10 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
 
   // TODO Print test
 //  std::cout << "type: " << list.txt_type << std::endl << std::endl;
-  std::cout << "Channels:" << std::endl;
-  for (i = 0; i < (int) kChannels.size(); i++) {
-    std::cout << list.txt_channels[i].ch_channel << std::endl;
-  }
+//  std::cout << "Channels:" << std::endl;
+//  for (i = 0; i < (int) kChannels.size(); i++) {
+//    std::cout << list.txt_channels[i].ch_channel << std::endl;
+//  }
 
   // Finds the requesting users address and port and sends the packet.
   for (auto user : kUsers) {
@@ -339,7 +339,7 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
 //      std::cout << "size of text_list: " << list_size << std::endl << std::endl;
 //      std::cout << "size of list: " << sizeof(list) << std::endl << std::endl;
 
-      if (sendto(server_socket, &list, list_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+      if (sendto(server_socket, &list, sizeof(list), 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
         Error("server: failed to send list\n");
       }
 
