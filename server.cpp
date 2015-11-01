@@ -105,8 +105,6 @@ void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short 
   memcpy(&login_request, buffer, sizeof(struct request_login));
 
   std::shared_ptr<User> current_user = std::make_shared<User>(login_request.req_username, request_address, request_port);
-//  current_user = new User(login_request.req_username, request_address, request_port);
-//  User *current_user = new User(login_request.req_username, request_address, request_port);
 //  RemoveUser(current_user);
   kUsers.insert({std::string(login_request.req_username), current_user});
 
@@ -171,10 +169,9 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
     }
   }
 
-  // If channel is new create a new channel
+  // If channel is new create it
   if (is_new_channel) {
     channel = std::make_shared<Channel>(join_request.req_channel);
-//    channel = new Channel(join_request.req_channel);
   }
 
   for (auto user : kUsers) {
@@ -240,7 +237,6 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
 
         for (it = channel->users.begin(); it != channel->users.end(); ++it) {
           if ((*it)->name == user.first) {
-//            channel->users.remove(user.second);
             break;
           }
         }
@@ -281,7 +277,6 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
     in_addr_t current_address = user.second->address;
 
     if (current_port == request_port && current_address == request_address) {
-//      current_user = user.second;
       for (auto channel_user : kChannels[say_request.req_channel]->users) {
         struct sockaddr_in client_addr;
         memset(&client_addr, 0, sizeof(struct sockaddr_in));
@@ -321,7 +316,6 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
  */
 void HandleListRequest(int server_socket, in_addr_t request_address, unsigned short request_port) {
   struct sockaddr_in client_addr;
-//  struct text_list *list = new text_list;
   size_t list_size = sizeof(text_list) + (kChannels.size() * sizeof(channel_info));
   struct text_list *list = (text_list *) malloc(list_size);
   memset(list, '\0', list_size);;
@@ -377,49 +371,6 @@ void HandleWhoRequest(int server_socket, in_addr_t request_address, unsigned sho
   std::cout << "server_socket: " << server_socket << std::endl;
   std::cout << "request_address: " << request_address << std::endl;
   std::cout << "request_port: " << request_port << std::endl;
-
-//  struct sockaddr_in client_addr;
-//  const size_t list_size = sizeof(text_list) + (kChannels.size() * sizeof(channel_info));
-//  struct text_list *list = (text_list *) malloc(list_size);
-//  memset(list, '\0', list_size);;
-//
-//  list->txt_type = TXT_LIST;
-//  list->txt_nchannels = (int) kChannels.size();
-//
-//  // Fills the packet's channels array.
-//  int i = 0;
-//  for (auto ch : kChannels) {
-//    strncpy(list->txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
-//  }
-//
-//  std::cout << "Channels" << std::endl;
-//  for (i = 0; i < list->txt_nchannels; i++) {
-//    std::cout << list->txt_channels[i].ch_channel << std::endl;
-//  }
-//
-//  // Finds the requesting users address and port and sends the packet.
-//  for (auto user : kUsers) {
-//    unsigned short current_port = user.second->port;
-//    in_addr_t current_address = user.second->address;
-//
-//    if (current_port == request_port && current_address == request_address) {
-//      memset(&client_addr, 0, sizeof(struct sockaddr_in));
-//      client_addr.sin_family = AF_INET;
-//      client_addr.sin_port = current_port;
-//      client_addr.sin_addr.s_addr = current_address;
-//
-//      size_t message_size = sizeof(list);
-//
-//      if (sendto(server_socket, &list, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
-//        Error("server: failed to send list\n");
-//      }
-//
-//      std::cout << "server: " << user.first << " lists channels" << std::endl;
-//      break;
-//    }
-//  }
-//
-//  free(list);
 }
 
 
