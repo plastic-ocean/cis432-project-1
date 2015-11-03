@@ -30,6 +30,7 @@
 // TODO Who request on non-existent channel should print message server side and send text_error
 // TODO add functions to header file
 // TODO test htonl() and ntohl()
+// TODO decide if RemoveUser is necessary: to logout users that did not send an /exit?
 
 
 /**
@@ -63,9 +64,9 @@ public:
 };
 
 
-/* kUsers is a global map of all the users connected to the server */
+/* users is a global map of all the users connected to the server */
 std::map<std::string, std::shared_ptr<User>> users;
-/* channels is a glbal map of all the channels that currently exist & have users in them */
+/* channels is a global map of all the channels that currently exist & have users in them */
 std::map<std::string, std::shared_ptr<Channel>> channels;
 
 
