@@ -12,7 +12,7 @@
 size_t kBufferSize = 2048;
 
 void Error(const char *);
-std::vector<std::string> StringSplit(std::string);
+std::vector<std::string> SplitString(std::string);
 bool ProcessInput(std::string);
 
 #endif //CIS432_PROJECT_1_CLIENT2_H

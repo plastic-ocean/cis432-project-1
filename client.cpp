@@ -65,7 +65,7 @@ void ClearPrompt() {
  *
  * @input is the input to split around.
  */
-std::vector<std::string> StringSplit(std::string input) {
+std::vector<std::string> SplitString(std::string input) {
   std::istringstream iss(input);
   std::vector<std::string> result{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
 
@@ -281,7 +281,7 @@ int SwitchChannel(std::string channel) {
 
 
 /**
- * Sends a join requests to the server.
+ * Sends a join request to the server.
  *
  * @channel is the channel to join.
  */
@@ -409,7 +409,7 @@ void HandleError(char *receive_buffer, char *output) {
  * @input is the string to process.
  */
 bool ProcessInput(std::string input) {
-  std::vector<std::string> inputs = StringSplit(input);
+  std::vector<std::string> inputs = SplitString(input);
 
   if (inputs[0] == "/exit") {
     SendLogout();
@@ -451,7 +451,7 @@ int main(int argc, char *argv[]) {
   memset(&receive_buffer, 0, kBufferSize);
 
   if (argc < 4) {
-    Error("usage: client [server name] [port] [username]");
+    Error("Usage: client [server name] [port] [username]");
   }
 
   domain = argv[1];

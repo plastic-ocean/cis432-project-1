@@ -38,41 +38,11 @@ void PrintPrompt() {
 
 
 // Splits strings around spaces.
-std::vector<std::string> StringSplit(std::string input) {
+std::vector<std::string> SplitString(std::string input) {
   std::istringstream iss(input);
   std::vector<std::string> result{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
 
   return result;
-}
-
-
-// Splits strings around spaces.
-std::vector<std::string> SplitString(char *input, char delimiter) {
-  std::vector<std::string> result;
-  std::string word = "";
-
-  size_t input_size = strlen(input);
-  for (size_t i = 0; i < input_size; i++) {
-    if (input[i] != delimiter) {
-      word += input[i];
-    } else {
-      result.push_back(word);
-      word = "";
-    }
-  }
-  result.push_back(word);
-
-  return result;
-}
-
-
-void StripChar(char *input, char c) {
-  size_t size = strlen(input);
-  for (size_t i = 0; i < size; i++) {
-    if (input[i] == c) {
-      input[i] = '\0';
-    }
-  }
 }
 
 
@@ -375,7 +345,7 @@ void HandleTextSay(char *receive_buffer, char *output) {
 
 // Processes the input string to decide what type of command it is.
 bool ProcessInput(std::string input) {
-  std::vector<std::string> inputs = StringSplit(input);
+  std::vector<std::string> inputs = SplitString(input);
 
   if (inputs[0] == "/exit") {
     SendLogout();
