@@ -26,6 +26,9 @@
 // Create copies of your client and server source. Modify them to send invalid packets to your good client
 // and server, to see if you can make your client or server crash. Fix any bugs you find.
 
+// TODO Leaving a non-existent channel should send and text_error
+// TODO Who request on non-existent channel should print message server side and send text_error
+
 
 /**
  * A class used to keep track of a channel

@@ -12,7 +12,7 @@
 // Client correctly sends Say message.
 // Client uses select() to wait for input from the user and the server.
 // Client correctly sends Join, Leave, Login, and Logout and handles Switch.
-// Client correctly sends List and TODO Who.
+// Client correctly sends List and Who.
 
 
 // Variables
@@ -38,6 +38,18 @@ void Error(const char *msg) {
  */
 void PrintPrompt() {
   std::cout << "> " << std::flush;
+}
+
+
+/**
+ * Clears the prompt.
+ */
+void ClearPrompt() {
+  std::string backspaces = "";
+  for (int i = 0; i < SAY_MAX; i++) {
+    backspaces.append("\b");
+  }
+  std::cout << backspaces;
 }
 
 
@@ -312,13 +324,12 @@ void HandleError(char *receive_buffer, char *output) {
   struct text_error error;
   memcpy(&error, receive_buffer, sizeof(struct text_error));
 
-  std::string backspaces = "";
-  for (int i = 0; i < SAY_MAX; i++) {
-    backspaces.append("\b");
-  }
-  std::cout << backspaces;
+  ClearPrompt();
+
   std::cout << "Error: " << error.txt_error << std::endl;
+
   PrintPrompt();
+
   std::cout << output << std::flush;
 }
 
@@ -332,19 +343,15 @@ void HandleError(char *receive_buffer, char *output) {
 void HandleTextWho(char *receive_buffer, char *output) {
   struct text_who *who = (struct text_who *) receive_buffer;
 
-  std::string backspaces = "";
-  for (int i = 0; i < SAY_MAX; i++) {
-    backspaces.append("\b");
-  }
-  std::cout << backspaces;
+  ClearPrompt();
 
   std::cout << "Users on channel " << who->txt_channel << ":" << std::endl;
-
   for (int i = 0; i < who->txt_nusernames; i++) {
     std::cout << " " << who->txt_users[i].us_username << std::endl;
   }
 
   PrintPrompt();
+
   std::cout << output << std::flush;
 }
 
@@ -359,11 +366,7 @@ void HandleTextList(char *receive_buffer, char *output) {
   struct text_list list;
   memcpy(&list, receive_buffer, sizeof(struct text_list));
 
-  std::string backspaces = "";
-  for (int i = 0; i < SAY_MAX; i++) {
-    backspaces.append("\b");
-  }
-  std::cout << backspaces;
+  ClearPrompt();
 
   std::cout << "Existing channels:" << std::endl;
   for (int i = 2; i < list.txt_nchannels + 2; i++) {
@@ -371,6 +374,7 @@ void HandleTextList(char *receive_buffer, char *output) {
   }
 
   PrintPrompt();
+
   std::cout << output << std::flush;
 }
 
@@ -385,11 +389,7 @@ void HandleTextSay(char *receive_buffer, char *output) {
   struct text_say say;
   memcpy(&say, receive_buffer, sizeof(struct text_say));
 
-  std::string backspaces = "";
-  for (int i = 0; i < SAY_MAX; i++) {
-    backspaces.append("\b");
-  }
-  std::cout << backspaces;
+  ClearPrompt();
 
   std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
   PrintPrompt();
