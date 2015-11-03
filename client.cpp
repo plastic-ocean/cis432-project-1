@@ -331,13 +331,6 @@ void HandleError(char *receive_buffer, char *output) {
  */
 void HandleTextWho(char *receive_buffer, char *output) {
   struct text_who *who = (struct text_who *) receive_buffer;
-//  memcpy(&who, receive_buffer, sizeof(text_who));
-
-//  int user_info_size = tmp.txt_nusernames;
-//  size_t who_size = sizeof(text_who) + (user_info_size * sizeof(user_info));
-//  struct text_who *who = (text_who *) malloc(who_size);
-//  memset(who, '\0', who_size);
-//  memcpy(&who, receive_buffer, who_size);
 
   std::string backspaces = "";
   for (int i = 0; i < SAY_MAX; i++) {
@@ -353,8 +346,6 @@ void HandleTextWho(char *receive_buffer, char *output) {
 
   PrintPrompt();
   std::cout << output << std::flush;
-
-//  free(who);
 }
 
 
