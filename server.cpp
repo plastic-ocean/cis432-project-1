@@ -29,6 +29,7 @@
 // TODO Leaving a non-existent channel should send and text_error
 // TODO Who request on non-existent channel should print message server side and send text_error
 // TODO add functions to header file
+// TODO test htonl() and ntohl()
 
 
 /**

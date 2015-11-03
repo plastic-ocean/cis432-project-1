@@ -18,8 +18,8 @@
 // TODO /list <something> needs to just be /list
 // TODO /join <nothing> needs to be /join <channel>
 // TODO /who <nothing> needs to be /who <channel>
-
 // TODO add functions to header file
+// TODO test htonl() and ntohl()
 
 
 // Global Variables
