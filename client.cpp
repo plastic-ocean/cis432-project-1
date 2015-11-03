@@ -564,5 +564,8 @@ int main(int argc, char *argv[]) {
 
   } // end of while
 
+  free(server_info);
+  close(client_socket);
+
   return 0;
 }
