@@ -563,7 +563,7 @@ int main(int argc, char *argv[]) {
           }
         }
 
-        memset(&receive_buffer, 0, SAY_MAX);
+        memset(&receive_buffer, 0, kBufferSize);
       } // end of if client_socket
 
     } // end of if result
