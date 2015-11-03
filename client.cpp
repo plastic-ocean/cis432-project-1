@@ -64,10 +64,25 @@ void ClearPrompt() {
  * Splits strings around spaces.
  *
  * @input is the input to split around.
+ * @return a vector of the split strings.
  */
 std::vector<std::string> SplitString(std::string input) {
-  std::istringstream iss(input);
-  std::vector<std::string> result{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
+  std::vector<std::string> result;
+  size_t index = input.find(' ');
+
+  if (index != std::string::npos) {
+    result.push_back(input.substr(0, index));
+
+    result.push_back(input.substr(index + 1, input.size()));
+
+    std::cout << result[0] << " - " << result[1] << std::endl;
+
+//  std::istringstream iss(input);
+//  std::vector<std::string> result{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
+
+  } else {
+    result.push_back(input);
+  }
 
   return result;
 }
@@ -306,7 +321,7 @@ int SendJoin(std::string channel) {
     memset((char *) &join, 0, sizeof(join));
     join.req_type = REQ_JOIN;
 
-    strncpy(join.req_channel, channel.c_str(), CHANNEL_MAX);
+    strncpy((char *) join.req_channel, channel.c_str(), CHANNEL_MAX);
 
     size_t message_size = sizeof(struct request_join);
 
@@ -415,13 +430,13 @@ bool ProcessInput(std::string input) {
     SendLogout();
     cooked_mode();
     return false;
-  } else if (inputs[0] == "/list") {
+  } else if (inputs[0] == "/list" && inputs.size() == 1) {
     SendList();
-  } else if (inputs[0] == "/join" && inputs.size() > 1) {
+  } else if (inputs[0] == "/join" && inputs.size() > 2) { // handle multi-word channel
     SendJoin(inputs[1]);
-  } else if (inputs[0] == "/leave" && inputs.size() > 1) {
+  } else if (inputs[0] == "/leave" && inputs.size() > 1) { // handle multi-word channel
     SendLeave(inputs[1]);
-  } else if (inputs[0] == "/who" && inputs.size() > 1) {
+  } else if (inputs[0] == "/who" && inputs.size() > 1) { // handle multi-word channel
     SendWho(inputs[1]);
   } else if (inputs[0] == "/switch" && inputs.size() > 1) {
     SwitchChannel(inputs[1]);

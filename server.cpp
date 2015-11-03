@@ -27,7 +27,9 @@
 // and server, to see if you can make your client or server crash. Fix any bugs you find.
 
 // TODO Leaving a non-existent channel should send and text_error
+// who error Error: No channel by the name <channel name>
 // TODO Who request on non-existent channel should print message server side and send text_error
+// leave error: Error: No channel by the name <channel name>
 // TODO add functions to header file
 // TODO test htonl() and ntohl()
 // TODO decide if RemoveUser is necessary: to logout users that did not send an /exit?
