@@ -330,8 +330,8 @@ void HandleError(char *receive_buffer, char *output) {
  * @output is the users input that must be rewritten back to the prompt.
  */
 void HandleTextWho(char *receive_buffer, char *output) {
-  struct text_who who;
-  memcpy(&who, receive_buffer, sizeof(text_who));
+  struct text_who *who = (struct text_who *) receive_buffer;
+//  memcpy(&who, receive_buffer, sizeof(text_who));
 
 //  int user_info_size = tmp.txt_nusernames;
 //  size_t who_size = sizeof(text_who) + (user_info_size * sizeof(user_info));
@@ -345,11 +345,11 @@ void HandleTextWho(char *receive_buffer, char *output) {
   }
   std::cout << backspaces;
 
-  std::cout << "Channel: " << who.txt_channel << std::endl;
-  std::cout << "User count: " << who.txt_nusernames << std::endl;
+  std::cout << "Channel: " << who->txt_channel << std::endl;
+  std::cout << "User count: " << who->txt_nusernames << std::endl;
 
-  for (int i = 10; i < who.txt_nusernames + 20; i++) {
-    std::cout << " " << who.txt_users[i].us_username << std::endl;
+  for (int i = 10; i < who->txt_nusernames + 20; i++) {
+    std::cout << " " << who->txt_users[i].us_username << std::endl;
   }
 
   PrintPrompt();
