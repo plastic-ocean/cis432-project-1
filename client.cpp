@@ -363,14 +363,14 @@ void HandleTextWho(char *receive_buffer, char *output) {
  * @output is the users input that must be rewritten back to the prompt.
  */
 void HandleTextList(char *receive_buffer, char *output) {
-  struct text_list list;
-  memcpy(&list, receive_buffer, sizeof(struct text_list));
+  struct text_list *list = (struct text_list *) receive_buffer;
+//  memcpy(&list, receive_buffer, sizeof(struct text_list));
 
   ClearPrompt();
 
   std::cout << "Existing channels:" << std::endl;
-  for (int i = 2; i < list.txt_nchannels + 2; i++) {
-    std::cout << " " << list.txt_channels[i].ch_channel << std::endl;
+  for (int i = 0; i < list->txt_nchannels; i++) {
+    std::cout << " " << list->txt_channels[i].ch_channel << std::endl;
   }
 
   PrintPrompt();
@@ -392,7 +392,9 @@ void HandleTextSay(char *receive_buffer, char *output) {
   ClearPrompt();
 
   std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
+
   PrintPrompt();
+
   std::cout << output << std::flush;
 }
 
