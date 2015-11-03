@@ -14,6 +14,11 @@
 // Client correctly sends Join, Leave, Login, and Logout and handles Switch.
 // Client correctly sends List and Who.
 
+// TODO input checking and messages for user:
+// TODO /list <something> needs to just be /list
+// TODO /join <nothing> needs to be /join <channel>
+// TODO /who <nothing> needs to be /who <channel>
+
 
 // Variables
 int client_socket;
