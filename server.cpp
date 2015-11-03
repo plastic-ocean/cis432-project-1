@@ -28,6 +28,7 @@
 
 // TODO Leaving a non-existent channel should send and text_error
 // TODO Who request on non-existent channel should print message server side and send text_error
+// TODO add functions to header file
 
 
 /**
@@ -62,9 +63,9 @@ public:
 
 
 /* kUsers is a global map of all the users connected to the server */
-std::map<std::string, std::shared_ptr<User>> kUsers;
-/* kChannels is a glbal map of all the channels that currently exist & have users in them */
-std::map<std::string, std::shared_ptr<Channel>> kChannels;
+std::map<std::string, std::shared_ptr<User>> users;
+/* channels is a glbal map of all the channels that currently exist & have users in them */
+std::map<std::string, std::shared_ptr<Channel>> channels;
 
 
 /**
@@ -125,7 +126,7 @@ void CreateSocket(char *domain, const char *port) {
  * @user is the user to remove.
  */
 void RemoveUser(User *user) {
-  for (auto channel : kChannels) {
+  for (auto channel : channels) {
     for (auto channel_user : channel.second->users) {
       if (channel_user->name == user->name) {
         channel.second->users.remove(channel_user);
@@ -134,9 +135,9 @@ void RemoveUser(User *user) {
       }
     }
   }
-  for (auto current_user : kUsers) {
+  for (auto current_user : users) {
     if (current_user.second->name == user->name) {
-      kUsers.erase(user->name);
+      users.erase(user->name);
       delete(user);
     }
   }
@@ -156,7 +157,7 @@ void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short 
 
   std::shared_ptr<User> current_user = std::make_shared<User>(login_request.req_username, request_address, request_port);
 //  RemoveUser(current_user);
-  kUsers.insert({std::string(login_request.req_username), current_user});
+  users.insert({std::string(login_request.req_username), current_user});
 
   std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
 }
@@ -173,15 +174,15 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
   struct request_logout logout_request;
   memcpy(&logout_request, buffer, sizeof(struct request_logout));
 
-  for (auto user : kUsers) {
+  for (auto user : users) {
     unsigned short current_port = user.second->port;
     in_addr_t current_address = user.second->address;
 
     if (current_port == request_port && current_address == request_address) {
       std::cout << "server: " << user.first << " logs out" << std::endl;
       
-      kUsers.erase(user.first);
-      for (auto c : kChannels) {
+      users.erase(user.first);
+      for (auto c : channels) {
         for (auto u : c.second->users) {
           if (u->name == user.first) {
             c.second->users.remove(u);
@@ -209,8 +210,8 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
   bool is_channel_user;
   std::shared_ptr<Channel> channel;
 
-  // If channel does exists in global map, set local channel to channel from kChannels
-  for (auto ch : kChannels) {
+  // If channel does exists in global map, set local channel to channel from channels
+  for (auto ch : channels) {
     if (join_request.req_channel == ch.second->name) {
       is_new_channel = false;
       channel = ch.second;
@@ -223,7 +224,7 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
     channel = std::make_shared<Channel>(join_request.req_channel);
   }
 
-  for (auto user : kUsers) {
+  for (auto user : users) {
     unsigned short current_port = user.second->port;
     in_addr_t current_address = user.second->address;
     if (current_port == request_port && current_address == request_address) {
@@ -243,7 +244,7 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
 
       // Otherwise
       if (is_new_channel) {
-        kChannels.insert({channel->name, channel});
+        channels.insert({channel->name, channel});
       }
       break;
     }
@@ -268,13 +269,13 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
   memcpy(&leave_request, buffer, sizeof(struct request_leave));
   current_channel = leave_request.req_channel;
 
-  for (auto user : kUsers) {
+  for (auto user : users) {
     unsigned short current_port = user.second->port;
     in_addr_t current_address = user.second->address;
 
     if (current_port == request_port && current_address == request_address) {
       is_channel = false;
-      for (auto ch : kChannels) {
+      for (auto ch : channels) {
         if (ch.first == current_channel) {
           is_channel = true;
           break;
@@ -282,7 +283,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
       }
 
       if (is_channel) {
-        channel = kChannels[current_channel];
+        channel = channels[current_channel];
 
         for (it = channel->users.begin(); it != channel->users.end(); ++it) {
           if ((*it)->name == user.first) {
@@ -294,7 +295,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
           channel->users.remove(*it);
           std::cout << user.first << " leaves channel " << channel->name << std::endl;
           if (channel->users.size() == 0) {
-            kChannels.erase(channel->name);
+            channels.erase(channel->name);
             std::cout << "server: removing empty channel " << channel->name << std::endl;
           }
         }
@@ -320,12 +321,12 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
   struct request_say say_request;
   memcpy(&say_request, buffer, sizeof(struct request_say));
 
-  for (auto user : kUsers) {
+  for (auto user : users) {
     unsigned short current_port = user.second->port;
     in_addr_t current_address = user.second->address;
 
     if (current_port == request_port && current_address == request_address) {
-      for (auto channel_user : kChannels[say_request.req_channel]->users) {
+      for (auto channel_user : channels[say_request.req_channel]->users) {
         struct sockaddr_in client_addr;
         memset(&client_addr, 0, sizeof(struct sockaddr_in));
 
@@ -364,21 +365,21 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
  */
 void HandleListRequest(int server_socket, in_addr_t request_address, unsigned short request_port) {
   struct sockaddr_in client_addr;
-  size_t list_size = sizeof(text_list) + (kChannels.size() * sizeof(channel_info));
+  size_t list_size = sizeof(text_list) + (channels.size() * sizeof(channel_info));
   struct text_list *list = (text_list *) malloc(list_size);
   memset(list, '\0', list_size);;
 
   list->txt_type = TXT_LIST;
-  list->txt_nchannels = (int) kChannels.size();
+  list->txt_nchannels = (int) channels.size();
 
   // Fills the packet's channels array.
   int i = 0;
-  for (auto ch : kChannels) {
+  for (auto ch : channels) {
     strncpy(list->txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
   }
 
   // Finds the requesting users address and port and sends the packet.
-  for (auto user : kUsers) {
+  for (auto user : users) {
     unsigned short port = user.second->port;
     in_addr_t address = user.second->address;
 
@@ -415,7 +416,7 @@ void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address
 
   int user_list_size = 0;
 
-  for (auto c : kChannels) {
+  for (auto c : channels) {
     if (c.first == who_request.req_channel) {
       user_list_size = (int) c.second->users.size();
     }
@@ -431,7 +432,7 @@ void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address
 
   // Fills the packet's users array with the usernames.
   int i = 0;
-  for (auto ch : kChannels) {
+  for (auto ch : channels) {
     if (ch.first == who_request.req_channel) {
       for (auto u : ch.second->users) {
         strncpy(who->txt_users[i++].us_username, u->name.c_str(), CHANNEL_MAX);
@@ -441,7 +442,7 @@ void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address
   }
 
   // Finds the requesting users address and port and sends the packet.
-  for (auto user : kUsers) {
+  for (auto user : users) {
     unsigned short port = user.second->port;
     in_addr_t address = user.second->address;
 

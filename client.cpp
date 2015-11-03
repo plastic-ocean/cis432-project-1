@@ -19,12 +19,14 @@
 // TODO /join <nothing> needs to be /join <channel>
 // TODO /who <nothing> needs to be /who <channel>
 
+// TODO add functions to header file
 
-// Variables
+
+// Global Variables
 int client_socket;
 struct addrinfo *server_info;
 std::string current_channel;
-std::vector<std::string> kChannels;
+std::vector<std::string> channels;
 
 
 /**
@@ -223,7 +225,7 @@ int SendWho(std::string channel) {
 int SendLeave(std::string channel) {
   bool contains_channel = false;
   std::vector<std::string>::iterator it;
-  for (it = kChannels.begin(); it != kChannels.end(); ++it) {
+  for (it = channels.begin(); it != channels.end(); ++it) {
     if (*it == channel) {
       contains_channel = true;
       break;
@@ -246,7 +248,7 @@ int SendLeave(std::string channel) {
   }
 
   if (contains_channel) {
-    kChannels.erase(it);
+    channels.erase(it);
   }
 
   return 0;
@@ -261,8 +263,8 @@ int SendLeave(std::string channel) {
 int SwitchChannel(std::string channel) {
   bool isSubscribed = false;
 
-  if (kChannels.size() > 0) {
-    for (auto c: kChannels) {
+  if (channels.size() > 0) {
+    for (auto c: channels) {
       if (channel == c) {
         current_channel = channel;
         isSubscribed = true;
@@ -290,7 +292,7 @@ int SendJoin(std::string channel) {
   }
 
   bool contains_channel = false;
-  for (std::vector<std::string>::iterator it = kChannels.begin(); it != kChannels.end(); ++it) {
+  for (std::vector<std::string>::iterator it = channels.begin(); it != channels.end(); ++it) {
     if (*it == channel) {
       contains_channel = true;
       break;
@@ -298,7 +300,7 @@ int SendJoin(std::string channel) {
   }
 
   if (!contains_channel) {
-    kChannels.push_back(channel);
+    channels.push_back(channel);
 
     struct request_join join;
     memset((char *) &join, 0, sizeof(join));
