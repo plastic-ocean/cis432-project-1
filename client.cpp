@@ -315,18 +315,39 @@ int SendJoin(std::string channel) {
 
 
 /**
- * Handles error packets from the server.
+ * Handles text_say packets from the server.
  *
  * @receive_buffer is the packet.
  * @output is the users input that must be rewritten back to the prompt.
  */
-void HandleError(char *receive_buffer, char *output) {
-  struct text_error error;
-  memcpy(&error, receive_buffer, sizeof(struct text_error));
+void HandleTextSay(char *receive_buffer, char *output) {
+  struct text_say *say = (struct text_say *) receive_buffer;
 
   ClearPrompt();
 
-  std::cout << "Error: " << error.txt_error << std::endl;
+  std::cout << "[" << say->txt_channel << "]" << "[" << say->txt_username << "]: " << say->txt_text << std::endl;
+
+  PrintPrompt();
+
+  std::cout << output << std::flush;
+}
+
+
+/**
+ * Handles text_list packets from the server.
+ *
+ * @receive_buffer is the packet.
+ * @output is the users input that must be rewritten back to the prompt.
+ */
+void HandleTextList(char *receive_buffer, char *output) {
+  struct text_list *list = (struct text_list *) receive_buffer;
+
+  ClearPrompt();
+
+  std::cout << "Existing channels:" << std::endl;
+  for (int i = 0; i < list->txt_nchannels; i++) {
+    std::cout << " " << list->txt_channels[i].ch_channel << std::endl;
+  }
 
   PrintPrompt();
 
@@ -357,41 +378,17 @@ void HandleTextWho(char *receive_buffer, char *output) {
 
 
 /**
- * Handles text_list packets from the server.
+ * Handles error packets from the server.
  *
  * @receive_buffer is the packet.
  * @output is the users input that must be rewritten back to the prompt.
  */
-void HandleTextList(char *receive_buffer, char *output) {
-  struct text_list *list = (struct text_list *) receive_buffer;
-//  memcpy(&list, receive_buffer, sizeof(struct text_list));
+void HandleError(char *receive_buffer, char *output) {
+  struct text_error *error = (struct text_error *) receive_buffer;
 
   ClearPrompt();
 
-  std::cout << "Existing channels:" << std::endl;
-  for (int i = 0; i < list->txt_nchannels; i++) {
-    std::cout << " " << list->txt_channels[i].ch_channel << std::endl;
-  }
-
-  PrintPrompt();
-
-  std::cout << output << std::flush;
-}
-
-
-/**
- * Handles text_say packets from the server.
- *
- * @receive_buffer is the packet.
- * @output is the users input that must be rewritten back to the prompt.
- */
-void HandleTextSay(char *receive_buffer, char *output) {
-  struct text_say say;
-  memcpy(&say, receive_buffer, sizeof(struct text_say));
-
-  ClearPrompt();
-
-  std::cout << "[" << say.txt_channel << "]" << "[" << say.txt_username << "]: " << say.txt_text << std::endl;
+  std::cout << "Error: " << error->txt_error << std::endl;
 
   PrintPrompt();
 
