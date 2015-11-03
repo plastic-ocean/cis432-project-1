@@ -541,9 +541,8 @@ int main(int argc, char *argv[]) {
         ssize_t read_size = read(client_socket, receive_buffer, kBufferSize);
 
         if (read_size != 0) {
-          struct text message;
-          memcpy(&message, receive_buffer, sizeof(struct text));
-          text_t text_type = message.txt_type;
+          struct text *message = (struct text *) receive_buffer;
+          text_t text_type = message->txt_type;
 
           switch (text_type) {
             case TXT_SAY:
