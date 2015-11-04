@@ -550,6 +550,7 @@ int main(int argc, char *argv[]) {
     receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
 
     if (receive_len > 0) {
+      std::cout << "server: received request, processing request." << std::endl;
       buffer[receive_len] = 0;
 
       ProcessRequest(server_socket, buffer, client_addr.sin_addr.s_addr, client_addr.sin_port);

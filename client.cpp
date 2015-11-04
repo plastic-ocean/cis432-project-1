@@ -15,9 +15,6 @@
 // Client correctly sends List and Who.
 
 // TODO input checking and messages for user:
-// TODO /list <something> needs to just be /list
-// TODO /join <nothing> needs to be /join <channel>
-// TODO /who <nothing> needs to be /who <channel>
 // TODO add functions to header file
 // TODO test htonl() and ntohl()
 
@@ -61,7 +58,7 @@ void ClearPrompt() {
 
 
 /**
- * Splits strings around spaces.
+ * Splits strings around the first space.
  *
  * @input is the input to split around.
  * @return a vector of the split strings.
@@ -74,11 +71,6 @@ std::vector<std::string> SplitString(std::string input) {
     result.push_back(input.substr(0, index));
 
     result.push_back(input.substr(index + 1, input.size()));
-
-    std::cout << result[0] << " - " << result[1] << std::endl;
-
-//  std::istringstream iss(input);
-//  std::vector<std::string> result{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
 
   } else {
     result.push_back(input);
@@ -178,7 +170,7 @@ int SendLogin(char *username) {
   return 0;
 }
 
-
+`
 /**
  * Sends logout request to the server.
  */
