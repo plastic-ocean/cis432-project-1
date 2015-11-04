@@ -14,10 +14,6 @@
 // Client correctly sends Join, Leave, Login, and Logout and handles Switch.
 // Client correctly sends List and Who.
 
-// TODO input checking and messages for user:
-// TODO add functions to header file
-// TODO test htonl() and ntohl()
-
 
 // Global Variables
 int client_socket;
@@ -424,11 +420,11 @@ bool ProcessInput(std::string input) {
     return false;
   } else if (inputs[0] == "/list" && inputs.size() == 1) {
     SendList();
-  } else if (inputs[0] == "/join" && inputs.size() == 2) { // handle multi-word channel
+  } else if (inputs[0] == "/join" && inputs.size() == 2) {
     SendJoin(inputs[1]);
-  } else if (inputs[0] == "/leave" && inputs.size() == 2) { // handle multi-word channel
+  } else if (inputs[0] == "/leave" && inputs.size() == 2) {
     SendLeave(inputs[1]);
-  } else if (inputs[0] == "/who" && inputs.size() == 2) { // handle multi-word channel
+  } else if (inputs[0] == "/who" && inputs.size() == 2) {
     SendWho(inputs[1]);
   } else if (inputs[0] == "/switch" && inputs.size() == 2) {
     SwitchChannel(inputs[1]);
