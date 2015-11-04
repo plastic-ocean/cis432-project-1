@@ -428,7 +428,7 @@ bool ProcessInput(std::string input) {
     return false;
   } else if (inputs[0] == "/list" && inputs.size() == 1) {
     SendList();
-  } else if (inputs[0] == "/join" && inputs.size() == 2) {
+  } else if (inputs[0] == "/join" && inputs.size() == 2 && inputs[1] != "") {
     SendJoin(inputs[1]);
   } else if (inputs[0] == "/leave" && inputs.size() == 2) {
     SendLeave(inputs[1]);
