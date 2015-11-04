@@ -175,7 +175,7 @@ void HandleError(int server_socket, std::string channel, std::string type, in_ad
       client_addr.sin_port = current_port;
       client_addr.sin_addr.s_addr = current_address;
 
-      std::string message = "Error: No channel by the name " + channel;
+      std::string message = "No channel by the name " + channel;
       strncpy(error.txt_error, message.c_str(), SAY_MAX);
       error.txt_type = TXT_ERROR;
 
@@ -609,7 +609,6 @@ int main(int argc, char *argv[]) {
     receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
 
     if (receive_len > 0) {
-      std::cout << "server: received request, processing request." << std::endl;
       buffer[receive_len] = 0;
 
       ProcessRequest(server_socket, buffer, client_addr.sin_addr.s_addr, client_addr.sin_port);
