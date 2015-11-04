@@ -149,6 +149,57 @@ void RemoveUser(User *user) {
 
 
 /**
+ * Handles errors from leave or who requests.
+ *
+ * @server_socket is the socket to send on.
+ * @channel is the channel's name
+ * @request_address is the user's address.
+ * @request_port is the user's port.
+ */
+void HandleError(int server_socket, std::string channel, std::string type, in_addr_t request_address, unsigned short request_port) {
+  std::string message_who = "list users in";
+  std::string message_leave = "leave";
+  std::string message_type = "";
+
+  for (auto user : users) {
+    unsigned short current_port = user.second->port;
+    in_addr_t current_address = user.second->address;
+
+    if (current_port == request_port && current_address == request_address) {
+      struct sockaddr_in client_addr;
+      memset(&client_addr, 0, sizeof(struct sockaddr_in));
+
+      struct text_error error;
+
+      client_addr.sin_family = AF_INET;
+      client_addr.sin_port = current_port;
+      client_addr.sin_addr.s_addr = current_address;
+
+      std::string message = "Error: No channel by the name " + channel;
+      strncpy(error.txt_error, message.c_str(), SAY_MAX);
+      error.txt_type = TXT_ERROR;
+
+      size_t message_size = sizeof(struct text_error);
+
+      if (sendto(server_socket, &error, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+        Error("server: failed to send error\n");
+      }
+
+      if (type == "who") {
+        message_type = message_who;
+      } else {
+        message_type = message_leave;
+      }
+
+      std::cout << "server: " << user.first << "trying to " << message_type << " non-existent channel " << channel << std::endl;
+
+      break;
+    }
+  }
+}
+
+
+/**
  * Logs in a user.
  *
  * @buffer is the login_request
@@ -263,7 +314,7 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
  * @request_address is the user's address.
  * @request_port is the user's port.
  */
-void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short request_port) {
+void HandleLeaveRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
   std::shared_ptr<Channel> channel;
   std::string current_channel;
   std::list<std::shared_ptr<User>>::const_iterator it;
@@ -305,7 +356,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
         }
         break;
       } else {
-        std::cout << "server: " << user.first << " trying to leave non-existent channel " << current_channel << std::endl;
+        HandleError(server_socket, std::string(current_channel), "leave", request_address, request_port);
       }
 
     }
@@ -420,10 +471,18 @@ void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address
 
   int user_list_size = 0;
 
+  bool is_channel = false;
   for (auto c : channels) {
     if (c.first == who_request.req_channel) {
       user_list_size = (int) c.second->users.size();
+      is_channel = true;
     }
+  }
+
+  if (!is_channel) {
+    // send error
+    HandleError(server_socket, std::string(who_request.req_channel), "who", request_address, request_port);
+    return;
   }
 
   size_t who_size = sizeof(text_who) + (user_list_size * sizeof(user_info));
@@ -493,7 +552,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       HandleJoinRequest(buffer, request_address, request_port);
       break;
     case REQ_LEAVE:
-      HandleLeaveRequest(buffer, request_address, request_port);
+      HandleLeaveRequest(server_socket, buffer, request_address, request_port);
       break;
     case REQ_SAY:
       HandleSayRequest(server_socket, buffer, request_address, request_port);
