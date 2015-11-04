@@ -170,7 +170,7 @@ int SendLogin(char *username) {
   return 0;
 }
 
-`
+
 /**
  * Sends logout request to the server.
  */
