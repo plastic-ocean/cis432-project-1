@@ -26,13 +26,8 @@
 // Create copies of your client and server source. Modify them to send invalid packets to your good client
 // and server, to see if you can make your client or server crash. Fix any bugs you find.
 
-// TODO Leaving a non-existent channel should send and text_error
-// who error Error: No channel by the name <channel name>
-// TODO Who request on non-existent channel should print message server side and send text_error
-// leave error: Error: No channel by the name <channel name>
 // TODO add functions to header file
 // TODO test htonl() and ntohl()
-// TODO decide if RemoveUser is necessary: to logout users that did not send an /exit?
 
 
 /**
@@ -120,30 +115,6 @@ void CreateSocket(char *domain, const char *port) {
 
   if (server_info == NULL) {
     Error("server: all sockets failed to connect");
-  }
-}
-
-
-/**
- * Removes a users from every channel and from the global users list.
- *
- * @user is the user to remove.
- */
-void RemoveUser(User *user) {
-  for (auto channel : channels) {
-    for (auto channel_user : channel.second->users) {
-      if (channel_user->name == user->name) {
-        channel.second->users.remove(channel_user);
-        delete(user);
-        break;
-      }
-    }
-  }
-  for (auto current_user : users) {
-    if (current_user.second->name == user->name) {
-      users.erase(user->name);
-      delete(user);
-    }
   }
 }
 
