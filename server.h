@@ -1,3 +1,11 @@
+// CIS 432 Into to Networks
+// Programming Project 1
+// Fall 2015
+//
+// Benjamin Barnes
+// H. Keith Hamm
+
+
 #ifndef CIS432_PROJECT_1_SERVER_H
 #define CIS432_PROJECT_1_SERVER_H
 

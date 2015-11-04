@@ -409,10 +409,10 @@ int main(int argc, char *argv[]) {
 
   CreateSocket(domain, port_str);
 
-  SendLogin(username);
-
-  current_channel = "Common";
-  SendJoin(current_channel);
+//  SendLogin(username);
+//
+//  current_channel = "Common";
+//  SendJoin(current_channel);
 
   if (raw_mode() != 0) {
     Error("client: error using raw mode");

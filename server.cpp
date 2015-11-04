@@ -1,3 +1,11 @@
+// CIS 432 Into to Networks
+// Programming Project 1
+// Fall 2015
+//
+// Benjamin Barnes
+// H. Keith Hamm
+
+
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <string.h>
@@ -17,6 +25,7 @@
 #include "server.h"
 #include "duckchat.h"
 
+
 // Server can accept connections.
 // Server handles Login and Logout from users, and keeps records of which users are logged in.
 // Server handles Join and Leave from users, keeps records of which channels a user belongs to,
@@ -25,9 +34,6 @@
 // Server correctly handles List and Who.
 // Create copies of your client and server source. Modify them to send invalid packets to your good client
 // and server, to see if you can make your client or server crash. Fix any bugs you find.
-
-// TODO add functions to header file
-// TODO test htonl() and ntohl()
 
 
 /**
