@@ -162,7 +162,7 @@ void HandleError(int server_socket, std::string channel, std::string type, in_ad
         message_type = message_leave;
       }
 
-      std::cout << "server: " << user.first << "trying to " << message_type << " non-existent channel " << channel << std::endl;
+      std::cout << "server: " << user.first << " trying to " << message_type << " non-existent channel " << channel << std::endl;
 
       break;
     }
