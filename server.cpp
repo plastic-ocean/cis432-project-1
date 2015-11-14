@@ -71,6 +71,8 @@ public:
 std::map<std::string, std::shared_ptr<User>> users;
 /* channels is a global map of all the channels that currently exist & have users in them */
 std::map<std::string, std::shared_ptr<Channel>> channels;
+/* our global server socket info */
+//struct sockaddr_in server_addr;
 
 
 /**
@@ -113,6 +115,7 @@ void CreateSocket(char *domain, const char *port) {
       continue;
     }
     if (connect(client_socket, server_info->ai_addr, server_info->ai_addrlen) != -1) {
+      std::cout << "server address " << server_info->ai_addr << std::endl;
       fcntl(client_socket, F_SETFL, O_NONBLOCK);
       break; // Success
     }
@@ -191,7 +194,7 @@ void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short 
 //  RemoveUser(current_user);
   users.insert({std::string(login_request.req_username), current_user});
 
-  std::cout << "server: " << login_request.req_username << " logs in" << std::endl;
+  std::cout << login_request.req_username << " logs in" << std::endl;
 }
 
 
