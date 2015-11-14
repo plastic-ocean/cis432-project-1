@@ -573,6 +573,9 @@ int main(int argc, char *argv[]) {
   for(int i = 3; i < argc; i+=2){
     server_list.push_back(Server(argv[i], atoi(argv[i+1]), -1));
   }
+  for(auto ser : server_list){
+    std::cout << ser.ip << ":" << ser.port << std::endl;
+  }
 
   while (1) {
     struct sockaddr_in client_addr;
