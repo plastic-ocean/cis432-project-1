@@ -119,8 +119,10 @@ unsigned int GetRandInt(){
     temp_block = new char[size];
     file.read(temp_block, size);
     file.close();
-    random_seed = (unsigned char)temp_block;
+    std::cout << "temp block " << temp_block <<std::endl;
+//    random_seed = (unsigned char)temp_block;
     delete[] temp_block;
+    random_seed = 0;
   } else {
     random_seed = 0;
     Error("Failed to read /dev/urandom");
@@ -577,7 +579,7 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
       HandleWhoRequest(server, buffer, request_address, request_port);
       break;
     case REQ_S2S_JOIN:
-      HandleS2SJoinRequest(server, buffer, request_address, request_port);
+//      HandleS2SJoinRequest(server, buffer, request_address, request_port);
       break;
     default:
       break;
