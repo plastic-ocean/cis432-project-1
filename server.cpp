@@ -60,6 +60,7 @@ public:
  */
 class User {
 public:
+  std::string ip;
   std::string name;
   in_addr_t address;
   unsigned short port;
@@ -101,7 +102,7 @@ void Error(const char *message) {
  * @domain is the domain to connect to.
  * @port is the port to connect on.
  */
-Server CreateSocket(char *domain, int port) {
+Server GetServerInfo(char *domain, int port) {
   Server temp_server;
   struct hostent *he;
   struct in_addr **addr_list;
@@ -181,10 +182,14 @@ void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short 
   struct request_login login_request;
   memcpy(&login_request, buffer, sizeof(struct request_login));
 
+  char ip[INET_ADDRSTRLEN];
+  inet_ntop(AF_INET, &request_address, ip, INET_ADDRSTRLEN);
+
   std::shared_ptr<User> current_user = std::make_shared<User>(login_request.req_username, request_address, request_port);
   users.insert({std::string(login_request.req_username), current_user});
 
-  std::cout << server.ip << ":" << server.port << " " << request_address << ":"
+
+  std::cout << server.ip << ":" << server.port << " " << ip << ":"
   << request_port << " recv Request login " << login_request.req_username << std::endl;
 }
 
@@ -571,7 +576,7 @@ int main(int argc, char *argv[]) {
     Error("server: bind failed\n");
   }
 
-  server = CreateSocket(domain, port);
+  server = GetServerInfo(domain, port);
 
   while (1) {
     struct sockaddr_in client_addr;
