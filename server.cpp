@@ -105,6 +105,19 @@ void CreateSocket(char *domain, const char *port) {
   hints.ai_socktype = SOCK_DGRAM;
   hints.ai_protocol = 0;
 
+  struct sockaddr_in temp_server;
+  struct hostent     *he;
+
+  temp_server.sin_family = AF_INET;
+  temp_server.sin_port = htons(atoi(port));
+
+  if ((he = gethostbyname(domain)) == NULL) {
+    puts("error resolving hostname..");
+    exit(1);
+  }
+  memcpy(&temp_server.sin_addr, he->h_addr_list[0], (size_t) he->h_length);
+  std::cout << "server address " << temp_server.sin_addr << std::endl;
+
   if ((status = getaddrinfo(domain, port, &hints, &server_info_tmp)) != 0) {
     std::cerr << "server: unable to resolve address: " << gai_strerror(status) << std::endl;
     exit(1);
@@ -115,7 +128,6 @@ void CreateSocket(char *domain, const char *port) {
       continue;
     }
     if (connect(client_socket, server_info->ai_addr, server_info->ai_addrlen) != -1) {
-      std::cout << "server address " << server_info->ai_addr << std::endl;
       fcntl(client_socket, F_SETFL, O_NONBLOCK);
       break; // Success
     }
