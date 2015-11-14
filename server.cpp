@@ -112,7 +112,7 @@ void Error(const char *message) {
 
 unsigned int GetRandInt(){
   unsigned int random_seed;
-  std::ifstream file("dev/urandom", std::ios::binary);
+  std::ifstream file("/dev/urandom", std::ios::binary);
   if(file.is_open()){
     char * temp_block;
     int size = sizeof(int);
