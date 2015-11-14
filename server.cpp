@@ -75,7 +75,16 @@ public:
   int port;
   int socket;
 
-  Server(std::string host_name, std::string ip, int port, int socket): host_name(host_name), ip(ip), port(port), socket(socket) {};
+  Server(std::string host_name, int port, int socket): host_name(host_name), port(port), socket(socket) {
+    struct hostent *he;
+    struct in_addr **addr_list;
+
+    if ((he = gethostbyname(host_name.c_str())) == NULL) {
+      Error("error resolving hostname");
+    }
+    addr_list = (struct in_addr **) he->h_addr_list;
+    strcpy(ip, inet_ntoa(*addr_list[0]));
+  };
 };
 
 
@@ -105,20 +114,20 @@ void Error(const char *message) {
  * @domain is the domain to connect to.
  * @port is the port to connect on.
  */
-Server GetServerInfo(char *domain, int port, int server_socket) {
-
-  struct hostent *he;
-  struct in_addr **addr_list;
-  char ip[100];
-
-  if ((he = gethostbyname(domain)) == NULL) {
-    Error("error resolving hostname");
-  }
-  addr_list = (struct in_addr **) he->h_addr_list;
-  strcpy(ip, inet_ntoa(*addr_list[0]));
-  Server temp_server = Server(domain, ip, port, server_socket);
-  return temp_server;
-}
+//Server GetServerInfo(char *domain, int port, int server_socket) {
+//
+//  struct hostent *he;
+//  struct in_addr **addr_list;
+//  char ip[100];
+//
+//  if ((he = gethostbyname(domain)) == NULL) {
+//    Error("error resolving hostname");
+//  }
+//  addr_list = (struct in_addr **) he->h_addr_list;
+//  strcpy(ip, inet_ntoa(*addr_list[0]));
+//  Server temp_server = Server(domain, ip, port, server_socket);
+//  return temp_server;
+//}
 
 
 /**
@@ -563,7 +572,7 @@ int main(int argc, char *argv[]) {
     std::cerr << "Usage: ./server domain_name port_num" << std::endl;
     exit(1);
   }
-  
+
   domain = argv[1];
   port = atoi(argv[2]);
 
@@ -579,7 +588,7 @@ int main(int argc, char *argv[]) {
   if (bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
     Error("server: bind failed\n");
   }
-  Server server = GetServerInfo(domain, port, server_socket);
+  Server server = Server(domain, port, server_socket);
 
   while (1) {
     struct sockaddr_in client_addr;
