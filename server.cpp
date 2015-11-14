@@ -67,13 +67,20 @@ public:
   User(std::string name, in_addr_t address, unsigned short port): name(name), address(address), port(port) {};
 };
 
+class Server {
+public:
+  std::string host_name;
+  std::string ip;
+  int port;
+};
+
 
 /* users is a global map of all the users connected to the server */
 std::map<std::string, std::shared_ptr<User>> users;
 /* channels is a global map of all the channels that currently exist & have users in them */
 std::map<std::string, std::shared_ptr<Channel>> channels;
-/* our global server socket info */
-//struct sockaddr_in server_addr;
+/* our global server info */
+Server server;
 
 
 /**
@@ -94,18 +101,8 @@ void Error(const char *message) {
  * @domain is the domain to connect to.
  * @port is the port to connect on.
  */
-void CreateSocket(char *domain) {
-  struct addrinfo hints;
-//  struct addrinfo *server_info_tmp;
-//  int status;
-//  int client_socket;
-//  struct addrinfo *server_info;
-
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_socktype = SOCK_DGRAM;
-  hints.ai_protocol = 0;
-
+Server CreateSocket(char *domain, int port) {
+  Server temp_server;
   struct hostent *he;
   struct in_addr **addr_list;
   char ip[100];
@@ -115,27 +112,10 @@ void CreateSocket(char *domain) {
   }
   addr_list = (struct in_addr **) he->h_addr_list;
   strcpy(ip, inet_ntoa(*addr_list[0]));
-  std::cout << "IP " << ip << std::endl;
-
-//  if ((status = getaddrinfo(domain, port, &hints, &server_info_tmp)) != 0) {
-//    std::cerr << "server: unable to resolve address: " << gai_strerror(status) << std::endl;
-//    exit(1);
-//  }
-//
-//  for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
-//    if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
-//      continue;
-//    }
-//    if (connect(client_socket, server_info->ai_addr, server_info->ai_addrlen) != -1) {
-//      fcntl(client_socket, F_SETFL, O_NONBLOCK);
-//      break; // Success
-//    }
-//    close(client_socket);
-//  }
-//
-//  if (server_info == NULL) {
-//    Error("server: all sockets failed to connect");
-//  }
+  temp_server.host_name = domain;
+  temp_server.port = port;
+  temp_server.ip = ip;
+  return temp_server;
 }
 
 
@@ -197,15 +177,15 @@ void HandleError(int server_socket, std::string channel, std::string type, in_ad
  * @request_address is the user's address.
  * @request_port is the user's port.
  */
-void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short request_port) {
+void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short request_port, Server server) {
   struct request_login login_request;
   memcpy(&login_request, buffer, sizeof(struct request_login));
 
   std::shared_ptr<User> current_user = std::make_shared<User>(login_request.req_username, request_address, request_port);
-//  RemoveUser(current_user);
   users.insert({std::string(login_request.req_username), current_user});
 
-  std::cout << login_request.req_username << " logs in" << std::endl;
+  std::cout << server.ip << ":" << server.port << " " << request_address << ":"
+  << request_port << " recv Request login " << login_request.req_username << std::endl;
 }
 
 
@@ -527,14 +507,14 @@ void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address
  * @request_address is the address to send to.
  * @request_port is the port to send to.
  */
-void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
+void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port, Server server) {
   struct request current_request;
   memcpy(&current_request, buffer, sizeof(struct request));
   request_t request_type = current_request.req_type;
 
   switch(request_type) {
     case REQ_LOGIN:
-      HandleLoginRequest(buffer, request_address, request_port);
+      HandleLoginRequest(buffer, request_address, request_port, server);
       break;
     case REQ_LOGOUT:
       HandleLogoutRequest(buffer, request_address, request_port);
@@ -568,7 +548,7 @@ int main(int argc, char *argv[]) {
   void* buffer[kBufferSize];
   int port;
   char *domain;
-//  const char *port_str;
+  Server server;
 
   if (argc < 3) {
     std::cerr << "Usage: ./server domain_name port_num" << std::endl;
@@ -577,7 +557,6 @@ int main(int argc, char *argv[]) {
 
   domain = argv[1];
   port = atoi(argv[2]);
-//  port_str = argv[2];
 
   memset((char *) &server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
@@ -592,7 +571,7 @@ int main(int argc, char *argv[]) {
     Error("server: bind failed\n");
   }
 
-  CreateSocket(domain);
+  server = CreateSocket(domain, port);
 
   while (1) {
     struct sockaddr_in client_addr;
@@ -602,7 +581,7 @@ int main(int argc, char *argv[]) {
     if (receive_len > 0) {
       buffer[receive_len] = 0;
 
-      ProcessRequest(server_socket, buffer, client_addr.sin_addr.s_addr, client_addr.sin_port);
+      ProcessRequest(server_socket, buffer, client_addr.sin_addr.s_addr, client_addr.sin_port, server);
     }
   }
 }
