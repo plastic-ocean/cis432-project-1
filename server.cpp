@@ -81,7 +81,8 @@ public:
     char temp_ip[100];
 
     if ((he = gethostbyname(host_name.c_str())) == NULL) {
-      Error("error resolving hostname");
+      std::string temp_str = "error resolving hostname" + host_name;
+      Error(temp_str.c_str());
     }
     addr_list = (struct in_addr **) he->h_addr_list;
     strcpy(temp_ip, inet_ntoa(*addr_list[0]));
@@ -105,31 +106,6 @@ void Error(const char *message) {
   perror(message);
   exit(1);
 }
-
-
-/**
- * Checks the address info of the server at a the given port. Prints error if not found.
- * getaddrinfo() returns a list of address structures into server_info_tmp.
- * Tries each address until a successful connect().
- * If socket() (or connect()) fails, closes the socket and tries the next address.
- *
- * @domain is the domain to connect to.
- * @port is the port to connect on.
- */
-//Server GetServerInfo(char *domain, int port, int server_socket) {
-//
-//  struct hostent *he;
-//  struct in_addr **addr_list;
-//  char ip[100];
-//
-//  if ((he = gethostbyname(domain)) == NULL) {
-//    Error("error resolving hostname");
-//  }
-//  addr_list = (struct in_addr **) he->h_addr_list;
-//  strcpy(ip, inet_ntoa(*addr_list[0]));
-//  Server temp_server = Server(domain, ip, port, server_socket);
-//  return temp_server;
-//}
 
 
 /**
@@ -590,7 +566,12 @@ int main(int argc, char *argv[]) {
   if (bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
     Error("server: bind failed\n");
   }
+
   Server server = Server(domain, port, server_socket);
+
+  for(int i = 3; i < argc; i+=2){
+    server_list.push_back(Server(argv[i], atoi(argv[i+1]), -1));
+  }
 
   while (1) {
     struct sockaddr_in client_addr;
