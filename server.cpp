@@ -137,13 +137,21 @@ unsigned int GetRandInt(){
 
 
 void SendS2SJoinRequest(Server server, std::string channel){
-  std::cout << server.host_name << std::endl;
-  std::cout << channel << std::endl;
-//  struct s2s_request_join join;
-//  memcpy(join.req_channel, sizeof(channel), channel);
+  struct s2s_request_join join;
+  memcpy(join.req_channel, channel.c_str(), sizeof(channel));
   srand(GetRandInt());
-  for(int i = 0; i < 10; i ++){
-    std::cout << rand() << std::endl;
+  join.message_id = rand();
+  size_t message_size = sizeof(struct s2s_request_join);
+  for(auto adj_server : server_list){
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(struct sockaddr_in));
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = (in_port_t) adj_server.port;
+    server_addr.sin_addr.s_addr = (in_addr_t) atoi(adj_server.ip);
+    if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &adj_server, sizeof(server_addr)) < 0) {
+      Error("server: failed to send s2s join\n");
+    }
   }
 }
 
