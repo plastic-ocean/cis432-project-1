@@ -148,7 +148,7 @@ void SendS2SJoinRequest(Server server, std::string channel){
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = (in_port_t) adj_server.port;
-    server_addr.sin_addr.s_addr = (in_addr_t) atoi(adj_server.ip);
+    server_addr.sin_addr.s_addr = (in_addr_t) atoi(adj_server.ip.c_str());
     if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &adj_server, sizeof(server_addr)) < 0) {
       Error("server: failed to send s2s join\n");
     }
