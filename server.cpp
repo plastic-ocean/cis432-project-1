@@ -21,6 +21,7 @@
 #include <netdb.h>
 #include <sys/fcntl.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 #include "server.h"
 #include "duckchat.h"
@@ -106,7 +107,9 @@ void CreateSocket(char *domain, const char *port) {
   hints.ai_protocol = 0;
 
   struct sockaddr_in temp_server;
-  struct hostent     *he;
+  struct hostent *he;
+  struct in_addr **addr_list;
+  char ip[100];
 
   temp_server.sin_family = AF_INET;
   temp_server.sin_port = htons(atoi(port));
@@ -115,6 +118,12 @@ void CreateSocket(char *domain, const char *port) {
     puts("error resolving hostname..");
     exit(1);
   }
+  addr_list = (struct in_addr **) he->h_addr_list;
+  for(int i = 0; addr_list[i] != NULL; i++){
+    strcpy(ip, inet_ntoa(*addr_list[i]));
+    break;
+  }
+  std::cout << "IP " << ip << std::endl;
   memcpy(&temp_server.sin_addr, he->h_addr_list[0], (size_t) he->h_length);
   std::cout << "server address regular " << temp_server.sin_addr.s_addr << std::endl;
 //  std::cout << "server address converted" << ntohl(he->h_addr) << std::endl;
