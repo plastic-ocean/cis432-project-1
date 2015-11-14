@@ -146,6 +146,8 @@ void SendS2SJoinRequest(Server server, std::string channel){
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(struct sockaddr_in));
 
+    // TODO figure out why failed to send s2s join
+
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = (in_port_t) adj_server.port;
     server_addr.sin_addr.s_addr = (in_addr_t) atoi(adj_server.ip.c_str());
