@@ -81,7 +81,7 @@ public:
     char temp_ip[100];
 
     if ((he = gethostbyname(host_name.c_str())) == NULL) {
-      std::string temp_str = "error resolving hostname" + host_name;
+      std::string temp_str = "error resolving hostname " + host_name;
       Error(temp_str.c_str());
     }
     addr_list = (struct in_addr **) he->h_addr_list;
@@ -103,7 +103,8 @@ std::list<Server> server_list;
  * Prints an error message and exists.
  */
 void Error(const char *message) {
-  perror(message);
+//  perror(message);
+  std::cerr << message << std::endl;
   exit(1);
 }
 
