@@ -117,7 +117,7 @@ Server GetServerInfo(char *domain, int port, int server_socket) {
   temp_server.host_name = domain;
   temp_server.port = port;
   temp_server.ip = ip;
-  temp_server.socket;
+  temp_server.socket = server_socket;
   return temp_server;
 }
 
