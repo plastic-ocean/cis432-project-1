@@ -563,6 +563,9 @@ int main(int argc, char *argv[]) {
     std::cerr << "Usage: ./server domain_name port_num" << std::endl;
     exit(1);
   }
+  
+  domain = argv[1];
+  port = atoi(argv[2]);
 
   memset((char *) &server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
@@ -577,7 +580,7 @@ int main(int argc, char *argv[]) {
     Error("server: bind failed\n");
   }
   Server server = GetServerInfo(domain, port, server_socket);
-  
+
   while (1) {
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
