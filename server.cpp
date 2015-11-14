@@ -283,7 +283,7 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
     channel = std::make_shared<Channel>(join_request.req_channel);
   }
 
-  SendS2SJoinRequest(server, channel->name);
+//  SendS2SJoinRequest(server, channel->name);
 
   for (auto user : users) {
     unsigned short current_port = user.second->port;
