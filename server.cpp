@@ -26,15 +26,15 @@
 #include "server.h"
 #include "duckchat.h"
 
-
-// Server can accept connections.
-// Server handles Login and Logout from users, and keeps records of which users are logged in.
-// Server handles Join and Leave from users, keeps records of which channels a user belongs to,
-// and keeps records of which users are in a channel.
-// Server handles the Say message.
-// Server correctly handles List and Who.
-// Create copies of your client and server source. Modify them to send invalid packets to your good client
-// and server, to see if you can make your client or server crash. Fix any bugs you find.
+// Add the required debugging text for all messages received from clients.
+// TODO Add support to handle the additional command line arguments and setup the topology.
+// TODO Add support for broadcasting Joins when a user joins a channel.
+// TODO Add support for forwarding Joins from another server.
+// TODO Add support for Server-to-Server Say messages, including loop detection.
+// TODO Add support for sending Leave when a Say cannot be forwarded.
+// TODO Add support for the soft state features.
+// TODO Try several topologies. Verify that trees are formed and pruned correctly.
+// TODO Copy your server code and modify it to send invalid packets to see if you can make your server crash. Fix any bugs you find.
 
 
 /**
@@ -74,6 +74,8 @@ public:
   std::string ip;
   int port;
   int socket;
+
+  Server(std::string host_name, std::string ip, int port, int socket): host_name(host_name), ip(ip), port(port), socket(socket) {};
 };
 
 
@@ -81,8 +83,8 @@ public:
 std::map<std::string, std::shared_ptr<User>> users;
 /* channels is a global map of all the channels that currently exist & have users in them */
 std::map<std::string, std::shared_ptr<Channel>> channels;
-/* our global server info */
-Server server;
+/* servers adjacent servers */
+std::list<Server> server_list;
 
 
 /**
@@ -104,7 +106,7 @@ void Error(const char *message) {
  * @port is the port to connect on.
  */
 Server GetServerInfo(char *domain, int port, int server_socket) {
-  Server temp_server;
+
   struct hostent *he;
   struct in_addr **addr_list;
   char ip[100];
@@ -114,10 +116,7 @@ Server GetServerInfo(char *domain, int port, int server_socket) {
   }
   addr_list = (struct in_addr **) he->h_addr_list;
   strcpy(ip, inet_ntoa(*addr_list[0]));
-  temp_server.host_name = domain;
-  temp_server.port = port;
-  temp_server.ip = ip;
-  temp_server.socket = server_socket;
+  Server temp_server = Server(domain, ip, port, server_socket);
   return temp_server;
 }
 
@@ -559,15 +558,11 @@ int main(int argc, char *argv[]) {
   void* buffer[kBufferSize];
   int port;
   char *domain;
-  Server server;
 
   if (argc < 3) {
     std::cerr << "Usage: ./server domain_name port_num" << std::endl;
     exit(1);
   }
-
-  domain = argv[1];
-  port = atoi(argv[2]);
 
   memset((char *) &server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
@@ -581,9 +576,8 @@ int main(int argc, char *argv[]) {
   if (bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
     Error("server: bind failed\n");
   }
-
-  server = GetServerInfo(domain, port, server_socket);
-
+  Server server = GetServerInfo(domain, port, server_socket);
+  
   while (1) {
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
