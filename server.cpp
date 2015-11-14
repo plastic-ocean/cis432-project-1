@@ -116,7 +116,7 @@ void CreateSocket(char *domain, const char *port) {
     exit(1);
   }
   memcpy(&temp_server.sin_addr, he->h_addr_list[0], (size_t) he->h_length);
-  std::cout << "server address regular " << he->h_addr << std::endl;
+  std::cout << "server address regular " << temp_server.sin_addr.s_addr << std::endl;
 //  std::cout << "server address converted" << ntohl(he->h_addr) << std::endl;
 
   if ((status = getaddrinfo(domain, port, &hints, &server_info_tmp)) != 0) {
