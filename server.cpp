@@ -260,7 +260,7 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
     in_addr_t current_address = user.second->address;
     if (current_port == request_port && current_address == request_address) {
       std::cout << server.ip << ":" << server.port << " " << user.second->ip << ":"
-      << request_port << " recv Request join " << user.first << " " << channel << std::endl;
+      << request_port << " recv Request join " << user.first << " " << channel->name << std::endl;
 
       is_channel_user = false;
       for (auto u : channel->users) {
