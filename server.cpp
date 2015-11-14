@@ -119,7 +119,7 @@ unsigned int GetRandInt(){
     temp_block = new char[size];
     file.read(temp_block, size);
     file.close();
-    random_seed = (unsigned int) int(temp_block);
+    random_seed = (unsigned int) temp_block;
     delete[] temp_block;
     return random_seed;
   } else {
@@ -127,14 +127,16 @@ unsigned int GetRandInt(){
   }
 }
 
-long GetRandLong(){
-
-}
+//long GetRandLong(){
+//
+//}
 
 
 void SendS2SJoinRequest(Server server, std::string channel){
-  struct s2s_request_join join;
-  memcpy(join.req_channel, sizeof(channel), channel);
+  std::cout << server << std::endl;
+  std::cout << channel << std::endl;
+//  struct s2s_request_join join;
+//  memcpy(join.req_channel, sizeof(channel), channel);
   for(int i = 0; i < 10; i ++){
     srand(GetRandInt());
     std::cout << rand() << std::endl;
@@ -619,7 +621,7 @@ int main(int argc, char *argv[]) {
   for(auto ser : server_list){
     std::cout << ser.ip << ":" << ser.port << std::endl;
   }
-
+  
   while (1) {
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
