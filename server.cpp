@@ -106,13 +106,9 @@ void CreateSocket(char *domain, const char *port) {
   hints.ai_socktype = SOCK_DGRAM;
   hints.ai_protocol = 0;
 
-  struct sockaddr_in temp_server;
   struct hostent *he;
   struct in_addr **addr_list;
   char ip[100];
-
-  temp_server.sin_family = AF_INET;
-  temp_server.sin_port = htons(atoi(port));
 
   if ((he = gethostbyname(domain)) == NULL) {
     puts("error resolving hostname..");
@@ -120,34 +116,27 @@ void CreateSocket(char *domain, const char *port) {
   }
   addr_list = (struct in_addr **) he->h_addr_list;
   strcpy(ip, inet_ntoa(*addr_list[0]));
-//  for(int i = 0; addr_list[i] != NULL; i++){
-//    strcpy(ip, inet_ntoa(*addr_list[i]));
-//    break;
-//  }
   std::cout << "IP " << ip << std::endl;
-  memcpy(&temp_server.sin_addr, he->h_addr_list[0], (size_t) he->h_length);
-  std::cout << "server address regular " << temp_server.sin_addr.s_addr << std::endl;
-//  std::cout << "server address converted" << ntohl(he->h_addr) << std::endl;
 
-  if ((status = getaddrinfo(domain, port, &hints, &server_info_tmp)) != 0) {
-    std::cerr << "server: unable to resolve address: " << gai_strerror(status) << std::endl;
-    exit(1);
-  }
-
-  for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
-    if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
-      continue;
-    }
-    if (connect(client_socket, server_info->ai_addr, server_info->ai_addrlen) != -1) {
-      fcntl(client_socket, F_SETFL, O_NONBLOCK);
-      break; // Success
-    }
-    close(client_socket);
-  }
-
-  if (server_info == NULL) {
-    Error("server: all sockets failed to connect");
-  }
+//  if ((status = getaddrinfo(domain, port, &hints, &server_info_tmp)) != 0) {
+//    std::cerr << "server: unable to resolve address: " << gai_strerror(status) << std::endl;
+//    exit(1);
+//  }
+//
+//  for (server_info = server_info_tmp; server_info != NULL; server_info = server_info->ai_next) {
+//    if ((client_socket = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol)) < 0) {
+//      continue;
+//    }
+//    if (connect(client_socket, server_info->ai_addr, server_info->ai_addrlen) != -1) {
+//      fcntl(client_socket, F_SETFL, O_NONBLOCK);
+//      break; // Success
+//    }
+//    close(client_socket);
+//  }
+//
+//  if (server_info == NULL) {
+//    Error("server: all sockets failed to connect");
+//  }
 }
 
 
