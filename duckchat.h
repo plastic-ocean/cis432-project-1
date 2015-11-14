@@ -105,7 +105,6 @@ struct s2s_request_leave {
 
 struct s2s_request_say {
     long message_id; /* identifier to determine message */
-    int
     char req_channel[CHANNEL_MAX];
 } packed;
 
