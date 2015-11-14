@@ -27,7 +27,7 @@
 #include "duckchat.h"
 
 // Add the required debugging text for all messages received from clients.
-// TODO Add support to handle the additional command line arguments and setup the topology.
+// Add support to handle the additional command line arguments and setup the topology.
 // TODO Add support for broadcasting Joins when a user joins a channel.
 // TODO Add support for forwarding Joins from another server.
 // TODO Add support for Server-to-Server Say messages, including loop detection.
@@ -577,6 +577,10 @@ int main(int argc, char *argv[]) {
     std::cout << ser.ip << ":" << ser.port << std::endl;
   }
 
+  std::cout << sizeof(1) << std::endl;
+  std::cout << sizeof((long)1) << std::endl;
+  std::cout << sizeof((double)1) << std::endl;
+  std::cout << sizeof((unsigned long)1) << std::endl;
   while (1) {
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
