@@ -94,12 +94,12 @@ void Error(const char *message) {
  * @domain is the domain to connect to.
  * @port is the port to connect on.
  */
-void CreateSocket(char *domain, const char *port) {
+void CreateSocket(char *domain) {
   struct addrinfo hints;
-  struct addrinfo *server_info_tmp;
-  int status;
-  int client_socket;
-  struct addrinfo *server_info;
+//  struct addrinfo *server_info_tmp;
+//  int status;
+//  int client_socket;
+//  struct addrinfo *server_info;
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = AF_UNSPEC;
@@ -111,8 +111,7 @@ void CreateSocket(char *domain, const char *port) {
   char ip[100];
 
   if ((he = gethostbyname(domain)) == NULL) {
-    puts("error resolving hostname..");
-    exit(1);
+    Error("error resolving hostname");
   }
   addr_list = (struct in_addr **) he->h_addr_list;
   strcpy(ip, inet_ntoa(*addr_list[0]));
@@ -569,7 +568,7 @@ int main(int argc, char *argv[]) {
   void* buffer[kBufferSize];
   int port;
   char *domain;
-  const char *port_str;
+//  const char *port_str;
 
   if (argc < 3) {
     std::cerr << "Usage: ./server domain_name port_num" << std::endl;
@@ -578,7 +577,7 @@ int main(int argc, char *argv[]) {
 
   domain = argv[1];
   port = atoi(argv[2]);
-  port_str = argv[2];
+//  port_str = argv[2];
 
   memset((char *) &server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
@@ -593,7 +592,7 @@ int main(int argc, char *argv[]) {
     Error("server: bind failed\n");
   }
 
-  CreateSocket(domain, port_str);
+  CreateSocket(domain);
 
   while (1) {
     struct sockaddr_in client_addr;
