@@ -327,7 +327,8 @@ void HandleLeaveRequest(Server server, void *buffer, in_addr_t request_address, 
 
         if (it != channel->users.end()) {
           channel->users.remove(*it);
-          std::cout << user.first << " leaves channel " << channel->name << std::endl;
+          std::cout << server.ip << ":" << server.port << " " << user.second->ip << ":"
+          << request_port << " recv Request leave " << user.first << " " << channel->name << std::endl;
           if (channel->users.size() == 0) {
             channels.erase(channel->name);
             std::cout << "server: removing empty channel " << channel->name << std::endl;
