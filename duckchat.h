@@ -94,18 +94,21 @@ struct request_keep_alive {
 
 /* structs used for server to server communications */
 struct s2s_request_join {
-    long message_id; /* identifier to determine message */
+    int message_id; /* identifier to determine message */
     char req_channel[CHANNEL_MAX];
 } packed;
 
 struct s2s_request_leave {
-    long message_id; /* identifier to determine message */
+    int message_id; /* identifier to determine message */
     char req_channel[CHANNEL_MAX];
 } packed;
 
 struct s2s_request_say {
-    long message_id; /* identifier to determine message */
+    int message_id; /* identifier to determine message */
+    long uniq_id; /* unique identifier */
+    char req_username[USERNAME_MAX];
     char req_channel[CHANNEL_MAX];
+    char req_text[SAY_MAX];
 } packed;
 
 

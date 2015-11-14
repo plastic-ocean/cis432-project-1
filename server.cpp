@@ -22,6 +22,7 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <fstream>
 
 #include "server.h"
 #include "duckchat.h"
@@ -106,6 +107,38 @@ void Error(const char *message) {
 //  perror(message);
   std::cerr << message << std::endl;
   exit(1);
+}
+
+
+unsigned int GetRandInt(){
+  unsigned int random_seed;
+  std::ifstream file("dev/urandom", std::ios::binary);
+  if(file.is_open()){
+    char * temp_block;
+    int size = sizeof(int);
+    temp_block = new char[size];
+    file.read(temp_block, size);
+    file.close();
+    random_seed = (unsigned int) int(temp_block);
+    delete[] temp_block;
+    return random_seed;
+  } else {
+    Error("Failed to read /dev/urandom");
+  }
+}
+
+long GetRandLong(){
+
+}
+
+
+void SendS2SJoinRequest(Server server, std::string channel){
+  struct s2s_request_join join;
+  memcpy(join.req_channel, sizeof(channel), channel);
+  for(int i = 0; i < 10; i ++){
+    srand(GetRandInt());
+    std::cout << rand() << std::endl;
+  }
 }
 
 
@@ -244,6 +277,8 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
     channel = std::make_shared<Channel>(join_request.req_channel);
   }
 
+  SendS2SJoinRequest(server, channel->name);
+
   for (auto user : users) {
     unsigned short current_port = user.second->port;
     in_addr_t current_address = user.second->address;
@@ -271,6 +306,11 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
     }
   }
 }
+
+
+//void HandleS2SJoinRequest (Server server, void *buffer, in_addr_t request_address, unsigned short request_port){
+//
+//}
 
 
 /**
@@ -532,6 +572,9 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
     case REQ_WHO:
       HandleWhoRequest(server, buffer, request_address, request_port);
       break;
+    case REQ_S2S_JOIN:
+      HandleS2SJoinRequest(server, buffer, request_address, request_port);
+      break;
     default:
       break;
   }
@@ -577,10 +620,6 @@ int main(int argc, char *argv[]) {
     std::cout << ser.ip << ":" << ser.port << std::endl;
   }
 
-  std::cout << sizeof(1) << std::endl;
-  std::cout << sizeof((long)1) << std::endl;
-  std::cout << sizeof((double)1) << std::endl;
-  std::cout << sizeof((unsigned long)1) << std::endl;
   while (1) {
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
