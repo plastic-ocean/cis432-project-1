@@ -119,8 +119,8 @@ unsigned int GetRandInt(){
     temp_block = new char[size];
     file.read(temp_block, size);
     file.close();
-    std::cout << "temp block " << temp_block <<std::endl;
-//    random_seed = (unsigned char)temp_block;
+    random_seed = static_cast<unsigned int>(*temp_block);
+    std::cout << "rand seed " << random_seed <<std::endl;
     delete[] temp_block;
     random_seed = 0;
   } else {
