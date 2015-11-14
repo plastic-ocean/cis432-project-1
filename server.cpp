@@ -73,6 +73,7 @@ public:
   std::string host_name;
   std::string ip;
   int port;
+  int socket;
 };
 
 
@@ -102,7 +103,7 @@ void Error(const char *message) {
  * @domain is the domain to connect to.
  * @port is the port to connect on.
  */
-Server GetServerInfo(char *domain, int port) {
+Server GetServerInfo(char *domain, int port, int server_socket) {
   Server temp_server;
   struct hostent *he;
   struct in_addr **addr_list;
@@ -116,6 +117,7 @@ Server GetServerInfo(char *domain, int port) {
   temp_server.host_name = domain;
   temp_server.port = port;
   temp_server.ip = ip;
+  temp_server.socket;
   return temp_server;
 }
 
@@ -178,7 +180,7 @@ void HandleError(int server_socket, std::string channel, std::string type, in_ad
  * @request_address is the user's address.
  * @request_port is the user's port.
  */
-void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short request_port, Server server) {
+void HandleLoginRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request_login login_request;
   memcpy(&login_request, buffer, sizeof(struct request_login));
 
@@ -234,7 +236,7 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
  * @request_address is the user's address.
  * @request_port is the user's port.
  */
-void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short request_port, Server server) {
+void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request_join join_request;
   memcpy(&join_request, buffer, sizeof(struct request_join));
   bool is_new_channel = true;
@@ -291,7 +293,7 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
  * @request_address is the user's address.
  * @request_port is the user's port.
  */
-void HandleLeaveRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
+void HandleLeaveRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
   std::shared_ptr<Channel> channel;
   std::string current_channel;
   std::list<std::shared_ptr<User>>::const_iterator it;
@@ -333,7 +335,7 @@ void HandleLeaveRequest(int server_socket, void *buffer, in_addr_t request_addre
         }
         break;
       } else {
-        HandleError(server_socket, std::string(current_channel), "leave", request_address, request_port);
+        HandleError(server.socket, std::string(current_channel), "leave", request_address, request_port);
       }
 
     }
@@ -349,7 +351,7 @@ void HandleLeaveRequest(int server_socket, void *buffer, in_addr_t request_addre
  * @request_address is the user's address.
  * @request_port is the user's port.
  */
-void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
+void HandleSayRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request_say say_request;
   memcpy(&say_request, buffer, sizeof(struct request_say));
 
@@ -377,11 +379,13 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
 
         size_t message_size = sizeof(struct text_say);
 
-        if (sendto(server_socket, &say, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+        if (sendto(server.socket, &say, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
           Error("server: failed to send say\n");
         }
       }
-      std::cout << user.second->name << " sends say message in " << say_request.req_channel << std::endl;
+      std::cout << server.ip << ":" << server.port << " " << user.second->ip << ":"
+      << request_port << " recv Request say " << user.first << " " << say_request.req_channel
+      << " \"" << say_request.req_text << "\"" << std::endl;
       break;
     }
   }
@@ -395,7 +399,7 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
  * @request_address is the address to send to.
  * @request_port is the port to send to.
  */
-void HandleListRequest(int server_socket, in_addr_t request_address, unsigned short request_port) {
+void HandleListRequest(Server server, in_addr_t request_address, unsigned short request_port) {
   struct sockaddr_in client_addr;
   size_t list_size = sizeof(text_list) + (channels.size() * sizeof(channel_info));
   struct text_list *list = (text_list *) malloc(list_size);
@@ -421,7 +425,7 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
       client_addr.sin_port = port;
       client_addr.sin_addr.s_addr = address;
 
-      if (sendto(server_socket, list, list_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+      if (sendto(server.socket, list, list_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
         Error("server: failed to send list\n");
       }
 
@@ -441,7 +445,7 @@ void HandleListRequest(int server_socket, in_addr_t request_address, unsigned sh
  * @request_address is the address to send to.
  * @request_port is the port to send to.
  */
-void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port) {
+void HandleWhoRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct sockaddr_in client_addr;
   struct request_who who_request;
   memcpy(&who_request, buffer, sizeof(struct request_who));
@@ -458,7 +462,7 @@ void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address
 
   if (!is_channel) {
     // send error
-    HandleError(server_socket, std::string(who_request.req_channel), "who", request_address, request_port);
+    HandleError(server.socket, std::string(who_request.req_channel), "who", request_address, request_port);
     return;
   }
 
@@ -492,7 +496,7 @@ void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address
       client_addr.sin_port = port;
       client_addr.sin_addr.s_addr = address;
 
-      if (sendto(server_socket, who, who_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+      if (sendto(server.socket, who, who_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
         Error("server: failed to send who\n");
       }
 
@@ -513,32 +517,32 @@ void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address
  * @request_address is the address to send to.
  * @request_port is the port to send to.
  */
-void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port, Server server) {
+void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request current_request;
   memcpy(&current_request, buffer, sizeof(struct request));
   request_t request_type = current_request.req_type;
 
   switch(request_type) {
     case REQ_LOGIN:
-      HandleLoginRequest(buffer, request_address, request_port, server);
+      HandleLoginRequest(server, buffer, request_address, request_port);
       break;
     case REQ_LOGOUT:
       HandleLogoutRequest(buffer, request_address, request_port);
       break;
     case REQ_JOIN:
-      HandleJoinRequest(buffer, request_address, request_port, server);
+      HandleJoinRequest(server, buffer, request_address, request_port);
       break;
     case REQ_LEAVE:
-      HandleLeaveRequest(server_socket, buffer, request_address, request_port);
+      HandleLeaveRequest(server, buffer, request_address, request_port);
       break;
     case REQ_SAY:
-      HandleSayRequest(server_socket, buffer, request_address, request_port);
+      HandleSayRequest(server, buffer, request_address, request_port);
       break;
     case REQ_LIST:
-      HandleListRequest(server_socket, request_address, request_port);
+      HandleListRequest(server, request_address, request_port);
       break;
     case REQ_WHO:
-      HandleWhoRequest(server_socket, buffer, request_address, request_port);
+      HandleWhoRequest(server, buffer, request_address, request_port);
       break;
     default:
       break;
@@ -577,17 +581,17 @@ int main(int argc, char *argv[]) {
     Error("server: bind failed\n");
   }
 
-  server = GetServerInfo(domain, port);
+  server = GetServerInfo(domain, port, server_socket);
 
   while (1) {
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
-    receive_len = recvfrom(server_socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
+    receive_len = recvfrom(server.socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
 
     if (receive_len > 0) {
       buffer[receive_len] = 0;
 
-      ProcessRequest(server_socket, buffer, client_addr.sin_addr.s_addr, client_addr.sin_port, server);
+      ProcessRequest(server, buffer, client_addr.sin_addr.s_addr, client_addr.sin_port);
     }
   }
 }
