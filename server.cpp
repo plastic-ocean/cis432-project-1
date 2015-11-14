@@ -119,10 +119,11 @@ void CreateSocket(char *domain, const char *port) {
     exit(1);
   }
   addr_list = (struct in_addr **) he->h_addr_list;
-  for(int i = 0; addr_list[i] != NULL; i++){
-    strcpy(ip, inet_ntoa(*addr_list[i]));
-    break;
-  }
+  strcpy(ip, inet_ntoa(*addr_list[0]));
+//  for(int i = 0; addr_list[i] != NULL; i++){
+//    strcpy(ip, inet_ntoa(*addr_list[i]));
+//    break;
+//  }
   std::cout << "IP " << ip << std::endl;
   memcpy(&temp_server.sin_addr, he->h_addr_list[0], (size_t) he->h_length);
   std::cout << "server address regular " << temp_server.sin_addr.s_addr << std::endl;
