@@ -141,9 +141,8 @@ void SendS2SJoinRequest(Server server, std::string channel){
   std::cout << channel << std::endl;
 //  struct s2s_request_join join;
 //  memcpy(join.req_channel, sizeof(channel), channel);
+  srand(GetRandInt());
   for(int i = 0; i < 10; i ++){
-//    srand(GetRandInt());
-    srand(time(NULL));
     std::cout << rand() << std::endl;
   }
 }
