@@ -65,7 +65,7 @@ public:
   in_addr_t address;
   unsigned short port;
 
-  User(std::string name, in_addr_t address, unsigned short port): name(name), address(address), port(port) {};
+  User(std::string ip, std::string name, in_addr_t address, unsigned short port): ip(ip), name(name), address(address), port(port) {};
 };
 
 class Server {
@@ -185,7 +185,7 @@ void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short 
   char ip[INET_ADDRSTRLEN];
   inet_ntop(AF_INET, &request_address, ip, INET_ADDRSTRLEN);
 
-  std::shared_ptr<User> current_user = std::make_shared<User>(login_request.req_username, request_address, request_port);
+  std::shared_ptr<User> current_user = std::make_shared<User>(ip, login_request.req_username, request_address, request_port);
   users.insert({std::string(login_request.req_username), current_user});
 
 
@@ -234,7 +234,7 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
  * @request_address is the user's address.
  * @request_port is the user's port.
  */
-void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short request_port) {
+void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short request_port, Server server) {
   struct request_join join_request;
   memcpy(&join_request, buffer, sizeof(struct request_join));
   bool is_new_channel = true;
@@ -259,7 +259,8 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
     unsigned short current_port = user.second->port;
     in_addr_t current_address = user.second->address;
     if (current_port == request_port && current_address == request_address) {
-      std::cout << "server: " << user.first << " joins channel "<< channel->name << std::endl;
+      std::cout << server.ip << ":" << server.port << " " << user.second->ip << ":"
+      << request_port << " recv Request join " << user.first << " " << channel << std::endl;
 
       is_channel_user = false;
       for (auto u : channel->users) {
@@ -525,7 +526,7 @@ void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, 
       HandleLogoutRequest(buffer, request_address, request_port);
       break;
     case REQ_JOIN:
-      HandleJoinRequest(buffer, request_address, request_port);
+      HandleJoinRequest(buffer, request_address, request_port, server);
       break;
     case REQ_LEAVE:
       HandleLeaveRequest(server_socket, buffer, request_address, request_port);
