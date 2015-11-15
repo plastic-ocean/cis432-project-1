@@ -136,7 +136,7 @@ unsigned int GetRandInt() {
     file.read(temp_block, size);
     file.close();
     random_seed = static_cast<unsigned int>(*temp_block);
-    std::cout << "rand seed " << random_seed <<std::endl;
+//    std::cout << "rand seed " << random_seed <<std::endl;
     delete[] temp_block;
     random_seed = 0;
   } else {
@@ -171,7 +171,7 @@ void SendS2SJoinRequest(Server server, std::string channel) {
 //    server_addr.sin_port = htons(adj_server.port);
 //    inet_pton(AF_INET, adj_server.ip.c_str(), &server_addr.sin_addr.s_addr);
 
-    if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &adj_server.addr_info, sizeof(struct sockaddr_in)) < 0) {
+    if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &adj_server.addr_info, sizeof(adj_server.addr_info)) < 0) {
       Error("server: failed to send s2s join\n");
     }
   }
