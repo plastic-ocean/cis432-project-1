@@ -84,7 +84,7 @@ public:
   Server(std::string host_name, int port, int socket): host_name(host_name), port(port), socket(socket) {
     struct hostent *he;
     struct in_addr **addr_list;
-    char temp_ip[100];
+//    char temp_ip[100];
 
     if ((he = gethostbyname(host_name.c_str())) == NULL) {
 //      std::string temp_str = "error resolving hostname " + host_name;
