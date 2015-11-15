@@ -635,13 +635,12 @@ int main(int argc, char *argv[]) {
   }
 
   domain = argv[1];
-//  port = atoi(argv[2]);
   port = argv[2];
 
   memset((char *) &server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  server_addr.sin_port = htons(port);
+  server_addr.sin_port = htons(atoi(port));
 
   if ((server_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     Error("server: can't open socket\n");
@@ -654,8 +653,9 @@ int main(int argc, char *argv[]) {
   Server server = Server(domain, port, server_socket);
 
   for (int i = 3; i < argc; i+=2) {
-    servers.push_back(Server(argv[i], atoi(argv[i + 1]), -1));
+    servers.push_back(Server(argv[i], argv[i + 1], -1));
   }
+
   for (auto serv : servers) {
     std::cout << serv.ip << ":" << serv.port << std::endl;
   }
