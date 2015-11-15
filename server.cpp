@@ -87,12 +87,13 @@ public:
     char temp_ip[100];
 
     if ((he = gethostbyname(host_name.c_str())) == NULL) {
-      std::string temp_str = "error resolving hostname " + host_name;
-      Error(temp_str.c_str());
+//      std::string temp_str = "error resolving hostname " + host_name;
+      Error("error resolving hostname " + host_name);
     }
+
     addr_list = (struct in_addr **) he->h_addr_list;
-    strcpy(temp_ip, inet_ntoa(*addr_list[0]));
-    ip = std::string(temp_ip);
+//    strcpy(temp_ip, inet_ntoa(*addr_list[0]));
+    ip = std::string(inet_ntoa(*addr_list[0]));
   };
 };
 
@@ -108,8 +109,7 @@ std::list<Server> servers;
 /**
  * Prints an error message and exists.
  */
-void Error(const char *message) {
-//  perror(message);
+void Error(std::string message) {
   std::cerr << message << std::endl;
   exit(1);
 }
