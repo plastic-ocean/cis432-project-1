@@ -128,6 +128,7 @@ void Error(std::string message) {
 unsigned int GetRandInt() {
   unsigned int random_seed;
   std::ifstream file("/dev/urandom", std::ios::binary);
+  std::cout << "getting rand seed" << std::endl;
   
   if (file.is_open()) {
     char * temp_block;
