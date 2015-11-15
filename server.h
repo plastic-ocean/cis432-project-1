@@ -14,7 +14,7 @@ int kBufferSize = 2048;
 class Channel;
 class User;
 
-void Error(const char *message);
+void Error(std::string message);
 void CreateSocket(char *domain, const char *port);
 void HandleError(int server_socket, std::string channel, std::string type, in_addr_t request_address, unsigned short request_port);
 void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
