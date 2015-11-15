@@ -84,15 +84,12 @@ public:
   Server(std::string host_name, int port, int socket): host_name(host_name), port(port), socket(socket) {
     struct hostent *he;
     struct in_addr **addr_list;
-//    char temp_ip[100];
 
     if ((he = gethostbyname(host_name.c_str())) == NULL) {
-//      std::string temp_str = "error resolving hostname " + host_name;
       Error("error resolving hostname " + host_name);
     }
 
     addr_list = (struct in_addr **) he->h_addr_list;
-//    strcpy(temp_ip, inet_ntoa(*addr_list[0]));
     ip = std::string(inet_ntoa(*addr_list[0]));
   };
 };
@@ -158,8 +155,8 @@ void SendS2SJoinRequest(Server server, std::string channel) {
     // TODO figure out why failed to send s2s join; try storing the preconverted ip in Server and use that instead of ip
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = (in_port_t) adj_server.port;
-    server_addr.sin_addr.s_addr = (in_addr_t) atoi(adj_server.ip.c_str());
+    server_addr.sin_port = htons(adj_server.port);
+    inet_pton(AF_INET, adj_server.ip.c_str(), &server_addr.sin_addr.s_addr);
 
     if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &adj_server, sizeof(server_addr)) < 0) {
       Error("server: failed to send s2s join\n");
@@ -334,9 +331,10 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
 }
 
 
-//void HandleS2SJoinRequest (Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
-//
-//}
+void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
+  std::cout << server.host_name << " received S2S join request: " << buffer << request_address << request_port <<
+      std::endl;
+}
 
 
 /**
@@ -599,7 +597,7 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
       HandleWhoRequest(server, buffer, request_address, request_port);
       break;
     case REQ_S2S_JOIN:
-//      HandleS2SJoinRequest(server, buffer, request_address, request_port);
+      HandleS2SJoinRequest(server, buffer, request_address, request_port);
       break;
     default:
       break;
@@ -642,8 +640,8 @@ int main(int argc, char *argv[]) {
   for (int i = 3; i < argc; i+=2) {
     servers.push_back(Server(argv[i], atoi(argv[i + 1]), -1));
   }
-  for (auto ser : servers) {
-    std::cout << ser.ip << ":" << ser.port << std::endl;
+  for (auto serv : servers) {
+    std::cout << serv.ip << ":" << serv.port << std::endl;
   }
 
   while (1) {
