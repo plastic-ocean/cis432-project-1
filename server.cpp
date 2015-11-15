@@ -78,15 +78,28 @@ public:
   std::string ip;
   int port;
   int socket;
+  struct addrinfo *addr_info;
   
   Server() {};
 
-  Server(std::string host_name, int port, int socket): host_name(host_name), port(port), socket(socket) {
+  Server(std::string host_name, char *port, int socket): host_name(host_name), port(atoi(port)), socket(socket) {
     struct hostent *he;
     struct in_addr **addr_list;
+    struct addrinfo hints;
+    int status;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_protocol = 0;
+
+    if ((status = getaddrinfo(host_name.c_str(), port, &hints, &addr_info)) != 0) {
+      std::cerr << "server: unable to resolve address: " << gai_strerror(status) << std::endl;
+      exit(1);
+    }
 
     if ((he = gethostbyname(host_name.c_str())) == NULL) {
-      Error("error resolving hostname " + host_name);
+      Error("server: error resolving hostname " + host_name);
     }
 
     addr_list = (struct in_addr **) he->h_addr_list;
@@ -149,16 +162,16 @@ void SendS2SJoinRequest(Server server, std::string channel) {
   size_t message_size = sizeof(struct s2s_request_join);
 
   for (auto adj_server : servers) {
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(struct sockaddr_in));
+//    struct sockaddr_in server_addr;
+//    memset(&server_addr, 0, sizeof(struct sockaddr_in));
 
     // TODO figure out why failed to send s2s join; try storing the preconverted ip in Server and use that instead of ip
 
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(adj_server.port);
-    inet_pton(AF_INET, adj_server.ip.c_str(), &server_addr.sin_addr.s_addr);
+//    server_addr.sin_family = AF_INET;
+//    server_addr.sin_port = htons(adj_server.port);
+//    inet_pton(AF_INET, adj_server.ip.c_str(), &server_addr.sin_addr.s_addr);
 
-    if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &adj_server, sizeof(server_addr)) < 0) {
+    if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &adj_server.addr_info, sizeof(struct sockaddr_in)) < 0) {
       Error("server: failed to send s2s join\n");
     }
   }
@@ -611,8 +624,10 @@ int main(int argc, char *argv[]) {
   int server_socket;
   int receive_len;
   void* buffer[kBufferSize];
-  int port;
+//  int port;
   char *domain;
+  char *port_str;
+  char *port;
 
   if (argc < 3) {
     std::cerr << "Usage: ./server domain_name port_num" << std::endl;
@@ -620,7 +635,8 @@ int main(int argc, char *argv[]) {
   }
 
   domain = argv[1];
-  port = atoi(argv[2]);
+//  port = atoi(argv[2]);
+  port = argv[2];
 
   memset((char *) &server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
