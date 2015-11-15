@@ -162,16 +162,16 @@ void SendS2SJoinRequest(Server server, std::string channel) {
   size_t message_size = sizeof(struct s2s_request_join);
 
   for (auto adj_server : servers) {
-//    struct sockaddr_in server_addr;
-//    memset(&server_addr, 0, sizeof(struct sockaddr_in));
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(struct sockaddr_in));
 
     // TODO figure out why failed to send s2s join; try storing the preconverted ip in Server and use that instead of ip
 
-//    server_addr.sin_family = AF_INET;
-//    server_addr.sin_port = htons(adj_server.port);
-//    inet_pton(AF_INET, adj_server.ip.c_str(), &server_addr.sin_addr.s_addr);
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(adj_server.port);
+    inet_pton(AF_INET, adj_server.ip.c_str(), &server_addr.sin_addr.s_addr);
 
-    if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &adj_server.addr_info, sizeof(adj_server.addr_info)) < 0) {
+    if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
       Error("server: failed to send s2s join\n");
     }
   }
