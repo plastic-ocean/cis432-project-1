@@ -52,6 +52,7 @@ public:
   Channel(std::string name): name(name) {};
 };
 
+
 /**
  * A class used to keep track of a user
  *
@@ -66,8 +67,10 @@ public:
   in_addr_t address;
   unsigned short port;
 
-  User(std::string ip, std::string name, in_addr_t address, unsigned short port): ip(ip), name(name), address(address), port(port) {};
+  User(std::string ip, std::string name, in_addr_t address, unsigned short port): ip(ip), name(name), address(address),
+                                                                                  port(port) {};
 };
+
 
 class Server {
 public:
@@ -75,6 +78,8 @@ public:
   std::string ip;
   int port;
   int socket;
+  
+  Server() {};
 
   Server(std::string host_name, int port, int socket): host_name(host_name), port(port), socket(socket) {
     struct hostent *he;
@@ -97,7 +102,7 @@ std::map<std::string, std::shared_ptr<User>> users;
 /* channels is a global map of all the channels that currently exist & have users in them */
 std::map<std::string, std::shared_ptr<Channel>> channels;
 /* servers adjacent servers */
-std::list<Server> server_list;
+std::list<Server> servers;
 
 
 /**
@@ -110,10 +115,11 @@ void Error(const char *message) {
 }
 
 
-unsigned int GetRandInt(){
+unsigned int GetRandInt() {
   unsigned int random_seed;
   std::ifstream file("/dev/urandom", std::ios::binary);
-  if(file.is_open()){
+  
+  if (file.is_open()) {
     char * temp_block;
     int size = sizeof(int);
     temp_block = new char[size];
@@ -131,26 +137,30 @@ unsigned int GetRandInt(){
 
 }
 
-//long GetRandLong(){
+//long GetRandLong() {
 //
 //}
 
 
-void SendS2SJoinRequest(Server server, std::string channel){
+void SendS2SJoinRequest(Server server, std::string channel) {
   struct s2s_request_join join;
   memcpy(join.req_channel, channel.c_str(), sizeof(channel));
+
   srand(GetRandInt());
   join.message_id = rand();
+
   size_t message_size = sizeof(struct s2s_request_join);
-  for(auto adj_server : server_list){
+
+  for (auto adj_server : servers) {
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(struct sockaddr_in));
 
-    // TODO figure out why failed to send s2s join
+    // TODO figure out why failed to send s2s join; try storing the preconverted ip in Server and use that instead of ip
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = (in_port_t) adj_server.port;
     server_addr.sin_addr.s_addr = (in_addr_t) atoi(adj_server.ip.c_str());
+
     if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &adj_server, sizeof(server_addr)) < 0) {
       Error("server: failed to send s2s join\n");
     }
@@ -223,7 +233,7 @@ void HandleLoginRequest(Server server, void *buffer, in_addr_t request_address, 
   char ip[INET_ADDRSTRLEN];
   inet_ntop(AF_INET, &request_address, ip, INET_ADDRSTRLEN);
 
-  std::shared_ptr<User> current_user = std::make_shared<User>(ip, login_request.req_username, request_address, request_port);
+  std::shared_ptr<User> current_user = std::make_shared<User>(std::string(ip), login_request.req_username, request_address, request_port);
   users.insert({std::string(login_request.req_username), current_user});
 
 
@@ -290,7 +300,7 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
 
   // If channel is new create it
   if (is_new_channel) {
-    channel = std::make_shared<Channel>(join_request.req_channel);
+    channel = std::make_shared<Channel>(std::string(join_request.req_channel));
   }
 
   SendS2SJoinRequest(server, channel->name);
@@ -324,7 +334,7 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
 }
 
 
-//void HandleS2SJoinRequest (Server server, void *buffer, in_addr_t request_address, unsigned short request_port){
+//void HandleS2SJoinRequest (Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
 //
 //}
 
@@ -629,10 +639,10 @@ int main(int argc, char *argv[]) {
 
   Server server = Server(domain, port, server_socket);
 
-  for(int i = 3; i < argc; i+=2){
-    server_list.push_back(Server(argv[i], atoi(argv[i+1]), -1));
+  for (int i = 3; i < argc; i+=2) {
+    servers.push_back(Server(argv[i], atoi(argv[i + 1]), -1));
   }
-  for(auto ser : server_list){
+  for (auto ser : servers) {
     std::cout << ser.ip << ":" << ser.port << std::endl;
   }
 
