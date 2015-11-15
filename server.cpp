@@ -138,13 +138,12 @@ unsigned int GetRandInt() {
     random_seed = static_cast<unsigned int>(*temp_block);
 //    std::cout << "rand seed " << random_seed <<std::endl;
     delete[] temp_block;
-    random_seed = 0;
   } else {
     random_seed = 0;
     Error("Failed to read /dev/urandom");
   }
-  return random_seed;
 
+  return random_seed;
 }
 
 //long GetRandLong() {
