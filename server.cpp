@@ -620,13 +620,10 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
 
 int main(int argc, char *argv[]) {
   struct sockaddr_in server_addr;
-
   int server_socket;
   int receive_len;
   void* buffer[kBufferSize];
-//  int port;
   char *domain;
-  char *port_str;
   char *port;
 
   if (argc < 3) {
