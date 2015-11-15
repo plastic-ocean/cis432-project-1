@@ -8,8 +8,8 @@ SERVER=server
 SERVER_NAME=`echo $SERVER | sed 's#.*/\(.*\)#\1#g'`
 
 # Generate a simple two-server topology
-$SERVER localhost 5050 localhost 5021 &
-$SERVER localhost 5051 localhost 5020 &
+$SERVER localhost 5020 localhost 5021 &
+$SERVER localhost 5021 localhost 5020 &
 
 # Generate a capital-H shaped topology
 #$SERVER localhost 4000 localhost 4001 &
