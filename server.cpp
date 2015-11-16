@@ -78,7 +78,6 @@ public:
   std::string ip;
   int port;
   int socket;
-  struct addrinfo *addr_info;
   
   Server() {};
 
@@ -87,16 +86,6 @@ public:
     struct in_addr **addr_list;
     struct addrinfo hints;
     int status;
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_protocol = 0;
-
-    if ((status = getaddrinfo(host_name.c_str(), port, &hints, &addr_info)) != 0) {
-      std::cerr << "server: unable to resolve address: " << gai_strerror(status) << std::endl;
-      exit(1);
-    }
 
     if ((he = gethostbyname(host_name.c_str())) == NULL) {
       Error("server: error resolving hostname " + host_name);
