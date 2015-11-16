@@ -657,6 +657,7 @@ int main(int argc, char *argv[]) {
     servers.insert({key, adj_server});
   }
 
+  std::cout << "Servers:" << std::endl;
   for (auto adj_server : servers) {
     std::cout << adj_server.second->ip << ":" << adj_server.second->port << std::endl;
   }
