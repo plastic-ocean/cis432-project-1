@@ -136,7 +136,7 @@ unsigned int GetRandSeed() {
 
 
 /**
- * Gets a new channel or retreives existing channels from the channels map.
+ * Gets a channels from the channels map or creates a new channel.
  *
  * @name is the name of the channel to get
  */
@@ -206,9 +206,11 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
   << " recv S2S Join " << join->req_channel << std::endl;
 
   // TODO if this server is not already subscribed to channel: subscribe to channel and forward the message
-
   // TODO don't send s2s join to the server that sent us the request otherwise endless loop!
-//  SendS2SJoinRequest(server, join->req_channel);
+  if (channels.find(join->req_channel) == channels.end()) {
+    GetChannel(join->req_channel); // create
+    SendS2SJoinRequest(server, join->req_channel);
+  }
 }
 
 
@@ -357,8 +359,10 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
     }
   }
 
-  // TODO if server is not subscribed to channel: subscribe to the channel then sends2sjoinrequest
-  SendS2SJoinRequest(server, channel->name);
+  // TODO if server is not subscribed to channel: subscribe to the channel (already subscribed) then sends2sjoinrequest
+  if (channels.find(channel->name) == channels.end()) {
+    SendS2SJoinRequest(server, channel->name);
+  }
 }
 
 
