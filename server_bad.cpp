@@ -45,7 +45,7 @@ public:
 
 
 std::map<std::string, std::shared_ptr<User>> users;
-std::map<std::string, std::shared_ptr<Channel>> channels;
+std::map<std::string, std::shared_ptr<Channel>> user_channels;
 
 
 /**
@@ -63,7 +63,7 @@ void Error(const char *message) {
  * @user is the user to remove.
  */
 void RemoveUser(User *user) {
-  for (auto channel : channels) {
+  for (auto channel : user_channels) {
     for (auto channel_user : channel.second->users) {
       if (channel_user->name == user->name) {
         channel.second->users.remove(channel_user);
@@ -129,7 +129,7 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
       std::cout << "server: " << user.first << " logs out" << std::endl;
 
       users.erase(user.first);
-      for (auto c : channels) {
+      for (auto c : user_channels) {
         for (auto u : c.second->users) {
           if (u->name == user.first) {
             c.second->users.remove(u);
@@ -159,7 +159,7 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
   std::shared_ptr<Channel> channel;
 
   // If channel does exists in global map, set local channel to channel from channels
-  for (auto ch : channels) {
+  for (auto ch : user_channels) {
     if (join_request.req_channel == ch.second->name) {
       is_new_channel = false;
       channel = ch.second;
@@ -192,7 +192,7 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
 
       // Otherwise
       if (is_new_channel) {
-        channels.insert({channel->name, channel});
+        user_channels.insert({channel->name, channel});
       }
       break;
     }
@@ -223,7 +223,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
 
     if (current_port == request_port && current_address == request_address) {
       is_channel = false;
-      for (auto ch : channels) {
+      for (auto ch : user_channels) {
         if (ch.first == current_channel) {
           is_channel = true;
           break;
@@ -231,7 +231,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
       }
 
       if (is_channel) {
-        channel = channels[current_channel];
+        channel = user_channels[current_channel];
 
         for (it = channel->users.begin(); it != channel->users.end(); ++it) {
           if ((*it)->name == user.first) {
@@ -243,7 +243,7 @@ void HandleLeaveRequest(void *buffer, in_addr_t request_address, unsigned short 
           channel->users.remove(*it);
           std::cout << user.first << " leaves channel " << channel->name << std::endl;
           if (channel->users.size() == 0) {
-            channels.erase(channel->name);
+            user_channels.erase(channel->name);
 //            delete(channel);
             std::cout << "server: removing empty channel " << channel->name << std::endl;
           }
@@ -276,7 +276,7 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
     in_addr_t current_address = user.second->address;
 
     if (current_port == request_port && current_address == request_address) {
-      for (auto channel_user : channels[say_request.req_channel]->users) {
+      for (auto channel_user : user_channels[say_request.req_channel]->users) {
         struct sockaddr_in client_addr;
         memset(&client_addr, 0, sizeof(struct sockaddr_in));
 
@@ -315,16 +315,16 @@ void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address
  */
 void HandleListRequest(int server_socket, in_addr_t request_address, unsigned short request_port) {
   struct sockaddr_in client_addr;
-  size_t list_size = sizeof(text_list) + (channels.size() * sizeof(channel_info));
+  size_t list_size = sizeof(text_list) + (user_channels.size() * sizeof(channel_info));
   struct text_list *list = (text_list *) malloc(list_size);
   memset(list, '\0', list_size);;
 
   list->txt_type = TXT_LIST;
-  list->txt_nchannels = (int) channels.size();
+  list->txt_nchannels = (int) user_channels.size();
 
   // Fills the packet's channels array.
   int i = 0;
-  for (auto ch : channels) {
+  for (auto ch : user_channels) {
     strncpy(list->txt_channels[i++].ch_channel, ch.first.c_str(), CHANNEL_MAX);
   }
 
@@ -366,7 +366,7 @@ void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address
 
   int user_list_size = 0;
 
-  for (auto c : channels) {
+  for (auto c : user_channels) {
     if (c.first == who_request.req_channel) {
       user_list_size = (int) c.second->users.size();
     }
@@ -382,7 +382,7 @@ void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address
 
   // Fills the packet's users array with the usernames.
   int i = 0;
-  for (auto ch : channels) {
+  for (auto ch : user_channels) {
     if (ch.first == who_request.req_channel) {
       for (auto u : ch.second->users) {
         strncpy(who->txt_users[i++].us_username, u->name.c_str(), CHANNEL_MAX);
