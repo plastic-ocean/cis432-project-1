@@ -210,7 +210,7 @@ void SendS2SJoinRequest(Server server, std::string channel, std::string request_
     size_t message_size = sizeof(struct s2s_request_join);
 
     for (auto adj_server : servers) {
-      std::string adj_server_ip_port = adj_server.second->ip + ":" + adj_server.second->port;
+      std::string adj_server_ip_port = adj_server.second->ip + ":" + std::to_string(adj_server.second->port);
       if (adj_server_ip_port != request_ip_port) {
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(struct sockaddr_in));
