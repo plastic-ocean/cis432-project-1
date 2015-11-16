@@ -210,18 +210,21 @@ void SendS2SJoinRequest(Server server, std::string channel, std::string request_
     size_t message_size = sizeof(struct s2s_request_join);
 
     for (auto adj_server : servers) {
-      struct sockaddr_in server_addr;
-      memset(&server_addr, 0, sizeof(struct sockaddr_in));
-      server_addr.sin_family = AF_INET;
-      server_addr.sin_port = htons(adj_server.second->port);
-      inet_pton(AF_INET, adj_server.second->ip.c_str(), &server_addr.sin_addr.s_addr);
+      std::string adj_server_ip_port = adj_server.second->ip + ":" + adj_server.second->port;
+      if (adj_server_ip_port != request_ip_port) {
+        struct sockaddr_in server_addr;
+        memset(&server_addr, 0, sizeof(struct sockaddr_in));
+        server_addr.sin_family = AF_INET;
+        server_addr.sin_port = htons(adj_server.second->port);
+        inet_pton(AF_INET, adj_server.second->ip.c_str(), &server_addr.sin_addr.s_addr);
 
-      if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
-        Error("server: failed to send s2s join\n");
+        if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
+          Error("server: failed to send s2s join\n");
+        }
+
+        std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port
+        << " send S2S Join " << channel << std::endl;
       }
-
-      std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port
-      << " send S2S Join " << channel << std::endl;
     }
   }
 }
@@ -232,16 +235,14 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
   char request_ip[INET_ADDRSTRLEN];
   inet_ntop(AF_INET, &request_address, request_ip, INET_ADDRSTRLEN);
 
-  std::ostringstream request_ip_port;
-  request_ip_port << request_ip << ":" << ntohs(request_port) << std::endl;
+  std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
 
-  std::cout << server.ip << ":" << server.port << " " << request_ip_port.str()
+  std::cout << server.ip << ":" << server.port << " " << request_ip_port
   << " recv S2S Join " << join->req_channel << std::endl;
 
-  // TODO don't send s2s join to the server that sent us the request
   if (server_channels.find(join->req_channel) == server_channels.end()) {
     CreateServerChannel(join->req_channel);
-    SendS2SJoinRequest(server, join->req_channel, request_ip_port.str());
+    SendS2SJoinRequest(server, join->req_channel, request_ip_port);
   }
 }
 
