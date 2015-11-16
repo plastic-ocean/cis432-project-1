@@ -155,9 +155,9 @@ unsigned int GetRandInt() {
 void SendS2SJoinRequest(Server server, std::string channel) {
   struct s2s_request_join join;
   memcpy(join.req_channel, channel.c_str(), sizeof(channel));
-
-  srand(GetRandInt());
-  join.message_id = rand();
+  join.req_type = REQ_S2S_JOIN;
+//  srand(GetRandInt());
+//  join.message_id = rand();
 
   size_t message_size = sizeof(struct s2s_request_join);
 
@@ -586,6 +586,8 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
   struct request current_request;
   memcpy(&current_request, buffer, sizeof(struct request));
   request_t request_type = current_request.req_type;
+
+  std::cout << "received type: " << request_type << std::endl;
 
   switch(request_type) {
     case REQ_LOGIN:
