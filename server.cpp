@@ -141,31 +141,46 @@ unsigned int GetRandSeed() {
  * @channel is the channel to send to other servers.
  */
 void SendS2SJoinRequest(Server server, std::string channel) {
-  struct s2s_request_join join;
-  memcpy(join.req_channel, channel.c_str(), sizeof(channel));
-  join.req_type = REQ_S2S_JOIN;
+  size_t servers_size = servers.size();
 
-  size_t message_size = sizeof(struct s2s_request_join);
+  if (servers_size > 0) {
+    struct s2s_request_join join;
+    memcpy(join.req_channel, channel.c_str(), sizeof(channel));
+    join.req_type = REQ_S2S_JOIN;
 
-  for (auto adj_server : servers) {
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(struct sockaddr_in));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(adj_server.port);
-    inet_pton(AF_INET, adj_server.ip.c_str(), &server_addr.sin_addr.s_addr);
+    size_t message_size = sizeof(struct s2s_request_join);
 
-    if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
-      Error("server: failed to send s2s join\n");
+    for (auto adj_server : servers) {
+      struct sockaddr_in server_addr;
+      memset(&server_addr, 0, sizeof(struct sockaddr_in));
+      server_addr.sin_family = AF_INET;
+      server_addr.sin_port = htons(adj_server.port);
+      inet_pton(AF_INET, adj_server.ip.c_str(), &server_addr.sin_addr.s_addr);
+
+      if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
+        Error("server: failed to send s2s join\n");
+      }
+
+      std::cout << server.ip << ":" << server.port << " " << adj_server.ip << ":" << adj_server.port
+      << " send S2S Join " << channel << std::endl;
     }
   }
+
 }
 
 
-void HandleS2SJoinRequest(Server server, void *buffer) {
-  std::cout << server.host_name << " received S2S join request: " << buffer << std::endl;
+void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
+  struct s2s_request_join *join = (struct s2s_request_join *) buffer;
+  char ip[INET_ADDRSTRLEN];
+  inet_ntop(AF_INET, &request_address, ip, INET_ADDRSTRLEN);
+
+  std::cout << server.ip << ":" << server.port << " " << ip << ":" << request_port
+  << " recv S2S Join " << join->req_channel << std::endl;
 
   // TODO if this server is not already subscribed to channel: subscribe to channel and forward the message
-  // TODO read buffer into s2s_request_join to get channel and call SendS2SJoinRequest
+
+  // TODO don't send join request to the server that sent us the request
+  SendS2SJoinRequest(server, join->req_channel);
 }
 
 
@@ -236,7 +251,6 @@ void HandleLoginRequest(Server server, void *buffer, in_addr_t request_address, 
 
   std::shared_ptr<User> current_user = std::make_shared<User>(std::string(ip), login_request.req_username, request_address, request_port);
   users.insert({std::string(login_request.req_username), current_user});
-
 
   std::cout << server.ip << ":" << server.port << " " << ip << ":"
   << request_port << " recv Request login " << login_request.req_username << std::endl;
@@ -596,7 +610,7 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
       HandleWhoRequest(server, buffer, request_address, request_port);
       break;
     case REQ_S2S_JOIN:
-      HandleS2SJoinRequest(server, buffer);
+      HandleS2SJoinRequest(server, buffer, request_address, request_port);
       break;
     default:
       break;
