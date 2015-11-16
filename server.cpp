@@ -35,7 +35,8 @@
 // TODO Add support for sending Leave when a Say cannot be forwarded.
 // TODO Add support for the soft state features.
 // TODO Try several topologies. Verify that trees are formed and pruned correctly.
-// TODO Copy your server code and modify it to send invalid packets to see if you can make your server crash. Fix any bugs you find.
+// TODO Copy your server code and modify it to send invalid packets to see if you can make your server crash.
+// TODO ^ Fix any bugs you find.
 
 
 /**
@@ -194,7 +195,8 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
  * @request_address is the user's address.
  * @request_port is the user's port.
  */
-void HandleError(int server_socket, std::string channel, std::string type, in_addr_t request_address, unsigned short request_port) {
+void HandleError(int server_socket, std::string channel, std::string type, in_addr_t request_address,
+                 unsigned short request_port) {
   std::string message_who = "list users in";
   std::string message_leave = "leave";
   std::string message_type = "";
@@ -229,7 +231,8 @@ void HandleError(int server_socket, std::string channel, std::string type, in_ad
         message_type = message_leave;
       }
 
-      std::cout << "server: " << user.first << " trying to " << message_type << " non-existent channel " << channel << std::endl;
+      std::cout << "server: " << user.first << " trying to " << message_type << " non-existent channel " << channel
+      << std::endl;
 
       break;
     }
@@ -251,7 +254,8 @@ void HandleLoginRequest(Server server, void *buffer, in_addr_t request_address, 
   char ip[INET_ADDRSTRLEN];
   inet_ntop(AF_INET, &request_address, ip, INET_ADDRSTRLEN);
 
-  std::shared_ptr<User> current_user = std::make_shared<User>(std::string(ip), login_request.req_username, request_address, request_port);
+  std::shared_ptr<User> current_user = std::make_shared<User>(std::string(ip), login_request.req_username,
+                                                              request_address, request_port);
   users.insert({std::string(login_request.req_username), current_user});
 
   std::cout << server.ip << ":" << server.port << " " << ip << ":"
@@ -651,6 +655,7 @@ int main(int argc, char *argv[]) {
 
   Server server = Server(domain, port, server_socket);
 
+  // Adds adjacent servers to servers map.
   for (int i = 3; i < argc; i += 2) {
     std::shared_ptr<Server> adj_server = std::make_shared<Server>(std::string(argv[i]), argv[i + 1], -1);
     std::string key = adj_server->ip + ":" + std::to_string(adj_server->port);
