@@ -1,4 +1,4 @@
-// CIS 432 Into to Networks
+// CIS 432 Intro to Networks
 // Programming Project 1
 // Fall 2015
 //
@@ -79,8 +79,6 @@ public:
   std::string ip;
   int port;
   int socket;
-  
-  Server() {};
 
   Server(std::string host_name, char *port, int socket): host_name(host_name), port(atoi(port)), socket(socket) {
     struct hostent *he;
