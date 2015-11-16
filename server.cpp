@@ -125,7 +125,7 @@ void Error(std::string message) {
 }
 
 
-unsigned int GetRandInt() {
+unsigned int GetRandSeed() {
   unsigned int random_seed;
   std::ifstream file("/dev/urandom", std::ios::binary);
   std::cout << "getting rand seed" << std::endl;
@@ -137,7 +137,6 @@ unsigned int GetRandInt() {
     file.read(temp_block, size);
     file.close();
     random_seed = static_cast<unsigned int>(*temp_block);
-//    std::cout << "rand seed " << random_seed <<std::endl;
     delete[] temp_block;
   } else {
     random_seed = 0;
@@ -147,17 +146,11 @@ unsigned int GetRandInt() {
   return random_seed;
 }
 
-//long GetRandLong() {
-//
-//}
-
 
 void SendS2SJoinRequest(Server server, std::string channel) {
   struct s2s_request_join join;
   memcpy(join.req_channel, channel.c_str(), sizeof(channel));
   join.req_type = REQ_S2S_JOIN;
-//  srand(GetRandInt());
-//  join.message_id = rand();
 
   size_t message_size = sizeof(struct s2s_request_join);
 
