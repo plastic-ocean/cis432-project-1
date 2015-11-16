@@ -320,9 +320,6 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
     channel = std::make_shared<Channel>(std::string(join_request.req_channel));
   }
 
-  // TODO if server is not subscribed to channel: subscribe to the channel then sends2sjoinrequest
-  SendS2SJoinRequest(server, channel->name);
-
   for (auto user : users) {
     unsigned short current_port = user.second->port;
     in_addr_t current_address = user.second->address;
@@ -349,6 +346,9 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
       break;
     }
   }
+
+  // TODO if server is not subscribed to channel: subscribe to the channel then sends2sjoinrequest
+  SendS2SJoinRequest(server, channel->name);
 }
 
 
