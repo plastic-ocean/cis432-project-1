@@ -136,6 +136,34 @@ unsigned int GetRandSeed() {
 
 
 /**
+ * Gets a new channel or retreives existing channels from the channels map.
+ *
+ * @name is the name of the channel to get
+ */
+std::shared_ptr<Channel> GetChannel(std::string name) {
+  bool is_new_channel = true;
+  std::shared_ptr<Channel> channel;
+
+  // If channel already exists, get it from channels map
+  for (auto ch : channels) {
+    if (name == ch.second->name) {
+      is_new_channel = false;
+      channel = ch.second;
+      break;
+    }
+  }
+
+  // If channel is new create it
+  if (is_new_channel) {
+    channel = std::make_shared<Channel>(std::string(name));
+    channels.insert({channel->name, channel});
+  }
+
+  return channel;
+}
+
+
+/**
  * Sends a S2S Join to all adjacent servers.
  *
  * @server is this server's info.
@@ -303,23 +331,8 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
 void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct request_join join_request;
   memcpy(&join_request, buffer, sizeof(struct request_join));
-  bool is_new_channel = true;
   bool is_channel_user;
-  std::shared_ptr<Channel> channel;
-
-  // If channel does exists in global map, set local channel to channel from channels
-  for (auto ch : channels) {
-    if (join_request.req_channel == ch.second->name) {
-      is_new_channel = false;
-      channel = ch.second;
-      break;
-    }
-  }
-
-  // If channel is new create it
-  if (is_new_channel) {
-    channel = std::make_shared<Channel>(std::string(join_request.req_channel));
-  }
+  std::shared_ptr<Channel> channel = GetChannel(join_request.req_channel);
 
   for (auto user : users) {
     unsigned short current_port = user.second->port;
@@ -340,10 +353,6 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
         channel->users.push_back(user.second);
       }
 
-      // Otherwise
-      if (is_new_channel) {
-        channels.insert({channel->name, channel});
-      }
       break;
     }
   }
