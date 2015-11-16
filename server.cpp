@@ -86,7 +86,7 @@ public:
     struct in_addr **addr_list;
 
     if ((he = gethostbyname(host_name.c_str())) == NULL) {
-      Error("server: error resolving hostname " + host_name);
+      Error("Failed to resolve hostname " + host_name);
     }
 
     addr_list = (struct in_addr **) he->h_addr_list;
@@ -219,7 +219,7 @@ void SendS2SJoinRequest(Server server, std::string channel, std::string request_
         inet_pton(AF_INET, adj_server.second->ip.c_str(), &server_addr.sin_addr.s_addr);
 
         if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
-          Error("server: failed to send s2s join\n");
+          Error("Failed to send S2S Join\n");
         }
 
         std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port
@@ -282,7 +282,7 @@ void HandleError(int server_socket, std::string channel, std::string type, in_ad
       size_t message_size = sizeof(struct text_error);
 
       if (sendto(server_socket, &error, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
-        Error("server: failed to send error\n");
+        Error("Failed to send error\n");
       }
 
       if (type == "who") {
@@ -291,7 +291,7 @@ void HandleError(int server_socket, std::string channel, std::string type, in_ad
         message_type = message_leave;
       }
 
-      std::cout << "server: " << user.first << " trying to " << message_type << " non-existent channel " << channel
+      std::cout << user.first << " trying to " << message_type << " non-existent channel " << channel
       << std::endl;
 
       break;
@@ -444,7 +444,7 @@ void HandleLeaveRequest(Server server, void *buffer, in_addr_t request_address, 
           << request_port << " recv Request leave " << user.first << " " << channel->name << std::endl;
           if (channel->users.size() == 0) {
             user_channels.erase(channel->name);
-            std::cout << "server: removing empty channel " << channel->name << std::endl;
+            std::cout << "removing empty channel " << channel->name << std::endl;
           }
         }
         break;
@@ -494,7 +494,7 @@ void HandleSayRequest(Server server, void *buffer, in_addr_t request_address, un
         size_t message_size = sizeof(struct text_say);
 
         if (sendto(server.socket, &say, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
-          Error("server: failed to send say\n");
+          Error("Failed to send say\n");
         }
       }
       std::cout << server.ip << ":" << server.port << " " << user.second->ip << ":"
@@ -540,7 +540,7 @@ void HandleListRequest(Server server, in_addr_t request_address, unsigned short 
       client_addr.sin_addr.s_addr = address;
 
       if (sendto(server.socket, list, list_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
-        Error("server: failed to send list\n");
+        Error("Failed to send list\n");
       }
 
       std::cout << "server: " << user.first << " lists channels" << std::endl;
@@ -611,7 +611,7 @@ void HandleWhoRequest(Server server, void *buffer, in_addr_t request_address, un
       client_addr.sin_addr.s_addr = address;
 
       if (sendto(server.socket, who, who_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
-        Error("server: failed to send who\n");
+        Error("Failed to send who\n");
       }
 
       std::cout << "server: " << user.first << " lists users in channel " << who_request.req_channel << std::endl;
@@ -689,11 +689,11 @@ int main(int argc, char *argv[]) {
   server_addr.sin_port = htons(atoi(port));
 
   if ((server_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-    Error("server: can't open socket\n");
+    Error("Failed to open socket\n");
   }
 
   if (bind(server_socket, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
-    Error("server: bind failed\n");
+    Error("Failed to bind socket\n");
   }
 
   Server server = Server(domain, port, server_socket);
