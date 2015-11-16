@@ -101,7 +101,7 @@ std::map<std::string, std::shared_ptr<User>> users;
 /* channels is all the channels that currently exist & have users in them */
 std::map<std::string, std::shared_ptr<Channel>> channels;
 
-/* servers is all adjacent servers */
+/* servers is all adjacent servers; key = "ip:port" */
 std::map<std::string, std::shared_ptr<Server>> servers;
 
 
