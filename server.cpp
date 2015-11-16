@@ -654,7 +654,7 @@ int main(int argc, char *argv[]) {
   for (int i = 3; i < argc; i += 2) {
     std::shared_ptr<Server> adj_server = std::make_shared<Server>(std::string(argv[i]), argv[i + 1], -1);
     std::string key = adj_server->ip + ":" + adj_server->port;
-    users.insert({key, adj_server});
+    servers.insert({key, adj_server});
   }
 
   for (auto adj_server : servers) {
