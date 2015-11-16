@@ -658,7 +658,7 @@ int main(int argc, char *argv[]) {
   }
 
   for (auto adj_server : servers) {
-    std::cout << server.ip << ":" << server.port << adj_server.second->ip << ":" << adj_server.second->port
+    std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port
     << " connected" << std::endl;
   }
 
