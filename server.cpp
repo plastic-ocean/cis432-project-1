@@ -143,12 +143,12 @@ unsigned int GetRandSeed() {
  *
  * @name is the name of the channel to get
  */
-std::shared_ptr<Channel> GetChannel(std::string name, std::map<std::string, std::shared_ptr<Channel>> channel_map) {
+std::shared_ptr<Channel> GetChannel(std::string name) {
   bool is_new_channel = true;
   std::shared_ptr<Channel> channel;
 
   // If channel already exists, get it from channels map
-  for (auto ch : channel_map) {
+  for (auto ch : user_channels) {
     if (name == ch.second->name) {
       is_new_channel = false;
       channel = ch.second;
@@ -159,10 +159,36 @@ std::shared_ptr<Channel> GetChannel(std::string name, std::map<std::string, std:
   // If channel is new create it
   if (is_new_channel) {
     channel = std::make_shared<Channel>(std::string(name));
-    channel_map.insert({channel->name, channel});
+    user_channels.insert({channel->name, channel});
   }
 
   return channel;
+}
+
+
+/**
+ * Gets a channels from the channels map or creates a new channel.
+ *
+ * @name is the name of the channel to get
+ */
+void CreateServerChannel(std::string name) {
+  bool is_new_channel = true;
+  std::shared_ptr<Channel> channel;
+
+  // If channel already exists, get it from channels map
+  for (auto ch : server_channels) {
+    if (name == ch.second->name) {
+      is_new_channel = false;
+      channel = ch.second;
+      break;
+    }
+  }
+
+  // If channel is new create it
+  if (is_new_channel) {
+    channel = std::make_shared<Channel>(std::string(name));
+    server_channels.insert({channel->name, channel});
+  }
 }
 
 
@@ -211,7 +237,7 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
   // TODO if this server is not already subscribed to channel: subscribe to channel and forward the message
   // TODO don't send s2s join to the server that sent us the request otherwise endless loop!
   if (server_channels.find(join->req_channel) == server_channels.end()) {
-    GetChannel(join->req_channel, server_channels); // create server channel
+    CreateServerChannel(join->req_channel);
     SendS2SJoinRequest(server, join->req_channel);
   }
 }
@@ -337,7 +363,7 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
   struct request_join join_request;
   memcpy(&join_request, buffer, sizeof(struct request_join));
   bool is_channel_user;
-  std::shared_ptr<Channel> channel = GetChannel(join_request.req_channel, user_channels);
+  std::shared_ptr<Channel> channel = GetChannel(join_request.req_channel);
 
   for (auto user : users) {
     unsigned short current_port = user.second->port;
@@ -364,7 +390,7 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
 
   // TODO if server is not subscribed to channel: subscribe to the channel (already subscribed) then sends2sjoinrequest
   if (server_channels.find(channel->name) == server_channels.end()) {
-    GetChannel(join_request.req_channel, server_channels);
+    CreateServerChannel(channel->name);
     SendS2SJoinRequest(server, channel->name);
   }
 }
