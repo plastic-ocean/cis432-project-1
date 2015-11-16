@@ -84,8 +84,6 @@ public:
   Server(std::string host_name, char *port, int socket): host_name(host_name), port(atoi(port)), socket(socket) {
     struct hostent *he;
     struct in_addr **addr_list;
-    struct addrinfo hints;
-    int status;
 
     if ((he = gethostbyname(host_name.c_str())) == NULL) {
       Error("server: error resolving hostname " + host_name);
@@ -598,7 +596,7 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
       HandleWhoRequest(server, buffer, request_address, request_port);
       break;
     case REQ_S2S_JOIN:
-      HandleS2SJoinRequest(server, buffer, request_address, request_port);
+      HandleS2SJoinRequest(server, buffer);
       break;
     default:
       break;
