@@ -29,7 +29,7 @@
 
 // Add the required debugging text for all messages received from clients.
 // Add support to handle the additional command line arguments and setup the topology.
-// TODO Add support for broadcasting Joins when a user joins a channel.
+// Add support for broadcasting Joins when a user joins a channel.
 // TODO Add support for forwarding Joins from another server.
 // TODO Add support for Server-to-Server Say messages, including loop detection.
 // TODO Add support for sending Leave when a Say cannot be forwarded.
@@ -171,16 +171,16 @@ void SendS2SJoinRequest(Server server, std::string channel) {
 
 void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct s2s_request_join *join = (struct s2s_request_join *) buffer;
-  char ip[INET_ADDRSTRLEN];
-  inet_ntop(AF_INET, &request_address, ip, INET_ADDRSTRLEN);
+  char request_ip[INET_ADDRSTRLEN];
+  inet_ntop(AF_INET, &request_address, request_ip, INET_ADDRSTRLEN);
 
-  std::cout << server.ip << ":" << server.port << " " << ip << ":" << request_port
+  std::cout << server.ip << ":" << server.port << " " << request_ip << ":" << ntohs(request_port)
   << " recv S2S Join " << join->req_channel << std::endl;
 
   // TODO if this server is not already subscribed to channel: subscribe to channel and forward the message
 
-  // TODO don't send join request to the server that sent us the request
-  SendS2SJoinRequest(server, join->req_channel);
+  // TODO don't send s2s join to the server that sent us the request otherwise endless loop!
+//  SendS2SJoinRequest(server, join->req_channel);
 }
 
 
