@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <fstream>
+#include <sstream>
 
 #include "server.h"
 #include "duckchat.h"
@@ -198,10 +199,10 @@ void CreateServerChannel(std::string name) {
  * @server is this server's info.
  * @channel is the channel to send to other servers.
  */
-void SendS2SJoinRequest(Server server, std::string channel) {
+void SendS2SJoinRequest(Server server, std::string channel, std::string request_ip_port) {
   size_t servers_size = servers.size();
 
-  if (servers_size > 0) {
+  if (servers_size > 0 && servers.find(request_ip_port) == servers.end()) {
     struct s2s_request_join join;
     memcpy(join.req_channel, channel.c_str(), sizeof(channel));
     join.req_type = REQ_S2S_JOIN;
@@ -231,14 +232,16 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
   char request_ip[INET_ADDRSTRLEN];
   inet_ntop(AF_INET, &request_address, request_ip, INET_ADDRSTRLEN);
 
-  std::cout << server.ip << ":" << server.port << " " << request_ip << ":" << ntohs(request_port)
+  std::ostringstream request_ip_port;
+  request_ip_port << request_ip << ":" << ntohs(request_port) << std::endl;
+
+  std::cout << server.ip << ":" << server.port << " " << request_ip_port.str()
   << " recv S2S Join " << join->req_channel << std::endl;
 
-  // TODO if this server is not already subscribed to channel: subscribe to channel and forward the message
-  // TODO don't send s2s join to the server that sent us the request otherwise endless loop!
+  // TODO don't send s2s join to the server that sent us the request
   if (server_channels.find(join->req_channel) == server_channels.end()) {
     CreateServerChannel(join->req_channel);
-    SendS2SJoinRequest(server, join->req_channel);
+    SendS2SJoinRequest(server, join->req_channel, request_ip_port.str());
   }
 }
 
@@ -388,10 +391,9 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
     }
   }
 
-  // TODO if server is not subscribed to channel: subscribe to the channel (already subscribed) then sends2sjoinrequest
   if (server_channels.find(channel->name) == server_channels.end()) {
     CreateServerChannel(channel->name);
-    SendS2SJoinRequest(server, channel->name);
+    SendS2SJoinRequest(server, channel->name, "");
   }
 }
 
