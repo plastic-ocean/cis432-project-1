@@ -95,12 +95,14 @@ public:
 };
 
 
-/* users is a global map of all the users connected to the server */
+/* users is all the users connected to the server */
 std::map<std::string, std::shared_ptr<User>> users;
-/* channels is a global map of all the channels that currently exist & have users in them */
+
+/* channels is all the channels that currently exist & have users in them */
 std::map<std::string, std::shared_ptr<Channel>> channels;
-/* servers adjacent servers */
-std::list<Server> servers;
+
+/* servers is all adjacent servers */
+std::map<std::string, std::shared_ptr<Server>> servers;
 
 
 /**
@@ -154,14 +156,14 @@ void SendS2SJoinRequest(Server server, std::string channel) {
       struct sockaddr_in server_addr;
       memset(&server_addr, 0, sizeof(struct sockaddr_in));
       server_addr.sin_family = AF_INET;
-      server_addr.sin_port = htons(adj_server.port);
-      inet_pton(AF_INET, adj_server.ip.c_str(), &server_addr.sin_addr.s_addr);
+      server_addr.sin_port = htons(adj_server.second->port);
+      inet_pton(AF_INET, adj_server.second->ip.c_str(), &server_addr.sin_addr.s_addr);
 
       if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
         Error("server: failed to send s2s join\n");
       }
 
-      std::cout << server.ip << ":" << server.port << " " << adj_server.ip << ":" << adj_server.port
+      std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port
       << " send S2S Join " << channel << std::endl;
     }
   }
@@ -649,12 +651,14 @@ int main(int argc, char *argv[]) {
 
   Server server = Server(domain, port, server_socket);
 
-  for (int i = 3; i < argc; i+=2) {
-    servers.push_back(Server(argv[i], argv[i + 1], -1));
+  for (int i = 3; i < argc; i += 2) {
+    std::shared_ptr<Server> adj_server = std::make_shared<Server>(std::string(argv[i]), argv[i + 1], -1);
+    std::string key = adj_server->ip + ":" + adj_server->port;
+    users.insert({key, adj_server});
   }
 
-  for (auto serv : servers) {
-    std::cout << serv.ip << ":" << serv.port << std::endl;
+  for (auto adj_server : servers) {
+    std::cout << adj_server.second->ip << ":" << adj_server.second->port << std::endl;
   }
 
   while (1) {
