@@ -136,7 +136,7 @@ unsigned int GetRandSeed() {
 
 
 /**
- * Sends a Join message to all adjacent servers.
+ * Sends a S2S Join to all adjacent servers.
  *
  * @server is this server's info.
  * @channel is the channel to send to other servers.
@@ -166,7 +166,6 @@ void SendS2SJoinRequest(Server server, std::string channel) {
       << " send S2S Join " << channel << std::endl;
     }
   }
-
 }
 
 
@@ -249,15 +248,15 @@ void HandleLoginRequest(Server server, void *buffer, in_addr_t request_address, 
   struct request_login login_request;
   memcpy(&login_request, buffer, sizeof(struct request_login));
 
-  char ip[INET_ADDRSTRLEN];
-  inet_ntop(AF_INET, &request_address, ip, INET_ADDRSTRLEN);
+  char request_ip[INET_ADDRSTRLEN];
+  inet_ntop(AF_INET, &request_address, request_ip, INET_ADDRSTRLEN);
 
-  std::shared_ptr<User> current_user = std::make_shared<User>(std::string(ip), login_request.req_username,
+  std::shared_ptr<User> current_user = std::make_shared<User>(std::string(request_ip), login_request.req_username,
                                                               request_address, request_port);
   users.insert({std::string(login_request.req_username), current_user});
 
-  std::cout << server.ip << ":" << server.port << " " << ip << ":"
-  << request_port << " recv Request login " << login_request.req_username << std::endl;
+  std::cout << server.ip << ":" << server.port << " " << request_ip << ":" << request_port
+  << " recv Request login " << login_request.req_username << std::endl;
 }
 
 
