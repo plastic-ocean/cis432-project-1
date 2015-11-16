@@ -9,7 +9,7 @@
 #ifndef CIS432_PROJECT_1_SERVER_H
 #define CIS432_PROJECT_1_SERVER_H
 
-int kBufferSize = 2048;
+size_t kBufferSize = 2048;
 
 class Channel;
 class User;

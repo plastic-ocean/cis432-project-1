@@ -136,6 +136,12 @@ unsigned int GetRandSeed() {
 }
 
 
+/**
+ * Sends a Join message to all adjacent servers.
+ *
+ * @server is this server's info.
+ * @channel is the channel to send to other servers.
+ */
 void SendS2SJoinRequest(Server server, std::string channel) {
   struct s2s_request_join join;
   memcpy(join.req_channel, channel.c_str(), sizeof(channel));
@@ -154,6 +160,14 @@ void SendS2SJoinRequest(Server server, std::string channel) {
       Error("server: failed to send s2s join\n");
     }
   }
+}
+
+
+void HandleS2SJoinRequest(Server server, void *buffer) {
+  std::cout << server.host_name << " received S2S join request: " << buffer << std::endl;
+
+  // TODO if this server is not already subscribed to channel: subscribe to channel and forward the message
+  // TODO read buffer into s2s_request_join to get channel and call SendS2SJoinRequest
 }
 
 
@@ -292,6 +306,7 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
     channel = std::make_shared<Channel>(std::string(join_request.req_channel));
   }
 
+  // TODO if server is not subscribed to channel: subscribe to the channel then sends2sjoinrequest
   SendS2SJoinRequest(server, channel->name);
 
   for (auto user : users) {
@@ -320,12 +335,6 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
       break;
     }
   }
-}
-
-
-void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
-  std::cout << server.host_name << " received S2S join request: " << buffer << request_address << request_port <<
-      std::endl;
 }
 
 
@@ -637,14 +646,14 @@ int main(int argc, char *argv[]) {
   }
 
   while (1) {
-    struct sockaddr_in client_addr;
-    socklen_t client_addr_len = sizeof(client_addr);
-    receive_len = recvfrom(server.socket, buffer, kBufferSize, 0, (struct sockaddr *) &client_addr, &client_addr_len);
+    struct sockaddr_in sock_addr;
+    socklen_t addr_len = sizeof(sock_addr);
+    receive_len = recvfrom(server.socket, buffer, kBufferSize, 0, (struct sockaddr *) &sock_addr, &addr_len);
 
     if (receive_len > 0) {
       buffer[receive_len] = 0;
 
-      ProcessRequest(server, buffer, client_addr.sin_addr.s_addr, client_addr.sin_port);
+      ProcessRequest(server, buffer, sock_addr.sin_addr.s_addr, sock_addr.sin_port);
     }
   }
 }
