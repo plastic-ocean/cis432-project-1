@@ -688,6 +688,9 @@ int main(int argc, char *argv[]) {
   char *domain;
   char *port;
 
+
+
+
   if (argc < 3) {
     std::cerr << "Usage: ./server domain_name port_num" << std::endl;
     exit(1);
@@ -723,10 +726,12 @@ int main(int argc, char *argv[]) {
     << " connected" << std::endl;
   }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
   while (1) {
     struct sockaddr_in sock_addr;
     socklen_t addr_len = sizeof(sock_addr);
-    receive_len = recvfrom(server.socket, buffer, kBufferSize, 0, (struct sockaddr *) &sock_addr, &addr_len);
+    receive_len = (int) recvfrom(server.socket, buffer, kBufferSize, 0, (struct sockaddr *) &sock_addr, &addr_len);
 
     if (receive_len > 0) {
       buffer[receive_len] = 0;
@@ -734,4 +739,5 @@ int main(int argc, char *argv[]) {
       ProcessRequest(server, buffer, sock_addr.sin_addr.s_addr, sock_addr.sin_port);
     }
   }
+#pragma clang diagnostic pop
 }
