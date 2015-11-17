@@ -142,7 +142,7 @@ unsigned int GetRandSeed() {
 
 
 /**
- * Gets a channels from the channels map or creates a new channel.
+ * Gets a channel from the channels map or creates a new channel.
  *
  * @name is the name of the channel to get
  */
@@ -170,7 +170,7 @@ std::shared_ptr<Channel> GetChannel(std::string name) {
 
 
 /**
- * Gets a channels from the channels map or creates a new channel.
+ * Gets a channel from the server channels map or creates a new channel.
  *
  * @name is the name of the channel to get.
  */
