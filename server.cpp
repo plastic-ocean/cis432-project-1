@@ -110,6 +110,8 @@ std::map<std::string, std::shared_ptr<Channel>> server_channels;
 
 /**
  * Prints an error message and exists.
+ *
+ * @message is the error to print.
  */
 void Error(std::string message) {
   std::cerr << message << std::endl;
@@ -170,7 +172,7 @@ std::shared_ptr<Channel> GetChannel(std::string name) {
 /**
  * Gets a channels from the channels map or creates a new channel.
  *
- * @name is the name of the channel to get
+ * @name is the name of the channel to get.
  */
 void CreateServerChannel(std::string name) {
   bool is_new_channel = true;
@@ -230,6 +232,14 @@ void SendS2SJoinRequest(Server server, std::string channel, std::string request_
 }
 
 
+/**
+ * Handles S2S join requests.
+ *
+ * @server is this server.
+ * @buffer is the login_request
+ * @request_address is the user's address.
+ * @request_port is the user's port.
+ */
 void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
   struct s2s_request_join *join = (struct s2s_request_join *) buffer;
   char request_ip[INET_ADDRSTRLEN];
@@ -303,6 +313,7 @@ void HandleError(int server_socket, std::string channel, std::string type, in_ad
 /**
  * Logs in a user.
  *
+ * @server is this server.
  * @buffer is the login_request
  * @request_address is the user's address.
  * @request_port is the user's port.
@@ -359,6 +370,7 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
 /**
  * Adds a user to the requested channel.
  *
+ * @server is this server.
  * @buffer is the logout_request
  * @request_address is the user's address.
  * @request_port is the user's port.
@@ -402,6 +414,7 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
 /**
  * Removes a user from the requested channel.
  *
+ * @server is this server.
  * @buffer is the logout_request
  * @request_address is the user's address.
  * @request_port is the user's port.
@@ -460,7 +473,7 @@ void HandleLeaveRequest(Server server, void *buffer, in_addr_t request_address, 
 /**
  * Sends message from a user to the requested channel.
  *
- * @server_socket is the socket to send on.
+ * @server is this server.
  * @buffer is the logout_request
  * @request_address is the user's address.
  * @request_port is the user's port.
@@ -509,7 +522,7 @@ void HandleSayRequest(Server server, void *buffer, in_addr_t request_address, un
 /**
  * Sends a text list packet containing every channel to the requesting user.
  *
- * @server_socket is the socket to send on.
+ * @server is this server.
  * @request_address is the address to send to.
  * @request_port is the port to send to.
  */
@@ -555,7 +568,7 @@ void HandleListRequest(Server server, in_addr_t request_address, unsigned short 
 /**
  * Sends a list of every user on the requested channel.
  *
- * @server_socket is the socket to send on.
+ * @server is this server.
  * @request_address is the address to send to.
  * @request_port is the port to send to.
  */
@@ -626,7 +639,7 @@ void HandleWhoRequest(Server server, void *buffer, in_addr_t request_address, un
 /**
  * Processes a request.
  *
- * @server_socket is the socket to send on.
+ * @server is this server.
  * @buffer is the request
  * @request_address is the address to send to.
  * @request_port is the port to send to.
