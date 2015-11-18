@@ -204,9 +204,9 @@ void CreateServerChannel(std::string name) {
 void SendS2SJoinRequest(Server server, std::string channel, std::string request_ip_port) {
   size_t servers_size = servers.size();
 
-  for (auto s : servers) {
-    std::cout << s.first << " ?= " << request_ip_port << std::endl;
-  }
+//  for (auto s : servers) {
+//    std::cout << s.first << " ?= " << request_ip_port << std::endl;
+//  }
 
   if (servers_size > 0) {
     struct s2s_request_join join;
