@@ -1,5 +1,5 @@
 // CIS 432 Intro to Networks
-// Programming Project 1
+// Programming Project 1 and 2
 // Fall 2015
 //
 // Benjamin Barnes
@@ -204,7 +204,7 @@ void CreateServerChannel(std::string name) {
 void SendS2SJoinRequest(Server server, std::string channel, std::string request_ip_port) {
   size_t servers_size = servers.size();
 
-  if (servers_size > 0 && servers.find(request_ip_port) == servers.end()) {
+  if (servers_size > 0 && servers.find(request_ip_port) == servers.end()) { // is this second check needed
     struct s2s_request_join join;
     memcpy(join.req_channel, channel.c_str(), sizeof(channel));
     join.req_type = REQ_S2S_JOIN;
@@ -726,8 +726,6 @@ int main(int argc, char *argv[]) {
     << " connected" << std::endl;
   }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
   while (1) {
     struct sockaddr_in sock_addr;
     socklen_t addr_len = sizeof(sock_addr);
@@ -739,5 +737,4 @@ int main(int argc, char *argv[]) {
       ProcessRequest(server, buffer, sock_addr.sin_addr.s_addr, sock_addr.sin_port);
     }
   }
-#pragma clang diagnostic pop
 }
