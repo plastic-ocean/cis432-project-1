@@ -646,7 +646,7 @@ void HandleSayRequest(Server server, void *buffer, in_addr_t request_address, un
 
       std::cout << "servers_size " << servers_size << std::endl;
 
-      if (servers_size > 1) {
+      if (servers_size > 0) {
         std::cout << "about to SendS2SSayRequest" << std::endl;
         SendS2SSayRequest(server, user.first, say_request.req_text, say_request.req_channel, request_ip_port);
       }
