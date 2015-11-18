@@ -18,6 +18,7 @@
 #include <map>
 #include <set>
 #include <memory>
+#include <queue>
 #include <netdb.h>
 #include <sys/fcntl.h>
 #include <unistd.h>
@@ -31,7 +32,7 @@
 // Add the required debugging text for all messages received from clients.
 // Add support to handle the additional command line arguments and setup the topology.
 // Add support for broadcasting Joins when a user joins a channel.
-// TODO Add support for forwarding Joins from another server.
+// Add support for forwarding Joins from another server.
 // TODO Add support for Server-to-Server Say messages, including loop detection.
 // TODO Add support for sending Leave when a Say cannot be forwarded.
 // TODO Add support for the soft state features.
@@ -107,6 +108,8 @@ std::map<std::string, std::shared_ptr<Server>> servers;
 /* all the server channels; key = channel name */
 std::map<std::string, std::shared_ptr<Channel>> server_channels;
 
+std::deque<long> s2s_say_cache;
+
 
 /**
  * Prints an error message and exists.
@@ -138,6 +141,29 @@ unsigned int GetRandSeed() {
   }
 
   return random_seed;
+}
+
+// send to local users
+void SendSay(Server server, struct s2s_request_say s2s_say) {
+  for (auto channel_user : user_channels[s2s_say.req_channel]->users) {
+    struct sockaddr_in client_addr;
+    memset(&client_addr, 0, sizeof(struct sockaddr_in));
+    client_addr.sin_family = AF_INET;
+    client_addr.sin_port = channel_user->port;
+    client_addr.sin_addr.s_addr = channel_user->address;
+
+    struct text_say say;
+    say.txt_type = TXT_SAY;
+    strncpy(say.txt_channel, s2s_say.req_channel, CHANNEL_MAX);
+    strncpy(say.txt_text, s2s_say.req_text, SAY_MAX);
+    strncpy(say.txt_username, s2s_say.req_username, USERNAME_MAX);
+
+    size_t message_size = sizeof(struct text_say);
+
+    if (sendto(server.socket, &say, message_size, 0, (struct sockaddr*) &client_addr, sizeof(client_addr)) < 0) {
+      Error("Failed to send say\n");
+    }
+  }
 }
 
 
@@ -210,7 +236,7 @@ void SendS2SJoinRequest(Server server, std::string channel, std::string request_
 
   if (servers_size > 0) {
     struct s2s_request_join join;
-    memcpy(join.req_channel, channel.c_str(), sizeof(channel));
+    memcpy(join.req_channel, channel.c_str(), CHANNEL_MAX);
     join.req_type = REQ_S2S_JOIN;
 
     size_t message_size = sizeof(struct s2s_request_join);
@@ -237,6 +263,45 @@ void SendS2SJoinRequest(Server server, std::string channel, std::string request_
 
 
 /**
+ * Sends a S2S Say to all adjacent servers.
+ *
+ * @server is this server's info.
+ * @username is the sending user.
+ * @text is the message to send.
+ * @channel is the channel to send to other servers.
+ */
+void SendS2SSayRequest(Server server, std::string username, std::string text, std::string channel,
+                       std::string request_ip_port) {
+  struct s2s_request_say say;
+  strncpy(say.req_channel, channel.c_str(), CHANNEL_MAX);
+  strncpy(say.req_username, username.c_str(), USERNAME_MAX);
+  strncpy(say.req_text, text.c_str(), SAY_MAX);
+  say.uniq_id = rand();
+  say.req_type = REQ_S2S_SAY;
+
+  size_t message_size = sizeof(struct s2s_request_say);
+
+  for (auto adj_server : servers) {
+    std::string adj_server_ip_port = adj_server.second->ip + ":" + std::to_string(adj_server.second->port);
+    if (adj_server_ip_port != request_ip_port) {
+      struct sockaddr_in server_addr;
+      memset(&server_addr, 0, sizeof(struct sockaddr_in));
+      server_addr.sin_family = AF_INET;
+      server_addr.sin_port = htons(adj_server.second->port);
+      inet_pton(AF_INET, adj_server.second->ip.c_str(), &server_addr.sin_addr.s_addr);
+
+      if (sendto(server.socket, &say, message_size, 0, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
+        Error("Failed to send S2S Say\n");
+      }
+
+      std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port
+      << " send S2S Say " << username << " " << channel << " \"" << text << "\"" << std::endl;
+    }
+  }
+}
+
+
+/**
  * Handles S2S join requests.
  *
  * @server is this server.
@@ -257,6 +322,59 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
   if (server_channels.find(join->req_channel) == server_channels.end()) {
     CreateServerChannel(join->req_channel);
     SendS2SJoinRequest(server, join->req_channel, request_ip_port);
+  }
+}
+
+
+/**
+ * Handles S2S Say requests.
+ *
+ * @server is this server.
+ * @buffer is the login_request
+ * @request_address is the user's address.
+ * @request_port is the user's port.
+ */
+void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
+  struct s2s_request_say *say = (struct s2s_request_say *) buffer;
+  char request_ip[INET_ADDRSTRLEN];
+  inet_ntop(AF_INET, &request_address, request_ip, INET_ADDRSTRLEN);
+  bool is_in_cache = false;
+  size_t servers_size = servers.size();
+
+  // check the cache
+  size_t cache_size = s2s_say_cache.size();
+  for (auto uniq_id : s2s_say_cache) {
+    if (uniq_id == say->uniq_id) {
+      is_in_cache = true;
+    }
+  }
+
+  if (!is_in_cache) {
+    if (cache_size == 3) {
+      s2s_say_cache.pop_front();
+    }
+    s2s_say_cache.push_back(say->uniq_id);
+
+    std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
+
+    if (user_channels.find(say->req_channel) != user_channels.end()) {
+      size_t size = user_channels[say->req_channel]->users.size();
+      if (size > 0) {
+        SendSay(server, *say);
+
+        std::cout << server.ip << ":" << server.port << " " << request_ip_port
+        << " recv S2S Say " << say->req_username << " " << say->req_channel << " \"" << say->req_text << "\"" << std::endl;
+        return;
+      }
+    }
+
+    // decide to forward or not
+    if (servers_size > 1) {
+      SendS2SSayRequest(server, say->req_username, say->req_text, say->req_channel, request_ip_port);
+    }
+  } else {
+    // send leave
+    std::cout << server.ip << ":" << server.port << "Send leave" << std::endl;
   }
 }
 
@@ -514,12 +632,26 @@ void HandleSayRequest(Server server, void *buffer, in_addr_t request_address, un
           Error("Failed to send say\n");
         }
       }
-      std::cout << server.ip << ":" << server.port << " " << user.second->ip << ":"
-      << request_port << " recv Request say " << user.first << " " << say_request.req_channel
+
+      char request_ip[INET_ADDRSTRLEN];
+      inet_ntop(AF_INET, &request_address, request_ip, INET_ADDRSTRLEN);
+
+      std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
+
+      std::cout << server.ip << ":" << server.port << " " << request_ip_port
+      << " recv Request say " << user.first << " " << say_request.req_channel
       << " \"" << say_request.req_text << "\"" << std::endl;
+
+      size_t servers_size = servers.size();
+      if (servers_size > 1) {
+        SendS2SSayRequest(server, user.first, say_request.req_text, say_request.req_channel, request_ip_port);
+      }
+
       break;
     }
   }
+
+
 }
 
 
@@ -678,6 +810,9 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
     case REQ_S2S_JOIN:
       HandleS2SJoinRequest(server, buffer, request_address, request_port);
       break;
+    case REQ_S2S_SAY:
+      HandleS2SSayRequest(server, buffer, request_address, request_port);
+      break;
     default:
       break;
   }
@@ -692,8 +827,7 @@ int main(int argc, char *argv[]) {
   char *domain;
   char *port;
 
-
-
+  srand(GetRandSeed());
 
   if (argc < 3) {
     std::cerr << "Usage: ./server domain_name port_num" << std::endl;
