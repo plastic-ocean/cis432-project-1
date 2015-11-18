@@ -41,6 +41,13 @@
 // TODO ^ Fix any bugs you find.
 
 
+// TODO problems with s2s say not forwarding messages; likely related to servers with no users
+// example: 
+//127.0.0.1:5021 127.0.0.1:50871 recv Request say user2 Common "dsfdfds"
+//127.0.0.1:5021 127.0.0.1:5020 send S2S Say user2 Common "dsfdfds"
+//127.0.0.1:5021 127.0.0.1:5022 send S2S Say user2 Common "dsfdfds"
+//127.0.0.1:5020 127.0.0.1:5021 recv S2S Say user2 Common "dsfdfds"
+// missing 127.0.0.1:5022 127.0.0.1:5021 recv S2S Say user2 Common "dsfdfds"
 /**
  * A class used to keep track of a channel
  *
