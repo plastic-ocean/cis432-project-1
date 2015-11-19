@@ -366,6 +366,10 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
     std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
 
     size_t size = user_channels[say->req_channel]->users.size();
+    std::cout << "req chan: " << say->req_channel << std::endl;
+    for(auto c : user_channels){
+      std::cout << c << std::endl;
+    }
     if ((user_channels.find(say->req_channel) != user_channels.end()) && size > 0) {
       SendSay(server, *say);
 
