@@ -376,7 +376,7 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
     }
 
     // decide to forward or not
-    if (servers_size > 1) {
+    if (servers_size > 0) {
       SendS2SSayRequest(server, say->req_username, say->req_text, say->req_channel, request_ip_port);
     }
   } else {
