@@ -376,7 +376,7 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
 
       std::cout << server.ip << ":" << server.port << " " << request_ip_port
       << " recv S2S Say " << say->req_username << " " << say->req_channel << " \"" << say->req_text << "\"" << std::endl;
-      return;
+      //return;
     }
 
     // decide to forward or not
