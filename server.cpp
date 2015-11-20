@@ -115,7 +115,7 @@ std::map<std::string, std::shared_ptr<Server>> servers;
 /* all the server channels; key = channel name */
 std::map<std::string, std::shared_ptr<Channel>> server_channels;
 
-std::deque<long> s2s_say_cache;
+//std::deque<long> s2s_say_cache;
 
 
 /**
@@ -345,51 +345,52 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
   struct s2s_request_say *say = (struct s2s_request_say *) buffer;
   char request_ip[INET_ADDRSTRLEN];
   inet_ntop(AF_INET, &request_address, request_ip, INET_ADDRSTRLEN);
-  bool is_in_cache = false;
+//  bool is_in_cache = false;
   size_t servers_size = servers.size();
 
   std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
   std::cout << server.ip << ":" << server.port << " " << request_ip_port
   << " recv S2S Say " << say->req_username << " " << say->req_channel << " \"" << say->req_text << "\"" << std::endl;
+  std::cout << "server size: " << servers_size << std::endl;
+  if (servers_size > 0) {
+    SendS2SSayRequest(server, say->req_username, say->req_text, say->req_channel, request_ip_port);
+  }
 
   // check the cache
 //  size_t cache_size = s2s_say_cache.size();
-  for (auto uniq_id : s2s_say_cache) {
-    if (uniq_id == say->uniq_id) {
-      is_in_cache = true;
-    }
-  }
-
-  if (!is_in_cache) {
-    std::cout << server.ip << ":" << server.port << " not in cache" << std::endl;
-//    if (cache_size == 3) {
-//      s2s_say_cache.pop_front();
+//  for (auto uniq_id : s2s_say_cache) {
+//    if (uniq_id == say->uniq_id) {
+//      is_in_cache = true;
 //    }
-//    s2s_say_cache.push_back(say->uniq_id);
-
-
-
-    size_t size = user_channels[say->req_channel]->users.size();
-    std::cout << "req chan: " << say->req_channel << std::endl;
-    std::cout << "size: " << size << std::endl;
-
-    for(auto c : user_channels){
-      std::cout << c.first << std::endl;
-    }
-    if ((user_channels.find(say->req_channel) != user_channels.end()) && size > 0) {
-      SendSay(server, *say);
-    }
-
-
-    // decide to forward or not
-    std::cout << "server size: " << servers_size << std::endl;
-    if (servers_size > 0) {
-      SendS2SSayRequest(server, say->req_username, say->req_text, say->req_channel, request_ip_port);
-    }
-  } else {
-    // send leave
-    std::cout << server.ip << ":" << server.port << "Send leave" << std::endl;
-  }
+//  }
+//
+//  if (!is_in_cache) {
+//    std::cout << server.ip << ":" << server.port << " not in cache" << std::endl;
+////    if (cache_size == 3) {
+////      s2s_say_cache.pop_front();
+////    }
+////    s2s_say_cache.push_back(say->uniq_id);
+//
+//
+//
+//    size_t size = user_channels[say->req_channel]->users.size();
+//    std::cout << "req chan: " << say->req_channel << std::endl;
+//    std::cout << "size: " << size << std::endl;
+//
+//    for(auto c : user_channels){
+//      std::cout << c.first << std::endl;
+//    }
+//    if ((user_channels.find(say->req_channel) != user_channels.end()) && size > 0) {
+//      SendSay(server, *say);
+//    }
+//
+//
+//    // decide to forward or not
+//
+//  } else {
+//    // send leave
+//    std::cout << server.ip << ":" << server.port << "Send leave" << std::endl;
+//  }
 }
 
 
