@@ -348,13 +348,7 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
   bool is_in_cache = false;
   size_t servers_size = servers.size();
 
-  std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
-  std::cout << server.ip << ":" << server.port << " " << request_ip_port
-  << " recv S2S Say " << say->req_username << " " << say->req_channel << " \"" << say->req_text << "\"" << std::endl;
-  std::cout << "server size: " << servers_size << std::endl;
-  if (servers_size > 0) {
-    SendS2SSayRequest(server, say->req_username, say->req_text, say->req_channel, request_ip_port);
-  }
+
 
   // check the cache
   size_t cache_size = s2s_say_cache.size();
@@ -365,30 +359,25 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
   }
 
   if (!is_in_cache) {
-    std::cout << server.ip << ":" << server.port << " not in cache" << std::endl;
+    std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
+    std::cout << server.ip << ":" << server.port << " " << request_ip_port
+    << " recv S2S Say " << say->req_username << " " << say->req_channel << " \"" << say->req_text << "\"" << std::endl;
+
+    if (servers_size > 0) {
+      SendS2SSayRequest(server, say->req_username, say->req_text, say->req_channel, request_ip_port);
+    }
+
     if (cache_size == 3) {
       std::cout << server.ip << ":" << server.port << " cache size is 3" << std::endl;
       s2s_say_cache.pop_front();
     }
-    std::cout << server.ip << ":" << server.port << " pushing to cache" << std::endl;
     s2s_say_cache.push_back(say->uniq_id);
 
-
-    std::cout << server.ip << ":" << server.port << " getting size of users in channel" << std::endl;
-//    size_t size = user_channels[say->req_channel]->users.size();
-    std::cout << "req chan: " << say->req_channel << std::endl;
-//    std::cout << "size: " << size << std::endl;
-    for(auto c : user_channels){
-      std::cout << c.first << std::endl;
-    }
-
+    /* if the s2s say req channel is in user channels, send message to users */
     if (user_channels.find(say->req_channel) != user_channels.end()) {
       std::cout << server.ip << ":" << server.port << " sending say to users" << std::endl;
       SendSay(server, *say);
     }
-
-    // decide to forward or not
-
   } else {
     // send leave
     std::cout << server.ip << ":" << server.port << "Send leave" << std::endl;
