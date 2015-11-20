@@ -372,6 +372,7 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
     size_t size = user_channels[say->req_channel]->users.size();
     std::cout << "req chan: " << say->req_channel << std::endl;
     std::cout << "size: " << size << std::endl;
+
     for(auto c : user_channels){
       std::cout << c.first << std::endl;
     }
@@ -381,6 +382,7 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
 
 
     // decide to forward or not
+    std::cout << "server size: " << servers_size << std::endl;
     if (servers_size > 0) {
       SendS2SSayRequest(server, say->req_username, say->req_text, say->req_channel, request_ip_port);
     }
