@@ -348,6 +348,10 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
   bool is_in_cache = false;
   size_t servers_size = servers.size();
 
+  std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
+  std::cout << server.ip << ":" << server.port << " " << request_ip_port
+  << " recv S2S Say " << say->req_username << " " << say->req_channel << " \"" << say->req_text << "\"" << std::endl;
+
   // check the cache
   size_t cache_size = s2s_say_cache.size();
   for (auto uniq_id : s2s_say_cache) {
@@ -363,7 +367,7 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
     }
     s2s_say_cache.push_back(say->uniq_id);
 
-    std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
+
 
     size_t size = user_channels[say->req_channel]->users.size();
     std::cout << "req chan: " << say->req_channel << std::endl;
@@ -373,11 +377,8 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
     }
     if ((user_channels.find(say->req_channel) != user_channels.end()) && size > 0) {
       SendSay(server, *say);
-
-      std::cout << server.ip << ":" << server.port << " " << request_ip_port
-      << " recv S2S Say " << say->req_username << " " << say->req_channel << " \"" << say->req_text << "\"" << std::endl;
-      //return;
     }
+
 
     // decide to forward or not
     if (servers_size > 0) {
