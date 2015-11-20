@@ -367,7 +367,6 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
     }
 
     if (cache_size == 3) {
-      std::cout << server.ip << ":" << server.port << " cache size is 3" << std::endl;
       s2s_say_cache.pop_front();
     }
     s2s_say_cache.push_back(say->uniq_id);
@@ -647,9 +646,6 @@ void HandleSayRequest(Server server, void *buffer, in_addr_t request_address, un
       << " \"" << say_request.req_text << "\"" << std::endl;
 
       size_t servers_size = servers.size();
-
-      std::cout << "servers_size " << servers_size << std::endl;
-
       if (servers_size > 0) {
         SendS2SSayRequest(server, user.first, say_request.req_text, say_request.req_channel, request_ip_port);
       }
