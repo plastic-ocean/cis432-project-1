@@ -362,10 +362,10 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
 
   if (!is_in_cache) {
     std::cout << server.ip << ":" << server.port << " not in cache" << std::endl;
-    if (cache_size == 3) {
-      s2s_say_cache.pop_front();
-    }
-    s2s_say_cache.push_back(say->uniq_id);
+//    if (cache_size == 3) {
+//      s2s_say_cache.pop_front();
+//    }
+//    s2s_say_cache.push_back(say->uniq_id);
 
 
 
