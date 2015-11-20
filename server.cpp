@@ -347,7 +347,9 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
   bool is_in_cache = false;
   size_t servers_size = servers.size();
 
-
+  if(servers_size == 1 && (user_channels.find(say->req_channel) == user_channels.end())){
+    std::cout << server.ip << ":" << server.port << "Send leave" << std::endl;
+  }
 
   // check the cache
   size_t cache_size = s2s_say_cache.size();
@@ -356,6 +358,9 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
       is_in_cache = true;
     }
   }
+
+  // if you have one adjacent server AND no users
+    // respond with leave
 
   if (!is_in_cache) {
     std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
@@ -375,9 +380,6 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
     if (user_channels.find(say->req_channel) != user_channels.end()) {
       SendSay(server, *say);
     }
-  } else {
-    // send leave
-    std::cout << server.ip << ":" << server.port << "Send leave" << std::endl;
   }
 }
 
