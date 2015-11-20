@@ -285,7 +285,6 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
   strncpy(say.req_text, text.c_str(), SAY_MAX);
   say.uniq_id = rand();
   say.req_type = REQ_S2S_SAY;
-  std::cout << server.ip << ":" << server.port << " inside s2s say" << std::endl;
   size_t message_size = sizeof(struct s2s_request_say);
 
   for (auto adj_server : servers) {
@@ -375,7 +374,6 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
 
     /* if the s2s say req channel is in user channels, send message to users */
     if (user_channels.find(say->req_channel) != user_channels.end()) {
-      std::cout << server.ip << ":" << server.port << " sending say to users" << std::endl;
       SendSay(server, *say);
     }
   } else {
@@ -653,7 +651,6 @@ void HandleSayRequest(Server server, void *buffer, in_addr_t request_address, un
       std::cout << "servers_size " << servers_size << std::endl;
 
       if (servers_size > 0) {
-        std::cout << "about to SendS2SSayRequest" << std::endl;
         SendS2SSayRequest(server, user.first, say_request.req_text, say_request.req_channel, request_ip_port);
       }
 
