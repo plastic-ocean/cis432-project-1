@@ -353,7 +353,7 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
   << " recv S2S Say " << say->req_username << " " << say->req_channel << " \"" << say->req_text << "\"" << std::endl;
 
   // check the cache
-  size_t cache_size = s2s_say_cache.size();
+//  size_t cache_size = s2s_say_cache.size();
   for (auto uniq_id : s2s_say_cache) {
     if (uniq_id == say->uniq_id) {
       is_in_cache = true;
