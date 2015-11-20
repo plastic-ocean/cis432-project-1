@@ -375,14 +375,14 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
 
 
     std::cout << server.ip << ":" << server.port << " getting size of users in channel" << std::endl;
-    size_t size = user_channels[say->req_channel]->users.size();
+//    size_t size = user_channels[say->req_channel]->users.size();
     std::cout << "req chan: " << say->req_channel << std::endl;
-    std::cout << "size: " << size << std::endl;
+//    std::cout << "size: " << size << std::endl;
     for(auto c : user_channels){
       std::cout << c.first << std::endl;
     }
 
-    if ((user_channels.find(say->req_channel) != user_channels.end()) && size > 0) {
+    if (user_channels.find(say->req_channel) != user_channels.end()) {
       std::cout << server.ip << ":" << server.port << " sending say to users" << std::endl;
       SendSay(server, *say);
     }
