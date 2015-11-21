@@ -226,36 +226,36 @@ void CreateServerChannel(std::string name) {
  * @server is this server's info.
  * @channel is the channel to send to other servers.
  */
-void SendS2SJoinRequest(Server server, std::string channel, std::string request_ip_port) {
+void SendS2SJoinRequest(Server server, std::string channel_name, std::string request_ip_port) {
   size_t servers_size = servers.size();
 
   std::cout << "nothing happeing here: " << request_ip_port << std::endl;
 
   if (servers_size > 0) {
     struct s2s_request_join join;
-    memcpy(join.req_channel, channel.c_str(), CHANNEL_MAX);
+    memcpy(join.req_channel, channel_name.c_str(), CHANNEL_MAX);
     join.req_type = REQ_S2S_JOIN;
 
     size_t message_size = sizeof(struct s2s_request_join);
 
     for (auto adj_server : servers) {
-      if (adj_server.second->channels.find(channel) == adj_server.second->channels.end()) {
+      if (adj_server.second->channels.find(channel_name) == adj_server.second->channels.end()) {
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(struct sockaddr_in));
         server_addr.sin_family = AF_INET;
         server_addr.sin_port = htons(adj_server.second->port);
         inet_pton(AF_INET, adj_server.second->ip.c_str(), &server_addr.sin_addr.s_addr);
 
-        // Add requester to channel.
-//        std::shared_ptr<Channel> new_channel = std::make_shared<Channel>(std::string(channel));
-//        servers.find(request_ip_port)->second->channels.insert({std::string(channel), new_channel});
+        // Add adj_server to channel_name.
+        std::shared_ptr<Channel> channel = std::make_shared<Channel>(std::string(channel_name));
+        adj_server.second->channels.insert({std::string(channel_name), channel});
 
         if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
           Error("Failed to send S2S Join\n");
         }
 
         std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port
-        << " send S2S Join " << channel << std::endl;
+        << " send S2S Join " << channel_name << std::endl;
       }
     }
   }
