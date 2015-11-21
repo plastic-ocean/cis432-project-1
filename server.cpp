@@ -164,7 +164,6 @@ void Error(std::string message) {
 
 
 void HandleSigalarm(int sig) {
-  std::cout << "received alarm " << sig << std::endl;
   signal(SIGALRM, &HandleSigalarm);
   alarm(0);
   alarm(10);
@@ -173,6 +172,7 @@ void HandleSigalarm(int sig) {
   for (auto s : servers) {
     if (s.second->join_count == 0) {
       // Remove all channels from server as if it left.
+      std::cout << "Removing channels from " << s.first << std::endl;
       s.second->channels.clear();
     } else {
       s.second->join_count--;
