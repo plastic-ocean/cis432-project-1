@@ -268,8 +268,7 @@ void SendS2SJoinRequest(Server server, std::string channel_name) {
  * @text is the message to send.
  * @channel is the channel to send to other servers.
  */
-void SendS2SSayRequest(Server server, std::string username, std::string text, std::string channel,
-                       std::string request_ip_port) {
+void SendS2SSayRequest(Server server, std::string username, std::string text, std::string channel) {
   struct s2s_request_say say;
   strncpy(say.req_channel, channel.c_str(), CHANNEL_MAX);
   strncpy(say.req_username, username.c_str(), USERNAME_MAX);
@@ -279,8 +278,8 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
   size_t message_size = sizeof(struct s2s_request_say);
 
   for (auto adj_server : servers) {
-    std::string adj_server_ip_port = adj_server.second->ip + ":" + std::to_string(adj_server.second->port);
-    if (adj_server_ip_port != request_ip_port) {
+//    std::string adj_server_ip_port = adj_server.second->ip + ":" + std::to_string(adj_server.second->port);
+    if (adj_server.second->channels.find(channel) != adj_server.second->channels.end()) {
       struct sockaddr_in server_addr;
       memset(&server_addr, 0, sizeof(struct sockaddr_in));
       server_addr.sin_family = AF_INET;
@@ -397,7 +396,7 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
     << " recv S2S Say " << say->req_username << " " << say->req_channel << " \"" << say->req_text << "\"" << std::endl;
 
     if (servers_size > 0) {
-      SendS2SSayRequest(server, say->req_username, say->req_text, say->req_channel, request_ip_port);
+      SendS2SSayRequest(server, say->req_username, say->req_text, say->req_channel);
     }
 
     if (cache_size == 3) {
@@ -433,10 +432,6 @@ void HandleS2SLeaveRequest(Server server, void *buffer, in_addr_t request_addres
 
   // Remove requester from server channel.
   servers.find(request_ip_port)->second->channels.erase(leave->req_channel);
-
-  for (auto c : servers.find(request_ip_port)->second->channels) {
-    std::cout << c.first << std::endl;
-  }
 }
 
 
@@ -705,7 +700,7 @@ void HandleSayRequest(Server server, void *buffer, in_addr_t request_address, un
 
       size_t servers_size = servers.size();
       if (servers_size > 0) {
-        SendS2SSayRequest(server, user.first, say_request.req_text, say_request.req_channel, request_ip_port);
+        SendS2SSayRequest(server, user.first, say_request.req_text, say_request.req_channel);
       }
 
       break;
