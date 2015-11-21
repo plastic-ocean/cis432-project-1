@@ -169,7 +169,7 @@ void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short r
 
   // If channel is new create it
   if (is_new_channel) {
-    channel = std::make_shared<Channel>(join_request.req_channel);
+    channel = std::make_shared<Channel>(std::string(join_request.req_channel));
   }
 
   for (auto user : users) {

@@ -36,7 +36,7 @@
 // Add support for broadcasting Joins when a user joins a channel.
 // Add support for forwarding Joins from another server.
 // Add support for Server-to-Server Say messages, including loop detection.
-// TODO Add support for sending Leave when a Say cannot be forwarded.
+// Add support for sending Leave when a Say cannot be forwarded.
 // TODO Add support for the soft state features.
 // TODO Try several topologies. Verify that trees are formed and pruned correctly.
 // TODO Copy your server code and modify it to send invalid packets to see if you can make your server crash.
@@ -51,7 +51,6 @@ class Server;
 
 void Error(std::string);
 void HandleSigalarm(int);
-void SetSigalarm();
 unsigned int GetRandSeed();
 std::shared_ptr<Channel> GetChannel(std::string);
 void SendUsersS2SSay(Server, struct s2s_request_say);
@@ -68,11 +67,11 @@ void HandleError(int, std::string, std::string, in_addr_t, unsigned short);
 void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
 void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
 void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleLeaveRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleListRequest(int server_socket, in_addr_t request_address, unsigned short request_port);
-void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port);
-void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port);
+void HandleLeaveRequest(Server, void *buffer, in_addr_t request_address, unsigned short request_port);
+void HandleSayRequest(Server, void *buffer, in_addr_t request_address, unsigned short request_port);
+void HandleListRequest(Server, in_addr_t request_address, unsigned short request_port);
+void HandleWhoRequest(Server, void *buffer, in_addr_t request_address, unsigned short request_port);
+void ProcessRequest(Server, void *buffer, in_addr_t request_address, unsigned short request_port);
 
 
 /**
@@ -116,6 +115,7 @@ public:
   int port;
   int socket;
   std::map<std::string, std::shared_ptr<Channel>> channels;
+  int join_count;
 
   Server() {};
 
@@ -129,6 +129,8 @@ public:
 
     addr_list = (struct in_addr **) he->h_addr_list;
     ip = std::string(inet_ntoa(*addr_list[0]));
+
+    join_count = 2;
   };
 };
 
@@ -166,16 +168,22 @@ void HandleSigalarm(int sig) {
   signal(SIGALRM, &HandleSigalarm);
   alarm(0);
   alarm(10);
-  for (auto s : server_channels) {
-    SendS2SJoinRequest(server, s.first);
+
+  // Checking if a joins has been received from all servers in the network.
+  for (auto s : servers) {
+    if (s.second->join_count == 0) {
+      // Remove all channels from server as if it left.
+      s.second->channels.clear();
+    } else {
+      s.second->join_count--;
+    }
+  }
+
+  // Sending join for all our channels to all adjacent servers.
+  for (auto c : server_channels) {
+    SendS2SJoinRequest(server, c.first);
   }
 }
-
-
-//void SetSigalarm() {
-//  signal(SIGALRM, &HandleSigalarm);
-//  alarm(10);
-//}
 
 
 unsigned int GetRandSeed() {
@@ -412,6 +420,11 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
   // Add requester to channel.
   std::shared_ptr<Channel> channel = std::make_shared<Channel>(std::string(join->req_channel));
   servers.find(request_ip_port)->second->channels.insert({std::string(join->req_channel), channel});
+
+  // After 2 minutes expect to receive join from each server, this keeps the count at 2.
+  if (servers.find(request_ip_port)->second->join_count != 2) {
+    servers.find(request_ip_port)->second->join_count++;
+  }
 
   if (server_channels.find(join->req_channel) == server_channels.end()) {
     CreateServerChannel(join->req_channel);
