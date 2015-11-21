@@ -277,12 +277,12 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
 
   for (auto adj_server : servers) {
     std::string adj_server_ip_port = adj_server.second->ip + ":" + std::to_string(adj_server.second->port);
-    std::cout << "checking for channel " << channel << std::endl;
-    std::cout << adj_server.second->ip << ":" << adj_server.second->port << std::endl;
-    for (auto c : adj_server.second->channels) {
-      std::cout << c.first << std::endl;
-    }
-    std::cout << std::endl;
+//    std::cout << "checking for channel " << channel << std::endl;
+//    std::cout << adj_server.second->ip << ":" << adj_server.second->port << std::endl;
+//    for (auto c : adj_server.second->channels) {
+//      std::cout << c.first << std::endl;
+//    }
+//    std::cout << std::endl;
     if (adj_server_ip_port != request_ip_port &&
         adj_server.second->channels.find(channel) != adj_server.second->channels.end()) {
       struct sockaddr_in server_addr;
@@ -363,6 +363,15 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
 
   // Add requester to channel.
   servers.find(request_ip_port)->second->channels.insert({std::string(join->req_channel), channel});
+
+  std::cout << "checking servers for channels; just inserted: " << join->req_channel << std::endl;
+  for (auto s : servers) {
+    std::cout << s.second->ip << ":" << s.second->port << std::endl;
+    for (auto c : s.second->channels) {
+      std::cout << c.first << std::endl;
+    }
+  }
+  std::cout << std::endl;
 
   if (server_channels.find(join->req_channel) == server_channels.end()) {
     CreateServerChannel(join->req_channel);
