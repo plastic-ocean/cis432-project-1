@@ -882,8 +882,8 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
 }
 
 
-void HandleSigalarm(int sign) {
-  std::cout << "received alarm" << std::endl;
+void HandleSigalarm(int signal) {
+  std::cout << "received alarm " << signal << std::endl;
 }
 
 
