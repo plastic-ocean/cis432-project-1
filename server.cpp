@@ -7,6 +7,8 @@
 
 
 #include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
 #include <sys/socket.h>
 #include <string.h>
 #include <netinet/in.h>
@@ -880,7 +882,7 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
 }
 
 
-void HandleSigalarm(int signal) {
+void HandleSigalarm(int sign) {
   std::cout << "received alarm" << std::endl;
 }
 
