@@ -364,7 +364,7 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
   // Add requester to channel.
   servers.find(request_ip_port)->second->channels.insert({std::string(join->req_channel), channel});
 
-  std::cout << "checking servers for channels; just inserted: " << join->req_channel << std::endl;
+  std::cout << request_ip_port << " checking adj servers for channels; just inserted: " << join->req_channel << std::endl;
   for (auto s : servers) {
     std::cout << s.second->ip << ":" << s.second->port << std::endl;
     for (auto c : s.second->channels) {
