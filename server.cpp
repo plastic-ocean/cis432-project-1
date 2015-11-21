@@ -304,10 +304,13 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
  */
 void SendS2SLeaveRequest(Server server, std::string channel) {
   size_t servers_size = servers.size();
+  std::cout << server.ip << ":" << server.port << " entering sends2sleaverequest" << std::endl;
 
   server_channels.erase(channel);
 
   if (servers_size > 0) {
+
+    std::cout << server.ip << ":" << server.port << " about to sends2sleaverequest" << std::endl;
     struct s2s_request_leave leave;
     memcpy(leave.req_channel, channel.c_str(), CHANNEL_MAX);
     leave.req_type = REQ_S2S_LEAVE;
@@ -380,6 +383,7 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
 
   // if there is only one adjacent server and no users
   if (servers_size == 1 && (user_channels.find(say->req_channel) == user_channels.end())) {
+    std::cout << server.ip << ":" << server.port << " sending leave" << std::endl;
     SendS2SLeaveRequest(server, say->req_channel);
   }
 
