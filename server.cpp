@@ -33,21 +33,12 @@
 // Add support to handle the additional command line arguments and setup the topology.
 // Add support for broadcasting Joins when a user joins a channel.
 // Add support for forwarding Joins from another server.
-// TODO Add support for Server-to-Server Say messages, including loop detection.
+// Add support for Server-to-Server Say messages, including loop detection.
 // TODO Add support for sending Leave when a Say cannot be forwarded.
 // TODO Add support for the soft state features.
 // TODO Try several topologies. Verify that trees are formed and pruned correctly.
 // TODO Copy your server code and modify it to send invalid packets to see if you can make your server crash.
 // TODO ^ Fix any bugs you find.
-
-
-// TODO problems with s2s say not forwarding messages; likely related to servers with no users
-// example: 
-//127.0.0.1:5021 127.0.0.1:50871 recv Request say user2 Common "dsfdfds"
-//127.0.0.1:5021 127.0.0.1:5020 send S2S Say user2 Common "dsfdfds"
-//127.0.0.1:5021 127.0.0.1:5022 send S2S Say user2 Common "dsfdfds"
-//127.0.0.1:5020 127.0.0.1:5021 recv S2S Say user2 Common "dsfdfds"
-// missing 127.0.0.1:5022 127.0.0.1:5021 recv S2S Say user2 Common "dsfdfds"
 /**
  * A class used to keep track of a channel
  *
@@ -88,6 +79,8 @@ public:
   std::string ip;
   int port;
   int socket;
+  std::map<std::string, std::shared_ptr<Channel>> channels;
+
 
   Server(std::string host_name, char *port, int socket): host_name(host_name), port(atoi(port)), socket(socket) {
     struct hostent *he;
@@ -132,7 +125,6 @@ void Error(std::string message) {
 unsigned int GetRandSeed() {
   unsigned int random_seed;
   std::ifstream file("/dev/urandom", std::ios::binary);
-  std::cout << "getting rand seed" << std::endl;
   
   if (file.is_open()) {
     char * temp_block;
@@ -151,7 +143,7 @@ unsigned int GetRandSeed() {
 }
 
 // send to local users
-void SendSay(Server server, struct s2s_request_say s2s_say) {
+void SendUsersS2SSay(Server server, struct s2s_request_say s2s_say) {
   for (auto channel_user : user_channels[s2s_say.req_channel]->users) {
     struct sockaddr_in client_addr;
     memset(&client_addr, 0, sizeof(struct sockaddr_in));
@@ -237,10 +229,6 @@ void CreateServerChannel(std::string name) {
 void SendS2SJoinRequest(Server server, std::string channel, std::string request_ip_port) {
   size_t servers_size = servers.size();
 
-//  for (auto s : servers) {
-//    std::cout << s.first << " ?= " << request_ip_port << std::endl;
-//  }
-
   if (servers_size > 0) {
     struct s2s_request_join join;
     memcpy(join.req_channel, channel.c_str(), CHANNEL_MAX);
@@ -289,7 +277,8 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
 
   for (auto adj_server : servers) {
     std::string adj_server_ip_port = adj_server.second->ip + ":" + std::to_string(adj_server.second->port);
-    if (adj_server_ip_port != request_ip_port) {
+    if (adj_server_ip_port != request_ip_port &&
+        adj_server.second->channels.find(say.req_channel) != adj_server.second->channels.end()) {
       struct sockaddr_in server_addr;
       memset(&server_addr, 0, sizeof(struct sockaddr_in));
       server_addr.sin_family = AF_INET;
@@ -302,6 +291,42 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
 
       std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port
       << " send S2S Say " << username << " " << channel << " \"" << text << "\"" << std::endl;
+    }
+  }
+}
+
+
+/**
+ * Sends a S2S Leave to all adjacent servers.
+ *
+ * @server is this server's info.
+ * @channel is the channel to send to other servers.
+ */
+void SendS2SLeaveRequest(Server server, std::string channel) {
+  size_t servers_size = servers.size();
+
+  server_channels.erase(channel);
+
+  if (servers_size > 0) {
+    struct s2s_request_leave leave;
+    memcpy(leave.req_channel, channel.c_str(), CHANNEL_MAX);
+    leave.req_type = REQ_S2S_LEAVE;
+
+    size_t message_size = sizeof(struct s2s_request_leave);
+
+    for (auto adj_server : servers) {
+      struct sockaddr_in server_addr;
+      memset(&server_addr, 0, sizeof(struct sockaddr_in));
+      server_addr.sin_family = AF_INET;
+      server_addr.sin_port = htons(adj_server.second->port);
+      inet_pton(AF_INET, adj_server.second->ip.c_str(), &server_addr.sin_addr.s_addr);
+
+      if (sendto(server.socket, &leave, message_size, 0, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
+        Error("Failed to send S2S Leave\n");
+      }
+
+      std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port
+      << " send S2S Leave " << channel << std::endl;
     }
   }
 }
@@ -325,6 +350,10 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
   std::cout << server.ip << ":" << server.port << " " << request_ip_port
   << " recv S2S Join " << join->req_channel << std::endl;
 
+  // Add requester to channel.
+  servers.find(request_ip_port)->second->channels.insert({join->req_channel,
+                                                          std::shared_ptr<Channel>(join->req_channel)});
+
   if (server_channels.find(join->req_channel) == server_channels.end()) {
     CreateServerChannel(join->req_channel);
     SendS2SJoinRequest(server, join->req_channel, request_ip_port);
@@ -346,9 +375,11 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
   inet_ntop(AF_INET, &request_address, request_ip, INET_ADDRSTRLEN);
   bool is_in_cache = false;
   size_t servers_size = servers.size();
+  std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
 
-  if(servers_size == 1 && (user_channels.find(say->req_channel) == user_channels.end())){
-    std::cout << server.ip << ":" << server.port << "Send leave" << std::endl;
+  // if there is only one adjacent server and no users
+  if (servers_size == 1 && (user_channels.find(say->req_channel) == user_channels.end())) {
+    SendS2SLeaveRequest(server, say->req_channel);
   }
 
   // check the cache
@@ -359,11 +390,7 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
     }
   }
 
-  // if you have one adjacent server AND no users
-    // respond with leave
-
   if (!is_in_cache) {
-    std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
     std::cout << server.ip << ":" << server.port << " " << request_ip_port
     << " recv S2S Say " << say->req_username << " " << say->req_channel << " \"" << say->req_text << "\"" << std::endl;
 
@@ -376,11 +403,34 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
     }
     s2s_say_cache.push_back(say->uniq_id);
 
-    /* if the s2s say req channel is in user channels, send message to users */
+    // if the s2s say req channel is in user channels, send message to users
     if (user_channels.find(say->req_channel) != user_channels.end()) {
-      SendSay(server, *say);
+      SendUsersS2SSay(server, *say);
     }
   }
+}
+
+
+/**
+ * Handles S2S Leave requests.
+ *
+ * @server is this server.
+ * @buffer is the login_request
+ * @request_address is the user's address.
+ * @request_port is the user's port.
+ */
+void HandleS2SLeaveRequest(Server server, void *buffer, in_addr_t request_address, unsigned short request_port) {
+  struct s2s_request_leave *leave = (struct s2s_request_leave *) buffer;
+  char request_ip[INET_ADDRSTRLEN];
+  inet_ntop(AF_INET, &request_address, request_ip, INET_ADDRSTRLEN);
+
+  std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
+
+  std::cout << server.ip << ":" << server.port << " " << request_ip_port
+  << " recv S2S Leave " << leave->req_channel << std::endl;
+
+  // Remove requester from server channel.
+  servers.find(request_ip_port)->second->channels.erase(leave->req_channel);
 }
 
 
@@ -818,6 +868,8 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
     case REQ_S2S_SAY:
       HandleS2SSayRequest(server, buffer, request_address, request_port);
       break;
+    case REQ_S2S_LEAVE:
+      HandleS2SLeaveRequest(server, buffer, request_address, request_port);
     default:
       break;
   }
