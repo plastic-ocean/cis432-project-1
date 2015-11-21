@@ -351,7 +351,7 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
   << " recv S2S Join " << join->req_channel << std::endl;
 
   // Add requester to channel.
-  servers.find(request_ip_port)->second->channels.insert({join->req_channel,
+  servers.find(request_ip_port)->second->channels.insert({std::string(join->req_channel),
                                                           std::shared_ptr<Channel>(join->req_channel)});
 
   if (server_channels.find(join->req_channel) == server_channels.end()) {
