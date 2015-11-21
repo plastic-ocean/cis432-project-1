@@ -277,7 +277,7 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
 
   for (auto adj_server : servers) {
     std::string adj_server_ip_port = adj_server.second->ip + ":" + std::to_string(adj_server.second->port);
-    std::cout << adj_server.second->ip << ":" << adj_server.second->port << std::endl;
+    std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port << std::endl;
     for (auto c : adj_server.second->channels) {
       std::cout << c.first << std::endl;
     }
