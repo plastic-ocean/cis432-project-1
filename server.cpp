@@ -125,6 +125,21 @@ void Error(std::string message) {
 }
 
 
+void SetSigalarm() {
+  signal(SIGALRM, &HandleSigalarm);
+  alarm(7);
+  alarm(5);
+}
+
+
+void HandleSigalarm(int sig) {
+  std::cout << "received alarm " << sig << std::endl;
+//  for (auto s : server_channels) {
+//    SendS2SJoinRequest(server, s.first);
+//  }
+}
+
+
 unsigned int GetRandSeed() {
   unsigned int random_seed;
   std::ifstream file("/dev/urandom", std::ios::binary);
@@ -231,6 +246,8 @@ void CreateServerChannel(std::string name) {
  */
 void SendS2SJoinRequest(Server server, std::string channel_name) {
   size_t servers_size = servers.size();
+
+  SetSigalarm();
 
   if (servers_size > 0) {
     struct s2s_request_join join;
@@ -882,13 +899,6 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
 }
 
 
-void HandleSigalarm(int sig) {
-  std::cout << "received alarm " << sig << std::endl;
-  signal(SIGALRM, &HandleSigalarm);
-  alarm(5);
-}
-
-
 int main(int argc, char *argv[]) {
   struct sockaddr_in server_addr;
   int server_socket;
@@ -933,9 +943,6 @@ int main(int argc, char *argv[]) {
     std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port
     << " connected" << std::endl;
   }
-
-  signal(SIGALRM, &HandleSigalarm);
-  alarm(5);
 
   while (1) {
     struct sockaddr_in sock_addr;
