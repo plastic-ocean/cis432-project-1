@@ -229,6 +229,8 @@ void CreateServerChannel(std::string name) {
 void SendS2SJoinRequest(Server server, std::string channel, std::string request_ip_port) {
   size_t servers_size = servers.size();
 
+  std::cout << "nothing happeing here: " << request_ip_port << std::endl;
+
   if (servers_size > 0) {
     struct s2s_request_join join;
     memcpy(join.req_channel, channel.c_str(), CHANNEL_MAX);
@@ -245,8 +247,8 @@ void SendS2SJoinRequest(Server server, std::string channel, std::string request_
         inet_pton(AF_INET, adj_server.second->ip.c_str(), &server_addr.sin_addr.s_addr);
 
         // Add requester to channel.
-        std::shared_ptr<Channel> new_channel = std::make_shared<Channel>(std::string(channel));
-        servers.find(request_ip_port)->second->channels.insert({std::string(channel), new_channel});
+//        std::shared_ptr<Channel> new_channel = std::make_shared<Channel>(std::string(channel));
+//        servers.find(request_ip_port)->second->channels.insert({std::string(channel), new_channel});
 
         if (sendto(server.socket, &join, message_size, 0, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0) {
           Error("Failed to send S2S Join\n");
@@ -360,9 +362,8 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
   std::cout << server.ip << ":" << server.port << " " << request_ip_port
   << " recv S2S Join " << join->req_channel << std::endl;
 
-  std::shared_ptr<Channel> channel = std::make_shared<Channel>(std::string(join->req_channel));
-
   // Add requester to channel.
+  std::shared_ptr<Channel> channel = std::make_shared<Channel>(std::string(join->req_channel));
   servers.find(request_ip_port)->second->channels.insert({std::string(join->req_channel), channel});
 
 //  std::cout << request_ip_port << " checking adj servers for channels; just inserted: " << join->req_channel << std::endl;
