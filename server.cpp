@@ -41,6 +41,40 @@
 // TODO Try several topologies. Verify that trees are formed and pruned correctly.
 // TODO Copy your server code and modify it to send invalid packets to see if you can make your server crash.
 // TODO ^ Fix any bugs you find.
+
+
+size_t kBufferSize = 2048;
+
+class Channel;
+class User;
+class Server;
+
+void Error(std::string);
+void HandleSigalarm(int);
+void SetSigalarm();
+unsigned int GetRandSeed();
+std::shared_ptr<Channel> GetChannel(std::string);
+void SendUsersS2SSay(Server, struct s2s_request_say);
+void CreateServerChannel(std::string);
+void CreateSocket(char *, const char *);
+void SendS2SJoinRequest(Server, std::string);
+void SendS2SSayRequest(Server, std::string, std::string, std::string, std::string);
+void SendS2SLeaveRequest(Server, std::string);
+void HandleS2SJoinRequest(Server, void *, in_addr_t, unsigned short);
+void HandleS2SSayRequest(Server, void *, in_addr_t, unsigned short);
+void HandleError(int, std::string, std::string, in_addr_t, unsigned short);
+
+
+void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
+void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
+void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
+void HandleLeaveRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port);
+void HandleSayRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port);
+void HandleListRequest(int server_socket, in_addr_t request_address, unsigned short request_port);
+void HandleWhoRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port);
+void ProcessRequest(int server_socket, void *buffer, in_addr_t request_address, unsigned short request_port);
+
+
 /**
  * A class used to keep track of a channel
  *
@@ -83,7 +117,7 @@ public:
   int socket;
   std::map<std::string, std::shared_ptr<Channel>> channels;
 
-
+  Server() {};
 
   Server(std::string host_name, char *port, int socket): host_name(host_name), port(atoi(port)), socket(socket) {
     struct hostent *he;
@@ -113,6 +147,8 @@ std::map<std::string, std::shared_ptr<Channel>> server_channels;
 
 std::deque<long> s2s_say_cache;
 
+Server server;
+
 
 /**
  * Prints an error message and exists.
@@ -127,17 +163,19 @@ void Error(std::string message) {
 
 void HandleSigalarm(int sig) {
   std::cout << "received alarm " << sig << std::endl;
-//  for (auto s : server_channels) {
-//    SendS2SJoinRequest(server, s.first);
-//  }
-}
-
-
-void SetSigalarm() {
   signal(SIGALRM, &HandleSigalarm);
-  alarm(7);
-  alarm(5);
+  alarm(0);
+  alarm(10);
+  for (auto s : server_channels) {
+    SendS2SJoinRequest(server, s.first);
+  }
 }
+
+
+//void SetSigalarm() {
+//  signal(SIGALRM, &HandleSigalarm);
+//  alarm(10);
+//}
 
 
 unsigned int GetRandSeed() {
@@ -246,8 +284,6 @@ void CreateServerChannel(std::string name) {
  */
 void SendS2SJoinRequest(Server server, std::string channel_name) {
   size_t servers_size = servers.size();
-
-  SetSigalarm();
 
   if (servers_size > 0) {
     struct s2s_request_join join;
@@ -930,7 +966,7 @@ int main(int argc, char *argv[]) {
     Error("Failed to bind socket\n");
   }
 
-  Server server = Server(domain, port, server_socket);
+  server = Server(domain, port, server_socket);
 
   // Adds adjacent servers to servers map.
   for (int i = 3; i < argc; i += 2) {
@@ -943,6 +979,9 @@ int main(int argc, char *argv[]) {
     std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port
     << " connected" << std::endl;
   }
+
+  signal(SIGALRM, &HandleSigalarm);
+  alarm(10);
 
   while (1) {
     struct sockaddr_in sock_addr;
