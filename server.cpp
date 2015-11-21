@@ -226,10 +226,8 @@ void CreateServerChannel(std::string name) {
  * @server is this server's info.
  * @channel is the channel to send to other servers.
  */
-void SendS2SJoinRequest(Server server, std::string channel_name, std::string request_ip_port) {
+void SendS2SJoinRequest(Server server, std::string channel_name) {
   size_t servers_size = servers.size();
-
-  std::cout << "nothing happeing here: " << request_ip_port << std::endl;
 
   if (servers_size > 0) {
     struct s2s_request_join join;
@@ -282,11 +280,6 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
 
   for (auto adj_server : servers) {
     std::string adj_server_ip_port = adj_server.second->ip + ":" + std::to_string(adj_server.second->port);
-    std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port << std::endl;
-    for (auto c : adj_server.second->channels) {
-      std::cout << c.first << std::endl;
-    }
-    std::cout << std::endl;
     if (adj_server_ip_port != request_ip_port) {
       struct sockaddr_in server_addr;
       memset(&server_addr, 0, sizeof(struct sockaddr_in));
@@ -313,13 +306,10 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
  */
 void SendS2SLeaveRequest(Server server, std::string channel) {
   size_t servers_size = servers.size();
-  std::cout << server.ip << ":" << server.port << " entering sends2sleaverequest" << std::endl;
 
   server_channels.erase(channel);
 
   if (servers_size > 0) {
-
-    std::cout << server.ip << ":" << server.port << " about to sends2sleaverequest" << std::endl;
     struct s2s_request_leave leave;
     memcpy(leave.req_channel, channel.c_str(), CHANNEL_MAX);
     leave.req_type = REQ_S2S_LEAVE;
@@ -366,18 +356,9 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
   std::shared_ptr<Channel> channel = std::make_shared<Channel>(std::string(join->req_channel));
   servers.find(request_ip_port)->second->channels.insert({std::string(join->req_channel), channel});
 
-//  std::cout << request_ip_port << " checking adj servers for channels; just inserted: " << join->req_channel << std::endl;
-//  for (auto s : servers) {
-//    std::cout << s.second->ip << ":" << s.second->port << std::endl;
-//    for (auto c : s.second->channels) {
-//      std::cout << c.first << std::endl;
-//    }
-//  }
-//  std::cout << std::endl;
-
   if (server_channels.find(join->req_channel) == server_channels.end()) {
     CreateServerChannel(join->req_channel);
-    SendS2SJoinRequest(server, join->req_channel, request_ip_port);
+    SendS2SJoinRequest(server, join->req_channel);
   }
 }
 
@@ -605,7 +586,7 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
 
   if (server_channels.find(channel->name) == server_channels.end()) {
     CreateServerChannel(channel->name);
-    SendS2SJoinRequest(server, channel->name, "");
+    SendS2SJoinRequest(server, channel->name);
   }
 }
 
