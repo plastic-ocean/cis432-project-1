@@ -433,6 +433,10 @@ void HandleS2SLeaveRequest(Server server, void *buffer, in_addr_t request_addres
 
   // Remove requester from server channel.
   servers.find(request_ip_port)->second->channels.erase(leave->req_channel);
+
+  for (auto c : servers.find(request_ip_port)->second->channels) {
+    std::cout << c.first << std::endl;
+  }
 }
 
 
