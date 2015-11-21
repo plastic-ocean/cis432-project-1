@@ -381,7 +381,6 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
 
   // if there is only one adjacent server and no users
   if (servers_size == 1 && (user_channels.find(say->req_channel) == user_channels.end())) {
-    std::cout << server.ip << ":" << server.port << " sending leave" << std::endl;
     SendS2SLeaveRequest(server, say->req_channel);
   }
 
