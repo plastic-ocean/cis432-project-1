@@ -82,6 +82,7 @@ public:
   std::map<std::string, std::shared_ptr<Channel>> channels;
 
 
+
   Server(std::string host_name, char *port, int socket): host_name(host_name), port(atoi(port)), socket(socket) {
     struct hostent *he;
     struct in_addr **addr_list;
@@ -879,6 +880,11 @@ void ProcessRequest(Server server, void *buffer, in_addr_t request_address, unsi
 }
 
 
+void HandleSigalarm(int signal) {
+  std::cout << "received alarm" << std::endl;
+}
+
+
 int main(int argc, char *argv[]) {
   struct sockaddr_in server_addr;
   int server_socket;
@@ -923,6 +929,9 @@ int main(int argc, char *argv[]) {
     std::cout << server.ip << ":" << server.port << " " << adj_server.second->ip << ":" << adj_server.second->port
     << " connected" << std::endl;
   }
+
+  signal(SIGALRM, &HandleSigalarm);
+  alarm(5);
 
   while (1) {
     struct sockaddr_in sock_addr;
