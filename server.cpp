@@ -226,7 +226,7 @@ void CreateServerChannel(std::string name) {
  * @server is this server's info.
  * @channel is the channel to send to other servers.
  */
-void SendS2SJoinRequest(Server server, std::string channel, std::string request_ip_port) {
+void SendS2SJoinRequest(Server server, std::string channel) {
   size_t servers_size = servers.size();
 
   if (servers_size > 0) {
@@ -237,8 +237,7 @@ void SendS2SJoinRequest(Server server, std::string channel, std::string request_
     size_t message_size = sizeof(struct s2s_request_join);
 
     for (auto adj_server : servers) {
-      std::string adj_server_ip_port = adj_server.second->ip + ":" + std::to_string(adj_server.second->port);
-      if (adj_server_ip_port != request_ip_port) {
+      if (adj_server.second->channels.find(channel) == adj_server.second->channels.end()) {
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(struct sockaddr_in));
         server_addr.sin_family = AF_INET;
@@ -373,7 +372,7 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
 
   if (server_channels.find(join->req_channel) == server_channels.end()) {
     CreateServerChannel(join->req_channel);
-    SendS2SJoinRequest(server, join->req_channel, request_ip_port);
+    SendS2SJoinRequest(server, join->req_channel);
   }
 }
 
@@ -601,7 +600,7 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
 
   if (server_channels.find(channel->name) == server_channels.end()) {
     CreateServerChannel(channel->name);
-    SendS2SJoinRequest(server, channel->name, "");
+    SendS2SJoinRequest(server, channel->name);
   }
 }
 
