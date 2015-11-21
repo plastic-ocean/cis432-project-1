@@ -350,9 +350,10 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
   std::cout << server.ip << ":" << server.port << " " << request_ip_port
   << " recv S2S Join " << join->req_channel << std::endl;
 
+  std::shared_ptr<Channel> channel = std::make_shared<Channel>(std::string(join->req_channel));
+
   // Add requester to channel.
-  servers.find(request_ip_port)->second->channels.insert({std::string(join->req_channel),
-                                                          std::shared_ptr<Channel>(join->req_channel)});
+  servers.find(request_ip_port)->second->channels.insert({std::string(join->req_channel), channel});
 
   if (server_channels.find(join->req_channel) == server_channels.end()) {
     CreateServerChannel(join->req_channel);
