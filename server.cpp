@@ -125,18 +125,18 @@ void Error(std::string message) {
 }
 
 
-void SetSigalarm() {
-  signal(SIGALRM, &HandleSigalarm);
-  alarm(7);
-  alarm(5);
-}
-
-
 void HandleSigalarm(int sig) {
   std::cout << "received alarm " << sig << std::endl;
 //  for (auto s : server_channels) {
 //    SendS2SJoinRequest(server, s.first);
 //  }
+}
+
+
+void SetSigalarm() {
+  signal(SIGALRM, &HandleSigalarm);
+  alarm(7);
+  alarm(5);
 }
 
 
