@@ -37,7 +37,7 @@
 // Add support for forwarding Joins from another server.
 // Add support for Server-to-Server Say messages, including loop detection.
 // Add support for sending Leave when a Say cannot be forwarded.
-// TODO Add support for the soft state features.
+// Add support for the soft state features.
 // TODO Try several topologies. Verify that trees are formed and pruned correctly.
 // TODO Copy your server code and modify it to send invalid packets to see if you can make your server crash.
 // TODO ^ Fix any bugs you find.
