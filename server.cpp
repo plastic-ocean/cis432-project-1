@@ -28,7 +28,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "server.h"
+//#include "server.h"
 #include "duckchat.h"
 
 // Add the required debugging text for all messages received from clients.
@@ -42,6 +42,7 @@
 // TODO Copy your server code and modify it to send invalid packets to see if you can make your server crash.
 // TODO ^ Fix any bugs you find.
 
+#define UNUSED(x) (void)(x)
 
 size_t kBufferSize = 2048;
 
@@ -164,9 +165,10 @@ void Error(std::string message) {
 
 
 void HandleSigalarm(int sig) {
+  UNUSED(sig);
   signal(SIGALRM, &HandleSigalarm);
   alarm(0);
-  alarm(10);
+  alarm(60);
 
   // TODO figure out how to ignore unused sig
 
@@ -174,7 +176,7 @@ void HandleSigalarm(int sig) {
   for (auto s : servers) {
     if (s.second->join_count == 0) {
       // Remove all channels from server as if it left.
-      std::cout << "Removing channels from " << s.first << " " << sig << std::endl;
+//      std::cout << "Removing channels from " << s.first << " " << sig << std::endl;
       s.second->channels.clear();
     } else {
       s.second->join_count--;
