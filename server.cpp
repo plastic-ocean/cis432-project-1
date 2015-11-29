@@ -45,7 +45,7 @@
 #define UNUSED(x) (void)(x)
 
 size_t kBufferSize = 2048;
-int kTime = 60;
+unsigned int kTime = 60;
 
 class Channel;
 class User;
@@ -487,8 +487,15 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
     }
   }
 
+  int active_servers = 0;
+  for (auto s : servers) {
+    if (s.second->channels.size() > 0) {
+      active_servers++;
+    }
+  }
+
   // if there is only one adjacent server and no users
-  if (servers_size == 1 && (user_channels.find(say->req_channel) == user_channels.end())) {
+  if (active_servers == 1 && (user_channels.find(say->req_channel) == user_channels.end())) {
     SendS2SLeaveRequest(server, say->req_channel);
   }
 }
