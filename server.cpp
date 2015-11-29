@@ -171,8 +171,6 @@ void HandleSigalarm(int sig) {
   alarm(0);
   alarm(kTime);
 
-  // TODO figure out how to ignore unused sig
-
   // Checking if a joins has been received from all servers in the network.
   for (auto s : servers) {
     if (s.second->join_count == 0) {
@@ -346,11 +344,13 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
   say.req_type = REQ_S2S_SAY;
   size_t message_size = sizeof(struct s2s_request_say);
 
-  if (unique_id == 0) {
-    say.uniq_id = rand();
-  } else {
-    say.uniq_id = unique_id;
-  }
+  UNUSED(unique_id);
+
+//  if (unique_id == 0) {
+//    say.uniq_id = rand();
+//  } else {
+//    say.uniq_id = unique_id;
+//  }
 
   for (auto adj_server : servers) {
     std::string adj_server_ip_port = adj_server.second->ip + ":" + std::to_string(adj_server.second->port);
