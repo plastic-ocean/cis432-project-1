@@ -344,13 +344,13 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
   say.req_type = REQ_S2S_SAY;
   size_t message_size = sizeof(struct s2s_request_say);
 
-  UNUSED(unique_id);
+//  UNUSED(unique_id);
 
-//  if (unique_id == 0) {
-//    say.uniq_id = rand();
-//  } else {
-//    say.uniq_id = unique_id;
-//  }
+  if (unique_id == 0) {
+    say.uniq_id = rand();
+  } else {
+    say.uniq_id = unique_id;
+  }
 
   for (auto adj_server : servers) {
     std::string adj_server_ip_port = adj_server.second->ip + ":" + std::to_string(adj_server.second->port);
@@ -616,7 +616,7 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
     in_addr_t current_address = user.second->address;
 
     if (current_port == request_port && current_address == request_address) {
-      std::cout << "server: " << user.first << " logs out" << std::endl;
+      std::cout << server.ip << ":" << server.port << user.first << " logs out" << std::endl;
       
       users.erase(user.first);
       for (auto c : user_channels) {
@@ -836,7 +836,7 @@ void HandleListRequest(Server server, in_addr_t request_address, unsigned short 
         Error("Failed to send list\n");
       }
 
-      std::cout << "server: " << user.first << " lists channels" << std::endl;
+      std::cout << server.ip << ":" << server.port << " " << user.first << " list channels" << std::endl;
       break;
     }
   }
@@ -907,7 +907,7 @@ void HandleWhoRequest(Server server, void *buffer, in_addr_t request_address, un
         Error("Failed to send who\n");
       }
 
-      std::cout << "server: " << user.first << " lists users in channel " << who_request.req_channel << std::endl;
+      std::cout << server.ip << ":" << server.port << " " << user.first << " lists users in channel " << who_request.req_channel << std::endl;
       break;
     }
   }
