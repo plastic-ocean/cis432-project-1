@@ -170,6 +170,8 @@ void HandleSigalarm(int sig) {
   alarm(0);
   alarm(60);
 
+  // TODO figure out how to ignore unused sig
+
   // Checking if a joins has been received from all servers in the network.
   for (auto s : servers) {
     if (s.second->join_count == 0) {
@@ -995,8 +997,8 @@ int main(int argc, char *argv[]) {
     << " connected" << std::endl;
   }
 
-//  signal(SIGALRM, &HandleSigalarm);
-//  alarm(60);
+  signal(SIGALRM, &HandleSigalarm);
+  alarm(60);
 
   while (1) {
     struct sockaddr_in sock_addr;
