@@ -456,6 +456,7 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
   // check the cache
   size_t cache_size = s2s_say_cache.size();
   for (auto uniq_id : s2s_say_cache) {
+    std::cout << uniq_id << ":" << say->uniq_id << std::endl;
     if (uniq_id == say->uniq_id) {
       is_in_cache = true;
     }
