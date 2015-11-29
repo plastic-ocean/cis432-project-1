@@ -28,7 +28,6 @@
 #include <fstream>
 #include <sstream>
 
-//#include "server.h"
 #include "duckchat.h"
 
 // Add the required debugging text for all messages received from clients.
@@ -38,18 +37,21 @@
 // Add support for Server-to-Server Say messages, including loop detection.
 // Add support for sending Leave when a Say cannot be forwarded.
 // Add support for the soft state features.
-// TODO Try several topologies. Verify that trees are formed and pruned correctly.
-// TODO Copy your server code and modify it to send invalid packets to see if you can make your server crash.
-// TODO ^ Fix any bugs you find.
+// Try several topologies. Verify that trees are formed and pruned correctly.
+// Copy your server code and modify it to send invalid packets to see if you can make your server crash.
+// ^ Fix any bugs you find.
 
 #define UNUSED(x) (void)(x)
+
 
 size_t kBufferSize = 2048;
 unsigned int kTime = 60;
 
+
 class Channel;
 class User;
 class Server;
+
 
 void Error(std::string);
 void HandleSigalarm(int);
@@ -110,6 +112,16 @@ public:
 };
 
 
+/**
+ * A class used to keep track of a server.
+ *
+ * @host_name is the domain name for the server.
+ * @port is the servers port.
+ * @socket is socket this server talks on.
+ * @ip is this server's IP address.
+ * @channels is this server's channels.
+ * @join_count is used to keep track of joins for handling alarms.
+ */
 class Server {
 public:
   std::string host_name;
@@ -149,8 +161,10 @@ std::map<std::string, std::shared_ptr<Server>> servers;
 /* all the server channels; key = channel name */
 std::map<std::string, std::shared_ptr<Channel>> server_channels;
 
+/* the S2S say unique ID cache */
 std::deque<long> s2s_say_cache;
 
+/* this server's info object */
 Server server;
 
 
@@ -165,6 +179,11 @@ void Error(std::string message) {
 }
 
 
+/**
+ * Handles alarms going off for sending S2S joins.
+ *
+ * @sig is the unused signal.
+ */
 void HandleSigalarm(int sig) {
   UNUSED(sig);
   signal(SIGALRM, &HandleSigalarm);
@@ -175,7 +194,6 @@ void HandleSigalarm(int sig) {
   for (auto s : servers) {
     if (s.second->join_count == 0) {
       // Remove all channels from server as if it left.
-//      std::cout << "Removing channels from " << s.first << " " << sig << std::endl;
       s.second->channels.clear();
     } else {
       s.second->join_count--;
@@ -189,6 +207,11 @@ void HandleSigalarm(int sig) {
 }
 
 
+/**
+ * Gets a random seeds used for timers.
+ *
+ * @return the random seed.
+ */
 unsigned int GetRandSeed() {
   unsigned int random_seed;
   std::ifstream file("/dev/urandom", std::ios::binary);
@@ -209,7 +232,12 @@ unsigned int GetRandSeed() {
   return random_seed;
 }
 
-// send to local users
+/**
+ * Sends a S2S say to all local users.
+ *
+ * @server is this server.
+ * @s2s_say is the received S2S say that is send to users.
+ */
 void SendUsersS2SSay(Server server, struct s2s_request_say s2s_say) {
   for (auto channel_user : user_channels[s2s_say.req_channel]->users) {
     struct sockaddr_in client_addr;
@@ -334,6 +362,8 @@ void SendS2SJoinRequest(Server server, std::string channel_name) {
  * @username is the sending user.
  * @text is the message to send.
  * @channel is the channel to send to other servers.
+ * @unique_id is the message's unique id.
+ * @request_ip_port is the ip and port string of the requesting server.
  */
 void SendS2SSayRequest(Server server, std::string username, std::string text, std::string channel, long unique_id,
                        std::string request_ip_port) {
@@ -343,8 +373,6 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
   strncpy(say.req_text, text.c_str(), SAY_MAX);
   say.req_type = REQ_S2S_SAY;
   size_t message_size = sizeof(struct s2s_request_say);
-
-//  UNUSED(unique_id);
 
   if (unique_id == 0) {
     say.uniq_id = rand();
@@ -596,7 +624,7 @@ void HandleLoginRequest(Server server, void *buffer, in_addr_t request_address, 
   users.insert({std::string(login_request.req_username), current_user});
 
   std::cout << server.ip << ":" << server.port << " " << request_ip << ":" << request_port
-  << " recv Request login " << login_request.req_username << std::endl;
+  << " recv Request Login " << login_request.req_username << std::endl;
 }
 
 
@@ -616,7 +644,7 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
     in_addr_t current_address = user.second->address;
 
     if (current_port == request_port && current_address == request_address) {
-      std::cout << server.ip << ":" << server.port << user.first << " logs out" << std::endl;
+      std::cout << server.ip << ":" << server.port << " " <<  user.first << " logs out" << std::endl;
       
       users.erase(user.first);
       for (auto c : user_channels) {
