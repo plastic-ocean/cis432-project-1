@@ -453,11 +453,6 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
   size_t servers_size = servers.size();
   std::string request_ip_port = std::string(request_ip) + ":" + std::to_string(ntohs(request_port));
 
-  // if there is only one adjacent server and no users
-  if (servers_size == 1 && (user_channels.find(say->req_channel) == user_channels.end())) {
-    SendS2SLeaveRequest(server, say->req_channel);
-  }
-
   // check the cache
   size_t cache_size = s2s_say_cache.size();
   for (auto uniq_id : s2s_say_cache) {
@@ -483,6 +478,11 @@ void HandleS2SSayRequest(Server server, void *buffer, in_addr_t request_address,
     if (user_channels.find(say->req_channel) != user_channels.end()) {
       SendUsersS2SSay(server, *say);
     }
+  }
+
+  // if there is only one adjacent server and no users
+  if (servers_size == 1 && (user_channels.find(say->req_channel) == user_channels.end())) {
+    SendS2SLeaveRequest(server, say->req_channel);
   }
 }
 
