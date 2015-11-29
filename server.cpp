@@ -45,7 +45,7 @@
 #define UNUSED(x) (void)(x)
 
 size_t kBufferSize = 2048;
-int kTime = 10;
+int kTime = 60;
 
 class Channel;
 class User;
