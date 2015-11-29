@@ -998,7 +998,7 @@ int main(int argc, char *argv[]) {
   }
 
   signal(SIGALRM, &HandleSigalarm);
-  alarm(10);
+  alarm(60);
 
   while (1) {
     struct sockaddr_in sock_addr;
