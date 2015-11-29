@@ -45,6 +45,7 @@
 #define UNUSED(x) (void)(x)
 
 size_t kBufferSize = 2048;
+int kTime = 10;
 
 class Channel;
 class User;
@@ -58,7 +59,7 @@ void SendUsersS2SSay(Server, struct s2s_request_say);
 void CreateServerChannel(std::string);
 void CreateSocket(char *, const char *);
 void SendS2SJoinRequest(Server, std::string);
-void SendS2SSayRequest(Server, std::string, std::string, std::string, std::string);
+void SendS2SSayRequest(Server, std::string, std::string, std::string, long, std::string);
 void SendS2SLeaveRequest(Server, std::string);
 void HandleS2SJoinRequest(Server, void *, in_addr_t, unsigned short);
 void HandleS2SSayRequest(Server, void *, in_addr_t, unsigned short);
@@ -168,7 +169,7 @@ void HandleSigalarm(int sig) {
   UNUSED(sig);
   signal(SIGALRM, &HandleSigalarm);
   alarm(0);
-  alarm(60);
+  alarm(kTime);
 
   // TODO figure out how to ignore unused sig
 
@@ -1004,7 +1005,7 @@ int main(int argc, char *argv[]) {
   }
 
   signal(SIGALRM, &HandleSigalarm);
-  alarm(60);
+  alarm(kTime);
 
   while (1) {
     struct sockaddr_in sock_addr;
