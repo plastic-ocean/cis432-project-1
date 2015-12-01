@@ -27,6 +27,8 @@
 #include <arpa/inet.h>
 #include <fstream>
 #include <sstream>
+#include <random>
+#include <climits>
 
 #include "duckchat.h"
 
@@ -56,12 +58,13 @@ class Server;
 void Error(std::string);
 void HandleSigalarm(int);
 unsigned int GetRandSeed();
+unsigned long long GetRand();
 std::shared_ptr<Channel> GetChannel(std::string);
 void SendUsersS2SSay(Server, struct s2s_request_say);
 void CreateServerChannel(std::string);
 void CreateSocket(char *, const char *);
 void SendS2SJoinRequest(Server, std::string);
-void SendS2SSayRequest(Server, std::string, std::string, std::string, long, std::string);
+void SendS2SSayRequest(Server, std::string, std::string, std::string, unsigned long long, std::string);
 void SendS2SLeaveRequest(Server, std::string);
 void HandleS2SJoinRequest(Server, void *, in_addr_t, unsigned short);
 void HandleS2SSayRequest(Server, void *, in_addr_t, unsigned short);
@@ -162,10 +165,15 @@ std::map<std::string, std::shared_ptr<Server>> servers;
 std::map<std::string, std::shared_ptr<Channel>> server_channels;
 
 /* the S2S say unique ID cache */
-std::deque<long> s2s_say_cache;
+std::deque<unsigned long long> s2s_say_cache;
 
 /* this server's info object */
 Server server;
+
+// choose a linear congruential engine
+std::minstd_rand rand_generator;
+// define our uniform distribution and range
+std::uniform_int_distribution<unsigned long long> distribution(1, ULLONG_MAX);
 
 
 /**
@@ -230,6 +238,14 @@ unsigned int GetRandSeed() {
   }
 
   return random_seed;
+}
+
+unsigned long long GetRand() {
+  unsigned long long number = distribution(rand_generator);
+
+  std::cout << "rand number " << number << std::endl;
+
+  return number;
 }
 
 /**
@@ -365,8 +381,8 @@ void SendS2SJoinRequest(Server server, std::string channel_name) {
  * @unique_id is the message's unique id.
  * @request_ip_port is the ip and port string of the requesting server.
  */
-void SendS2SSayRequest(Server server, std::string username, std::string text, std::string channel, long unique_id,
-                       std::string request_ip_port) {
+void SendS2SSayRequest(Server server, std::string username, std::string text, std::string channel,
+                       unsigned long long unique_id, std::string request_ip_port) {
   struct s2s_request_say say;
   strncpy(say.req_channel, channel.c_str(), CHANNEL_MAX);
   strncpy(say.req_username, username.c_str(), USERNAME_MAX);
@@ -375,7 +391,8 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
   size_t message_size = sizeof(struct s2s_request_say);
 
   if (unique_id == 0) {
-    say.uniq_id = rand();
+    // TODO rand() only returns an int, but we need a 64 bit number (a long long int)
+    say.uniq_id = GetRand(); // rand();
   } else {
     say.uniq_id = unique_id;
   }
@@ -1001,7 +1018,9 @@ int main(int argc, char *argv[]) {
   char *domain;
   char *port;
 
-  srand(GetRandSeed());
+//  srand(GetRandSeed());
+
+  rand_generator.seed(GetRandSeed()); // create a seed
 
   if (argc < 3) {
     std::cerr << "Usage: ./server domain_name port_num" << std::endl;

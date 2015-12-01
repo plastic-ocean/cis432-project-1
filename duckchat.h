@@ -105,7 +105,7 @@ struct s2s_request_leave {
 
 struct s2s_request_say {
     request_t req_type; /* = REQ_S2S_SAY */
-    long uniq_id; /* unique identifier */
+    unsigned long long uniq_id; /* unique identifier */
     char req_username[USERNAME_MAX];
     char req_channel[CHANNEL_MAX];
     char req_text[SAY_MAX];
