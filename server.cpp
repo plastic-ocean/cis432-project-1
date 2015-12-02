@@ -65,7 +65,7 @@ void CreateServerChannel(std::string);
 void CreateSocket(char *, const char *);
 void SendS2SJoinRequest(Server, std::string);
 void SendS2SSayRequest(Server, std::string, std::string, std::string, unsigned long long, std::string);
-void SendS2SLeaveRequest(Server, std::string);
+void SendS2SLeaveRequest(Server, std::string, std::string);
 void HandleS2SJoinRequest(Server, void *, in_addr_t, unsigned short);
 void HandleS2SSayRequest(Server, void *, in_addr_t, unsigned short);
 void HandleError(int, std::string, std::string, in_addr_t, unsigned short);
@@ -199,7 +199,7 @@ void HandleSigalarm(int sig) {
   alarm(0);
   alarm(kTime);
 
-  std::cout << 'alarm when off' << std::endl;
+  std::cout << "alarm when off" << std::endl;
 
   // Checking if a joins has been received from all servers in the network.
   for (auto s : servers) {
