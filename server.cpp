@@ -203,10 +203,10 @@ void HandleSigalarm(int sig) {
   for (auto adj_server : servers) {
     if (adj_server.second->join_count <= 0) {
       // Remove all channels from server as if it left.
-      std::cout << server.ip << ":" << server.port << "clearing server channels map" << std::endl;
+      std::cout << server.ip << ":" << server.port << " clearing server channels map" << std::endl;
       adj_server.second->channels.clear();
     } else {
-      std::cout << server.ip << ":" << server.port << "decremented join count " << server.join_count << std::endl;
+      std::cout << server.ip << ":" << server.port << " decremented join count " << server.join_count << std::endl;
       adj_server.second->join_count--;
     }
   }
@@ -503,6 +503,7 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
 
   // After 2 minutes expect to receive join from each server, this keeps the count at 2.
   if (servers.find(request_ip_port)->second->join_count != 2) {
+    std::cout << server.ip << ":" << server.port << " set join_count to 2" << std::endl;
     servers.find(request_ip_port)->second->join_count = 2;
   }
 
