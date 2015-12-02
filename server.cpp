@@ -203,10 +203,10 @@ void HandleSigalarm(int sig) {
   for (auto adj_server : servers) {
     if (adj_server.second->join_count <= 0) {
       // Remove all channels from server as if it left.
-      std::cout << "clearing server channels map" << std::endl;
+      std::cout << server.ip << ":" << server.port << "clearing server channels map" << std::endl;
       adj_server.second->channels.clear();
     } else {
-      std::cout << "decremented join count" << std::endl;
+      std::cout << server.ip << ":" << server.port << "decremented join count " << server.join_count << std::endl;
       adj_server.second->join_count--;
     }
   }
