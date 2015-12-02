@@ -1,0 +1,49 @@
+CIS 432 � Introduction to Computer Networks
+Programming Assignment 02
+
+
+Please fill this form and send it together with your program.
+Put all the source files, makefile and this text file into a folder by the lastname of one of the group members (all lowercase letters),
+compress it into a tarball, gz or zip and send using TurnIN Homework page.
+(https://systems.cs.uoregon.edu/apps/turnin.php)
+Please include any special instructions for compiling and running your program on ix.
+
+Student Names: Benjamin Barnes, H. Keith Hamm
+Student IDs: 951289352, 950993252
+
+To run the program on IX, you should make clean, make, and then run the start_servers.sh with some topology.
+
+
+
+
+Answer the questions by selecting one of the given options. You may add additional information if you wish to.
+
+- Does the server broadcast Joins correctly when a user requests a Join? Yes. In our implementation, we do not send joins
+to servers from which we have already received a join on that channel, unless we get a leave from them or the timer
+has expired (we have not received a join). We did this based off the guide provided: our output matches the guide exactly.
+ 
+- Does the server broadcast Joins correctly when receiving a Join from another server? Yes. Our output matches the
+guide H-topology exactly.
+
+- Does the server generate unique identifiers correctly? Yes.
+
+- Does the server renew Joins once per minute? Yes. We have optimized this process by only sending a join to an
+adjacent server if we have not received a join from it in the past minute. This allows us to not send unnecessary joins.
+For example, in the case of a triangle where each node is connected to the others (and all three have users so none are pruned),
+ only two nodes will send joins as the third will hold back because it knows the other two are actively sending
+joins and therefore still present. In addition, since servers with no users also have no channels, there is nothing to renew,
+so it doesn't send a Join although it will forward one started by a server that has users.
+  
+- Does the server remove Joins older than two minutes? Yes.
+ 
+- Does the server reply with a Leave message when it cannot forward a Say message? Yes.
+
+- Does the server reply with a Leave message when it receives a duplicate Say message? Yes.
+
+- Does the server avoid sending inappropriate Join, Leave, or Say messages? Yes.
+
+- Does the server have all the functionality from program #1 when working in isolation? Yes.
+
+- Does the client have all the functionality from program #1? Yes.
+ 
+
