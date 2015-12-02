@@ -47,7 +47,7 @@
 
 
 size_t kBufferSize = 2048;
-unsigned int kTime = 10;
+unsigned int kTime = 60;
 
 
 class Channel;
