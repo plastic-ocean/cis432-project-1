@@ -69,16 +69,14 @@ void SendS2SLeaveRequest(Server, std::string, std::string);
 void HandleS2SJoinRequest(Server, void *, in_addr_t, unsigned short);
 void HandleS2SSayRequest(Server, void *, in_addr_t, unsigned short);
 void HandleError(int, std::string, std::string, in_addr_t, unsigned short);
-
-
-void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleLeaveRequest(Server, void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleSayRequest(Server, void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleListRequest(Server, in_addr_t request_address, unsigned short request_port);
-void HandleWhoRequest(Server, void *buffer, in_addr_t request_address, unsigned short request_port);
-void ProcessRequest(Server, void *buffer, in_addr_t request_address, unsigned short request_port);
+void HandleLoginRequest(void *, in_addr_t , unsigned short );
+void HandleLogoutRequest(void *, in_addr_t , unsigned short );
+void HandleJoinRequest(void *, in_addr_t , unsigned short );
+void HandleLeaveRequest(Server, void *, in_addr_t , unsigned short );
+void HandleSayRequest(Server, void *, in_addr_t , unsigned short );
+void HandleListRequest(Server, in_addr_t , unsigned short );
+void HandleWhoRequest(Server, void *, in_addr_t , unsigned short );
+void ProcessRequest(Server, void *, in_addr_t , unsigned short );
 
 
 /**
