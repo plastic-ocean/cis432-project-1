@@ -63,7 +63,7 @@ std::shared_ptr<Channel> GetChannel(std::string);
 void SendUsersS2SSay(Server, struct s2s_request_say);
 void CreateServerChannel(std::string);
 void CreateSocket(char *, const char *);
-void SendS2SJoinRequest(Server, std::string);
+void SendS2SJoinRequest(Server, std::string, std::string);
 void SendS2SSayRequest(Server, std::string, std::string, std::string, unsigned long long, std::string);
 void SendS2SLeaveRequest(Server, std::string, std::string);
 void HandleS2SJoinRequest(Server, void *, in_addr_t, unsigned short);
