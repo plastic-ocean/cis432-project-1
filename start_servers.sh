@@ -13,9 +13,9 @@ SERVER_NAME=`echo $SERVER | sed 's#.*/\(.*\)#\1#g'`
 #$SERVER localhost 5022 localhost 5021 &
 
 # Generate a simple three-server triangular topology
-#$SERVER localhost 5020 localhost 5021 localhost 5022 &
-#$SERVER localhost 5021 localhost 5020 localhost 5022 &
-#$SERVER localhost 5022 localhost 5021 localhost 5020 &
+$SERVER localhost 5020 localhost 5021 localhost 5022 &
+$SERVER localhost 5021 localhost 5020 localhost 5022 &
+$SERVER localhost 5022 localhost 5021 localhost 5020 &
 
 # Generate a simple four-server linear topology
 #$SERVER localhost 5020 localhost 5021 &
@@ -24,13 +24,13 @@ SERVER_NAME=`echo $SERVER | sed 's#.*/\(.*\)#\1#g'`
 #$SERVER localhost 5023 localhost 5022 &
 
 # Generate a capital-H shaped topology
-$SERVER localhost 6000 localhost 6001 &
-$SERVER localhost 6001 localhost 6000 localhost 6002 localhost 6003 &
-$SERVER localhost 6002 localhost 6001 &
-$SERVER localhost 6003 localhost 6001 localhost 6005 &
-$SERVER localhost 6004 localhost 6005 &
-$SERVER localhost 6005 localhost 6004 localhost 6003 localhost 6006 &
-$SERVER localhost 6006 localhost 6005 &
+#$SERVER localhost 6000 localhost 6001 &
+#$SERVER localhost 6001 localhost 6000 localhost 6002 localhost 6003 &
+#$SERVER localhost 6002 localhost 6001 &
+#$SERVER localhost 6003 localhost 6001 localhost 6005 &
+#$SERVER localhost 6004 localhost 6005 &
+#$SERVER localhost 6005 localhost 6004 localhost 6003 localhost 6006 &
+#$SERVER localhost 6006 localhost 6005 &
 
 # Generate a 3x3 grid topology
 #$SERVER localhost 6000 localhost 6001 localhost 6003 &
