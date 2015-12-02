@@ -47,7 +47,7 @@
 
 
 size_t kBufferSize = 2048;
-unsigned int kTime = 60;
+unsigned int kTime = 10;
 
 
 class Channel;
@@ -198,6 +198,8 @@ void HandleSigalarm(int sig) {
   signal(SIGALRM, &HandleSigalarm);
   alarm(0);
   alarm(kTime);
+
+  std::cout << 'alarm when off' << std::endl;
 
   // Checking if a joins has been received from all servers in the network.
   for (auto s : servers) {
