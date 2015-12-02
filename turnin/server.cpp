@@ -1,5 +1,5 @@
 // CIS 432 Intro to Networks
-// Programming Project 1 and 2
+// Programming Project 2
 // Fall 2015
 //
 // Benjamin Barnes
@@ -44,7 +44,6 @@
 // ^ Fix any bugs you find.
 
 #define UNUSED(x) (void)(x)
-
 
 size_t kBufferSize = 2048;
 unsigned int kTime = 60;
@@ -224,7 +223,7 @@ void HandleSigalarm(int sig) {
 unsigned int GetRandSeed() {
   unsigned int random_seed;
   std::ifstream file("/dev/urandom", std::ios::binary);
-  
+
   if (file.is_open()) {
     char * temp_block;
     int size = sizeof(int);
@@ -688,7 +687,7 @@ void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short
 
     if (current_port == request_port && current_address == request_address) {
       std::cout << server.ip << ":" << server.port << " " <<  user.first << " logs out" << std::endl;
-      
+
       users.erase(user.first);
       for (auto c : user_channels) {
         for (auto u : c.second->users) {
@@ -762,7 +761,7 @@ void HandleLeaveRequest(Server server, void *buffer, in_addr_t request_address, 
   std::list<std::shared_ptr<User>>::const_iterator it;
   bool is_channel;
   struct request_leave leave_request;
-  
+
   memcpy(&leave_request, buffer, sizeof(struct request_leave));
   current_channel = leave_request.req_channel;
 
