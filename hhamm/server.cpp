@@ -45,6 +45,7 @@
 
 #define UNUSED(x) (void)(x)
 
+
 size_t kBufferSize = 2048;
 unsigned int kTime = 60;
 
@@ -62,22 +63,20 @@ std::shared_ptr<Channel> GetChannel(std::string);
 void SendUsersS2SSay(Server, struct s2s_request_say);
 void CreateServerChannel(std::string);
 void CreateSocket(char *, const char *);
-void SendS2SJoinRequest(Server, std::string);
+void SendS2SJoinRequest(Server, std::string, std::string);
 void SendS2SSayRequest(Server, std::string, std::string, std::string, unsigned long long, std::string);
 void SendS2SLeaveRequest(Server, std::string, std::string);
 void HandleS2SJoinRequest(Server, void *, in_addr_t, unsigned short);
 void HandleS2SSayRequest(Server, void *, in_addr_t, unsigned short);
 void HandleError(int, std::string, std::string, in_addr_t, unsigned short);
-
-
-void HandleLoginRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleLogoutRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleJoinRequest(void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleLeaveRequest(Server, void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleSayRequest(Server, void *buffer, in_addr_t request_address, unsigned short request_port);
-void HandleListRequest(Server, in_addr_t request_address, unsigned short request_port);
-void HandleWhoRequest(Server, void *buffer, in_addr_t request_address, unsigned short request_port);
-void ProcessRequest(Server, void *buffer, in_addr_t request_address, unsigned short request_port);
+void HandleLoginRequest(void *, in_addr_t , unsigned short );
+void HandleLogoutRequest(void *, in_addr_t , unsigned short );
+void HandleJoinRequest(void *, in_addr_t , unsigned short );
+void HandleLeaveRequest(Server, void *, in_addr_t , unsigned short );
+void HandleSayRequest(Server, void *, in_addr_t , unsigned short );
+void HandleListRequest(Server, in_addr_t , unsigned short );
+void HandleWhoRequest(Server, void *, in_addr_t , unsigned short );
+void ProcessRequest(Server, void *, in_addr_t , unsigned short );
 
 
 /**
@@ -169,10 +168,10 @@ std::deque<unsigned long long> s2s_say_cache;
 /* this server's info object */
 Server server;
 
-/* choose a linear congruential engine */
+/* choose a linear congruential engine for the S2S Say unique id */
 std::minstd_rand rand_generator;
 
-/* define our uniform distribution and range */
+/* define our uniform distribution and range for the S2S Say unique id */
 std::uniform_int_distribution<unsigned long long> distribution(1, ULLONG_MAX);
 
 
@@ -210,7 +209,7 @@ void HandleSigalarm(int sig) {
 
   // Sending join for all our channels to all adjacent servers.
   for (auto c : server_channels) {
-    SendS2SJoinRequest(server, c.first);
+    SendS2SJoinRequest(server, c.first, "");
   }
 }
 
@@ -342,7 +341,7 @@ void CreateServerChannel(std::string name) {
  * @server is this server's info.
  * @channel is the channel to send to other servers.
  */
-void SendS2SJoinRequest(Server server, std::string channel_name) {
+void SendS2SJoinRequest(Server server, std::string channel_name, std::string request_ip_port) {
   size_t servers_size = servers.size();
 
   if (servers_size > 0) {
@@ -353,7 +352,8 @@ void SendS2SJoinRequest(Server server, std::string channel_name) {
     size_t message_size = sizeof(struct s2s_request_join);
 
     for (auto adj_server : servers) {
-      if (adj_server.second->channels.find(channel_name) == adj_server.second->channels.end()) {
+      std::string adj_server_ip_port = adj_server.second->ip + ":" + std::to_string(adj_server.second->port);
+      if (adj_server_ip_port != request_ip_port) {
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(struct sockaddr_in));
         server_addr.sin_family = AF_INET;
@@ -396,7 +396,6 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
   size_t message_size = sizeof(struct s2s_request_say);
 
   if (unique_id == 0) {
-    // TODO rand() only returns an int, but we need a 64 bit number (a long long int)
     say.uniq_id = GetRand(); // rand();
   } else {
     say.uniq_id = unique_id;
@@ -505,7 +504,7 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
 
   if (server_channels.find(join->req_channel) == server_channels.end()) {
     CreateServerChannel(join->req_channel);
-    SendS2SJoinRequest(server, join->req_channel);
+    SendS2SJoinRequest(server, join->req_channel, request_ip_port);
   }
 }
 
@@ -742,7 +741,7 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
 
   if (server_channels.find(channel->name) == server_channels.end()) {
     CreateServerChannel(channel->name);
-    SendS2SJoinRequest(server, channel->name);
+    SendS2SJoinRequest(server, channel->name, "");
   }
 }
 

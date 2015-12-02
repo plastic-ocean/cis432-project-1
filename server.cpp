@@ -396,7 +396,6 @@ void SendS2SSayRequest(Server server, std::string username, std::string text, st
   size_t message_size = sizeof(struct s2s_request_say);
 
   if (unique_id == 0) {
-    // TODO rand() only returns an int, but we need a 64 bit number (a long long int)
     say.uniq_id = GetRand(); // rand();
   } else {
     say.uniq_id = unique_id;
