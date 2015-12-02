@@ -211,7 +211,7 @@ void HandleSigalarm(int sig) {
 
   // Sending join for all our channels to all adjacent servers.
   for (auto c : server_channels) {
-    SendS2SJoinRequest(server, c.first);
+    SendS2SJoinRequest(server, c.first, "");
   }
 }
 
@@ -343,7 +343,7 @@ void CreateServerChannel(std::string name) {
  * @server is this server's info.
  * @channel is the channel to send to other servers.
  */
-void SendS2SJoinRequest(Server server, std::string channel_name) {
+void SendS2SJoinRequest(Server server, std::string channel_name, std::string request_ip_port) {
   size_t servers_size = servers.size();
 
   if (servers_size > 0) {
@@ -354,7 +354,8 @@ void SendS2SJoinRequest(Server server, std::string channel_name) {
     size_t message_size = sizeof(struct s2s_request_join);
 
     for (auto adj_server : servers) {
-      if (adj_server.second->channels.find(channel_name) == adj_server.second->channels.end()) {
+      std::string adj_server_ip_port = adj_server.second->ip + ":" + adj_server.second->port;
+      if (adj_server_ip_port != request_ip_port) {
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(struct sockaddr_in));
         server_addr.sin_family = AF_INET;
@@ -506,7 +507,7 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
 
   if (server_channels.find(join->req_channel) == server_channels.end()) {
     CreateServerChannel(join->req_channel);
-    SendS2SJoinRequest(server, join->req_channel);
+    SendS2SJoinRequest(server, join->req_channel, request_ip_port);
   }
 }
 
@@ -743,7 +744,7 @@ void HandleJoinRequest(Server server, void *buffer, in_addr_t request_address, u
 
   if (server_channels.find(channel->name) == server_channels.end()) {
     CreateServerChannel(channel->name);
-    SendS2SJoinRequest(server, channel->name);
+    SendS2SJoinRequest(server, channel->name, "");
   }
 }
 
