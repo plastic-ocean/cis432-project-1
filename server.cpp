@@ -206,6 +206,7 @@ void HandleSigalarm(int sig) {
       std::cout << "clearing server channels map" << std::endl;
       adj_server.second->channels.clear();
     } else {
+      std::cout << "decremented join count" << std::endl;
       adj_server.second->join_count--;
     }
   }
