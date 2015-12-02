@@ -199,8 +199,6 @@ void HandleSigalarm(int sig) {
   alarm(0);
   alarm(kTime);
 
-  std::cout << "alarm when off" << std::endl;
-
   // Checking if a joins has been received from all servers in the network.
   for (auto s : servers) {
     if (s.second->join_count == 0) {
@@ -349,6 +347,7 @@ void SendS2SJoinRequest(Server server, std::string channel_name) {
   size_t servers_size = servers.size();
 
   if (servers_size > 0) {
+    std::cout << "server_size > 0" << std::endl;
     struct s2s_request_join join;
     memcpy(join.req_channel, channel_name.c_str(), CHANNEL_MAX);
     join.req_type = REQ_S2S_JOIN;
@@ -356,7 +355,9 @@ void SendS2SJoinRequest(Server server, std::string channel_name) {
     size_t message_size = sizeof(struct s2s_request_join);
 
     for (auto adj_server : servers) {
+      std::cout << "adj_server" << std::endl;
       if (adj_server.second->channels.find(channel_name) == adj_server.second->channels.end()) {
+        std::cout << "adj_server.second->channels.find(channel_name) == adj_server.second->channels.end()" << std::endl;
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(struct sockaddr_in));
         server_addr.sin_family = AF_INET;
