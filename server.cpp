@@ -147,7 +147,7 @@ public:
     addr_list = (struct in_addr **) he->h_addr_list;
     ip = std::string(inet_ntoa(*addr_list[0]));
 
-    join_count = 2;
+    join_count = 0;
   };
 };
 
