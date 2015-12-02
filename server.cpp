@@ -161,7 +161,7 @@ std::map<std::string, std::shared_ptr<Channel>> user_channels;
 /* all adjacent servers; key = "ip:port" */
 std::map<std::string, std::shared_ptr<Server>> servers;
 
-/* all the server channels; key = channel name */
+/* all the server channels for this server; key = channel name */
 std::map<std::string, std::shared_ptr<Channel>> server_channels;
 
 /* the S2S say unique ID cache */
@@ -200,12 +200,13 @@ void HandleSigalarm(int sig) {
   alarm(kTime);
 
   // Checking if a joins has been received from all servers in the network.
-  for (auto s : servers) {
-    if (s.second->join_count == 0) {
+  for (auto adj_server : servers) {
+    if (adj_server.second->join_count <= 0) {
       // Remove all channels from server as if it left.
-      s.second->channels.clear();
+      std::cout << "clearing server channels map" << std::endl;
+      adj_server.second->channels.clear();
     } else {
-      s.second->join_count--;
+      adj_server.second->join_count--;
     }
   }
 
@@ -501,7 +502,7 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
 
   // After 2 minutes expect to receive join from each server, this keeps the count at 2.
   if (servers.find(request_ip_port)->second->join_count != 2) {
-    servers.find(request_ip_port)->second->join_count++;
+    servers.find(request_ip_port)->second->join_count = 2;
   }
 
   if (server_channels.find(join->req_channel) == server_channels.end()) {
