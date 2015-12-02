@@ -147,7 +147,7 @@ public:
     addr_list = (struct in_addr **) he->h_addr_list;
     ip = std::string(inet_ntoa(*addr_list[0]));
 
-    join_count = 2;
+    join_count = 0;
   };
 };
 
@@ -347,7 +347,6 @@ void SendS2SJoinRequest(Server server, std::string channel_name) {
   size_t servers_size = servers.size();
 
   if (servers_size > 0) {
-    std::cout << "server_size > 0" << std::endl;
     struct s2s_request_join join;
     memcpy(join.req_channel, channel_name.c_str(), CHANNEL_MAX);
     join.req_type = REQ_S2S_JOIN;
@@ -355,9 +354,7 @@ void SendS2SJoinRequest(Server server, std::string channel_name) {
     size_t message_size = sizeof(struct s2s_request_join);
 
     for (auto adj_server : servers) {
-      std::cout << "adj_server" << std::endl;
       if (adj_server.second->channels.find(channel_name) == adj_server.second->channels.end()) {
-        std::cout << "adj_server.second->channels.find(channel_name) == adj_server.second->channels.end()" << std::endl;
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(struct sockaddr_in));
         server_addr.sin_family = AF_INET;
