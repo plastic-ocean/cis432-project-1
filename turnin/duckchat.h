@@ -31,6 +31,12 @@ typedef int text_t;
 #define REQ_WHO 6
 #define REQ_KEEP_ALIVE 7 /* Only needed by graduate students */
 
+/* define codes for server to sever communication */
+#define REQ_S2S_JOIN 8
+#define REQ_S2S_LEAVE 9
+#define REQ_S2S_SAY 10
+
+
 /* Define codes for text types.  These are the messages sent to the client. */
 #define TXT_SAY 0
 #define TXT_LIST 1
@@ -83,6 +89,30 @@ struct request_who {
 struct request_keep_alive {
     request_t req_type; /* = REQ_KEEP_ALIVE */
 } packed;
+
+
+
+/* structs used for server to server communications */
+struct s2s_request_join {
+    request_t req_type; /* = REQ_S2S_JOIN */
+    char req_channel[CHANNEL_MAX];
+} packed;
+
+struct s2s_request_leave {
+    request_t req_type; /* = REQ_S2S_LEAVE */
+    char req_channel[CHANNEL_MAX];
+} packed;
+
+struct s2s_request_say {
+    request_t req_type; /* = REQ_S2S_SAY */
+    unsigned long long uniq_id; /* unique identifier */
+    char req_username[USERNAME_MAX];
+    char req_channel[CHANNEL_MAX];
+    char req_text[SAY_MAX];
+} packed;
+
+
+
 
 /* This structure is used for a generic text type, to the client. */
 struct text {
