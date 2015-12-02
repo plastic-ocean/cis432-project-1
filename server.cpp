@@ -147,7 +147,7 @@ public:
     addr_list = (struct in_addr **) he->h_addr_list;
     ip = std::string(inet_ntoa(*addr_list[0]));
 
-    join_count = 0;
+    join_count = 2;
   };
 };
 
@@ -503,8 +503,8 @@ void HandleS2SJoinRequest(Server server, void *buffer, in_addr_t request_address
 
   // After 2 minutes expect to receive join from each server, this keeps the count at 2.
   if (servers.find(request_ip_port)->second->join_count != 2) {
-    std::cout << server.ip << ":" << server.port << " " << request_ip_port << " set join_count to 2" << std::endl;
-    servers.find(request_ip_port)->second->join_count = 2;
+    std::cout << server.ip << ":" << server.port << " " << request_ip_port << " incrementing join_count" << std::endl;
+    servers.find(request_ip_port)->second->join_count++;
   }
 
   if (server_channels.find(join->req_channel) == server_channels.end()) {
